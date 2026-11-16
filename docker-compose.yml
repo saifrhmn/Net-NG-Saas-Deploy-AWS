@@ -1,0 +1,70 @@
+# Karbar full stack: API (.NET 9) + Web (Angular/nginx) + optional SQL Server
+#
+#   cp .env.example .env            # then fill in real values
+#   docker compose up -d --build    # uses the external DB from .env
+#   docker compose --profile local-db up -d --build   # also starts a local SQL Server
+
+name: karbar
+
+services:
+  api:
+    build:
+      context: ./KARBAR_Web_App_API
+    image: karbar-api:latest
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION}
+      JwtSettings__Key: ${JWT_KEY}
+      SapSettings__BaseUrl: ${SAP_BASE_URL}
+      SapSettings__UserName: ${SAP_USERNAME}
+      SapSettings__Password: ${SAP_PASSWORD}
+    volumes:
+      - api-images:/app/wwwroot/Images
+    networks:
+      - karbar
+
+  web:
+    build:
+      context: ./KARBAR_Web_App_Frontend
+      args:
+        # URL the *browser* uses to reach the API
+        API_BASE_URL: ${API_BASE_URL:-http://localhost:8080/api/}
+    image: karbar-web:latest
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - karbar
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles: ["local-db"]
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD}
+      MSSQL_PID: Developer
+    ports:
+      - "${SQL_PORT:-1433}:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+      - ./db/backups:/var/opt/mssql/backup   # put .bak files here to restore
+    networks:
+      - karbar
+
+volumes:
+  api-images:
+  sql-data:
+
+networks:
+  karbar:
