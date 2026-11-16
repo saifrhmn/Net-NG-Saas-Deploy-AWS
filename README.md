@@ -16,15 +16,20 @@ This repo holds the Karbar web app and everything needed to run it in Docker, on
 | `.env.example` | Template for `.env`, which holds all passwords and settings. `.env` is never committed. |
 | `db/backups/` | Put `.bak` files here to restore them into the `sqlserver` container |
 
+**How this guide works:**
+- AWS resources (server, firewall, load balancer, certificate…) are created in the **AWS web console**: https://console.aws.amazon.com. No AWS CLI is needed on your PC.
+- All commands run in an **Ubuntu terminal**. Each block is marked with where it runs:
+  - 💻 **PC terminal**: Ubuntu on your PC. On Windows, that's **WSL Ubuntu** (`wsl --install -d Ubuntu`). There, `d:\` is `/mnt/d/`.
+  - ☁️ **Server terminal**: the AWS server, after you log in with `ssh karbar` (Step 6).
+
 ## Contents
 
 **Part 1 – Run on your PC**
-- [1.1 Quick start](#11-quick-start)
-- [1.2 Restore the existing database into Docker](#12-restore-the-existing-database-into-docker)
+- [1.1 Quick start](#11-quick-start) · [1.2 Restore the existing database into Docker](#12-restore-the-existing-database-into-docker)
 
 **Part 2 – Deploy to AWS (one EC2 server)**
 - [How it fits together](#how-it-fits-together) · [What you need](#what-you-need) · [All steps at a glance](#all-steps-at-a-glance)
-- [Step 0](#step-0--install-the-aws-cli-and-sign-in) AWS CLI · [1](#step-1--check-the-database-and-take-a-backup) Backup · [2](#step-2--create-the-key-pair-pem) Key pair · [3](#step-3--create-the-security-groups) Security groups · [4](#step-4--create-the-backup-bucket-and-the-servers-iam-role) S3 + IAM · [5](#step-5--launch-the-ec2-server) EC2 · [6](#step-6--connect-to-the-server-with-the-pem-key) SSH · [7](#step-7--install-docker-on-the-server) Docker · [8](#step-8--copy-the-code-and-the-backup-to-the-server) Copy · [9](#step-9--create-env-on-the-server) `.env` · [10](#step-10--restore-the-database) Restore · [11](#step-11--build-and-start-the-app) Start · [12](#step-12--set-up-automatic-backups) Backups · [13](#step-13--request-the-https-certificate) Certificate · [14](#step-14--create-the-load-balancer) Load balancer · [15](#step-15--point-your-domain-at-the-load-balancer) DNS · [16](#step-16--test) Test · [17](#step-17--save-the-ids-and-tidy-up) Tidy up
+- [Step 1](#step-1--check-the-database-and-take-a-backup) Backup · [2](#step-2--create-the-key-pair-pem) Key pair · [3](#step-3--create-the-security-groups) Security groups · [4](#step-4--create-the-backup-bucket-and-the-servers-iam-role) S3 + IAM · [5](#step-5--launch-the-ec2-server) EC2 · [6](#step-6--connect-to-the-server-with-the-pem-key) SSH · [7](#step-7--install-docker-on-the-server) Docker · [8](#step-8--copy-the-code-and-the-backup-to-the-server) Copy · [9](#step-9--create-env-on-the-server) `.env` · [10](#step-10--restore-the-database) Restore · [11](#step-11--build-and-start-the-app) Start · [12](#step-12--set-up-automatic-backups) Backups · [13](#step-13--request-the-https-certificate) Certificate · [14](#step-14--create-the-load-balancer) Load balancer · [15](#step-15--point-your-domain-at-the-load-balancer) DNS · [16](#step-16--test) Test · [17](#step-17--tidy-up) Tidy up
 
 **Part 3 – Run it**
 - [Go-live day](#go-live-day) · [Daily operations](#daily-operations) · [Updating the app](#updating-the-app) · [Restoring a newer backup](#restoring-a-newer-backup) · [If the server is lost](#if-the-server-is-lost)
@@ -36,12 +41,14 @@ This repo holds the Karbar web app and everything needed to run it in Docker, on
 
 ## 1.1 Quick start
 
-Needs Docker Desktop.
+Needs Docker: Docker Desktop with WSL integration turned on, or Docker Engine on Ubuntu.
 
-```powershell
-cd d:\Personal\Karber-deply-AWS-Docker
-cp .env.example .env                               # then fill in real values
-docker compose up -d --build                       # app only, using an external database
+💻 **PC terminal:**
+
+```bash
+cd /mnt/d/Personal/Karber-deply-AWS-Docker     # on plain Ubuntu: the folder where you cloned the repo
+cp .env.example .env                           # then fill in real values: nano .env
+docker compose up -d --build                   # app only, using an external database
 docker compose --profile local-db up -d --build    # app + SQL Server in Docker
 ```
 
@@ -61,45 +68,44 @@ If you run the API from Visual Studio instead of Docker, `.env` isn't used. Put 
 
 These steps copy `Karbar_DB` from `projectdev` into the local `sqlserver` container.
 
-> Run the `docker` commands in **PowerShell**. Git Bash changes paths like `/var/opt/...` before Docker sees them, and the commands fail.
-
 1. **Back up** on `projectdev` (in SSMS):
 
    ```sql
    BACKUP DATABASE Karbar_DB TO DISK = 'C:\Temp\Karbar_DB.bak' WITH COPY_ONLY, COMPRESSION, INIT, STATS = 10;
    ```
 
-   Copy `Karbar_DB.bak` from `C:\Temp` on that machine to `db\backups\` in this repo.
+   Copy `Karbar_DB.bak` from `C:\Temp` on that machine to `db/backups/` in this repo.
 
-2. **Start SQL Server.** First set a strong `SQL_SA_PASSWORD` in `.env`: 8+ characters, with upper case, lower case, a digit and a symbol.
+2. **Start SQL Server.** First set a strong `SQL_SA_PASSWORD` in `.env`: 8+ characters, with upper case, lower case, a digit and a symbol. 💻 **PC terminal:**
 
-   ```powershell
+   ```bash
    docker compose --profile local-db up -d sqlserver
    docker compose logs -f sqlserver     # wait for "SQL Server is now ready for client connections", then Ctrl+C
    ```
 
-3. **Find the file names inside the backup.** Note the two `LogicalName` values (data and log):
+3. **Add a short `sql` command**, then restore:
 
-   ```powershell
-   docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<SQL_SA_PASSWORD>" -C `
-     -Q "RESTORE FILELISTONLY FROM DISK='/var/opt/mssql/backup/Karbar_DB.bak'"
+   ```bash
+   sql() { docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa \
+             -P "$(grep '^SQL_SA_PASSWORD=' .env | cut -d= -f2-)" -C "$@"; }
+
+   # Note the two LogicalName values (data + log)
+   sql -Q "RESTORE FILELISTONLY FROM DISK='/var/opt/mssql/backup/Karbar_DB.bak'" -W
+
+   # Replace Karbar_DB / Karbar_DB_log with those names if different
+   sql -Q "RESTORE DATABASE Karbar_DB FROM DISK='/var/opt/mssql/backup/Karbar_DB.bak'
+           WITH MOVE 'Karbar_DB' TO '/var/opt/mssql/data/Karbar_DB.mdf',
+                MOVE 'Karbar_DB_log' TO '/var/opt/mssql/data/Karbar_DB_log.ldf', REPLACE, STATS = 10"
    ```
 
-4. **Restore.** Replace `Karbar_DB` / `Karbar_DB_log` with the names from step 3:
+4. **Recreate the app login.** Logins aren't stored in the backup. The second command links the restored `testuser` user to the new login:
 
-   ```powershell
-   docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<SQL_SA_PASSWORD>" -C `
-     -Q "RESTORE DATABASE Karbar_DB FROM DISK='/var/opt/mssql/backup/Karbar_DB.bak' WITH MOVE 'Karbar_DB' TO '/var/opt/mssql/data/Karbar_DB.mdf', MOVE 'Karbar_DB_log' TO '/var/opt/mssql/data/Karbar_DB_log.ldf', REPLACE, STATS = 10"
+   ```bash
+   sql -Q "CREATE LOGIN testuser WITH PASSWORD='<APP_DB_PASSWORD>', CHECK_POLICY=OFF;"
+   sql -d Karbar_DB -Q "ALTER USER testuser WITH LOGIN = testuser;"
    ```
 
-5. **Recreate the app login.** Logins aren't stored in the backup. The second command links the restored `testuser` user to the new login:
-
-   ```powershell
-   docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "<SQL_SA_PASSWORD>" -C `
-     -Q "CREATE LOGIN testuser WITH PASSWORD='<APP_DB_PASSWORD>', CHECK_POLICY=OFF; USE Karbar_DB; ALTER USER testuser WITH LOGIN = testuser;"
-   ```
-
-6. **Point the API at it.** In `.env`:
+5. **Point the API at it.** In `.env`:
 
    ```env
    DB_CONNECTION=Server=sqlserver,1433;Database=Karbar_DB;User=testuser;Password=<APP_DB_PASSWORD>;TrustServerCertificate=True;Trusted_Connection=False;MultipleActiveResultSets=true;
@@ -148,73 +154,38 @@ Everything runs on **one EC2 server** with Docker Compose: the Angular site, the
 
 ## What you need
 
-- An **AWS account** and an IAM user that can create EC2, S3, IAM, ACM, Route 53 and load balancer resources, plus an **access key** for that user, for the AWS CLI.
+- An **AWS account**, and a login to the AWS console with permission for EC2, S3, IAM, Certificate Manager and Route 53.
 - A **domain name** you can add DNS records to. Without one, see [No domain yet?](#no-domain-yet).
-- On your PC: PowerShell, `ssh` / `scp` / `tar` (built into Windows 10/11), SSMS, and access to `projectdev`.
+- An **Ubuntu terminal** on your PC (Ubuntu, or WSL Ubuntu on Windows) with `ssh`, `scp` and `rsync`: `sudo apt-get install -y openssh-client rsync`.
+- SSMS, and access to `projectdev` for the backup.
 
-Every AWS step below shows **two ways** to do it. Pick one per step:
-- **CLI**: copy the PowerShell commands. They're quickest and easy to repeat.
-- **Console**: click through the AWS web console instead.
-
-> **Run all CLI commands in one PowerShell window, in order**, from `d:\Personal\Karber-deply-AWS-Docker`. Later commands reuse `$variables` from earlier ones. If you close the window, [reload them](#step-17--save-the-ids-and-tidy-up).
+> **Pick one AWS region and use it everywhere** (e.g. *Asia Pacific (Singapore) ap-southeast-1*). Check the region selector at the top right of every console page. Resources in another region won't appear.
 >
-> PowerShell tip: arguments containing commas must be in **quotes**, e.g. `"Type=forward,TargetGroupArn=$TG_WEB"`. Otherwise PowerShell splits them and the command fails.
+> Replace `karbar.example.com` with your real domain everywhere in this guide.
 
 ## All steps at a glance
 
 | #  | Step | Where | Time |
 |----|------|-------|------|
-| 0  | Install the AWS CLI and sign in | Your PC | 5 min |
 | 1  | Check the database and take a backup | SSMS on `projectdev` | 10 min |
-| 2  | Create the key pair (`karbar-key.pem`) | Your PC | 1 min |
-| 3  | Create the security groups | Your PC | 2 min |
-| 4  | Create the backup bucket and the server's IAM role | Your PC | 2 min |
-| 5  | Launch the EC2 server | Your PC | 3 min |
-| 6  | Connect to the server with the `.pem` key | Your PC → server | 1 min |
-| 7  | Install Docker | Server | 3 min |
-| 8  | Copy the code and the backup | Your PC → server | 5 min |
-| 9  | Create `.env` | Server | 5 min |
-| 10 | Restore the database | Server | 5–15 min |
-| 11 | Build and start the app | Server | 10 min |
-| 12 | Set up automatic backups | Server + your PC | 10 min |
-| 13 | Request the HTTPS certificate | Your PC + DNS | 5–30 min |
-| 14 | Create the load balancer | Your PC | 5 min |
-| 15 | Point your domain at the load balancer | Your PC / DNS | 5 min |
+| 2  | Create the key pair (`karbar-key.pem`) | AWS console + 💻 | 2 min |
+| 3  | Create the security groups | AWS console | 5 min |
+| 4  | Create the backup bucket and the server's IAM role | AWS console | 5 min |
+| 5  | Launch the EC2 server | AWS console | 5 min |
+| 6  | Connect to the server with the `.pem` key | 💻 | 2 min |
+| 7  | Install Docker | ☁️ | 3 min |
+| 8  | Copy the code and the backup | 💻 / ☁️ | 5 min |
+| 9  | Create `.env` | ☁️ | 5 min |
+| 10 | Restore the database | ☁️ | 5–15 min |
+| 11 | Build and start the app | ☁️ | 10 min |
+| 12 | Set up automatic backups | ☁️ + AWS console | 10 min |
+| 13 | Request the HTTPS certificate | AWS console + DNS | 5–30 min |
+| 14 | Create the load balancer | AWS console | 10 min |
+| 15 | Point your domain at the load balancer | DNS | 5 min |
 | 16 | Test | Browser | 10 min |
-| 17 | Save the IDs and tidy up | Your PC + server | 5 min |
+| 17 | Tidy up | 💻 / ☁️ | 5 min |
 
 ---
-
-## Step 0 – Install the AWS CLI and sign in
-
-```powershell
-winget install -e --id Amazon.AWSCLI     # then close and reopen PowerShell
-aws --version
-
-aws configure
-#   AWS Access Key ID:     <IAM → Users → your user → Security credentials → Create access key>
-#   AWS Secret Access Key: <...>
-#   Default region name:   ap-southeast-1
-#   Default output format: json
-
-aws sts get-caller-identity              # shows your account ID = signed in correctly
-```
-
-Set the values that every later step uses. **Change `$DOMAIN`**, and also `$REGION` if you use a different region:
-
-```powershell
-cd d:\Personal\Karber-deply-AWS-Docker
-$REGION = "ap-southeast-1"
-$env:AWS_DEFAULT_REGION = $REGION
-$DOMAIN = "karbar.example.com"
-$BUCKET = "karbar-db-backups-$(Get-Random)"       # S3 names must be globally unique
-$MYIP   = (Invoke-RestMethod https://checkip.amazonaws.com).Trim()
-
-# Writes a file without a BOM (the AWS CLI can't read Windows PowerShell's default UTF-8 BOM)
-function Save-File($name, $text) { [IO.File]::WriteAllText((Join-Path $PWD $name), $text) }
-```
-
-> **Create everything in the same region.** In the console, check the region selector at the top right on every page.
 
 ## Step 1 – Check the database and take a backup
 
@@ -250,180 +221,169 @@ WITH COPY_ONLY, COMPRESSION, INIT, STATS = 10;
 
 The key pair is how you log in to the server. AWS keeps the public half. You download the private half as `karbar-key.pem`.
 
-**CLI:**
+**AWS console:** **EC2 → Network & Security → Key Pairs → Create key pair**
+- Name: `karbar-key`
+- Key pair type: **RSA**
+- Private key file format: **.pem**
+- **Create key pair**. The file `karbar-key.pem` downloads, usually to `Downloads`.
 
-```powershell
-$key = aws ec2 create-key-pair --key-name karbar-key --key-type rsa --key-format pem `
-         --query KeyMaterial --output text
-Save-File "karbar-key.pem" (($key -join "`n") + "`n")
+💻 **PC terminal.** Move the key into `~/.ssh` and lock it down. `ssh` refuses keys that other users can read:
+
+```bash
+mkdir -p ~/.ssh && chmod 700 ~/.ssh
+
+# WSL on Windows (Downloads is on the C: drive):
+cp /mnt/c/Users/<your-windows-user>/Downloads/karbar-key.pem ~/.ssh/
+# Plain Ubuntu:
+# mv ~/Downloads/karbar-key.pem ~/.ssh/
+
+chmod 400 ~/.ssh/karbar-key.pem
+ls -l ~/.ssh/karbar-key.pem          # should show -r--------
 ```
 
-**Console:** **EC2 → Key pairs → Create key pair** → name `karbar-key`, type **RSA**, format **.pem** → **Create**. The file downloads. Move it to `d:\Personal\Karber-deply-AWS-Docker\`.
-
-**Either way**, lock the file down so only you can read it. Otherwise `ssh` refuses to use it:
-
-```powershell
-icacls .\karbar-key.pem /inheritance:r /grant:r "$($env:USERNAME):(R)"
-```
-
-> ⚠️ AWS gives you the private key **only once**. Store a copy in a password manager. Without it you can't log in to the server. `*.pem` is in `.gitignore`. **Never** commit it or send it in chat or email.
-
-To use an SSH key you already have instead: `aws ec2 import-key-pair --key-name karbar-key --public-key-material fileb://$HOME/.ssh/id_rsa.pub`
+> ⚠️ **Keep the key in `~/.ssh`, not under `/mnt/c` or `/mnt/d`.** On Windows drives `chmod` has no effect, and `ssh` reports *UNPROTECTED PRIVATE KEY FILE*.
+>
+> ⚠️ AWS gives you the private key **only once**. Store a copy in a password manager. Without it you can't log in to the server. Never commit it (`*.pem` is in `.gitignore`), and never send it in chat or email.
 
 ## Step 3 – Create the security groups
 
-Security groups are firewalls:
+Security groups are firewalls. You need two:
 
-| Name         | Allows in                                                                           |
-|--------------|-------------------------------------------------------------------------------------|
-| `karbar-alb` | Ports 80 and 443 from anywhere: the public website                                 |
-| `karbar-ec2` | Port 22 from **your IP only** (SSH), and ports 80 and 8080 **from the load balancer only** |
+**AWS console:** **EC2 → Network & Security → Security Groups → Create security group**
 
-**CLI:**
+**First group, `karbar-alb`** (for the load balancer):
 
-```powershell
-# Default network
-$VPC = aws ec2 describe-vpcs --filters "Name=is-default,Values=true" --query "Vpcs[0].VpcId" --output text
-$SUBNETS = (aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" "Name=default-for-az,Values=true" `
-             --query "Subnets[].SubnetId" --output text) -split "\s+"
-$VPC; $SUBNETS      # one vpc-… and at least two subnet-…
+| Field | Value |
+|---|---|
+| Name / Description | `karbar-alb` / `Karbar load balancer` |
+| VPC | the default VPC |
+| Inbound rule 1 | Type **HTTP**, Source **Anywhere-IPv4** (`0.0.0.0/0`) |
+| Inbound rule 2 | Type **HTTPS**, Source **Anywhere-IPv4** (`0.0.0.0/0`) |
 
-$SG_ALB = aws ec2 create-security-group --group-name karbar-alb --description "Karbar load balancer" `
-            --vpc-id $VPC --query GroupId --output text
-aws ec2 authorize-security-group-ingress --group-id $SG_ALB --protocol tcp --port 80  --cidr 0.0.0.0/0
-aws ec2 authorize-security-group-ingress --group-id $SG_ALB --protocol tcp --port 443 --cidr 0.0.0.0/0
+**Second group, `karbar-ec2`** (for the server):
 
-$SG_EC2 = aws ec2 create-security-group --group-name karbar-ec2 --description "Karbar app server" `
-            --vpc-id $VPC --query GroupId --output text
-aws ec2 authorize-security-group-ingress --group-id $SG_EC2 --protocol tcp --port 22   --cidr "$MYIP/32"
-aws ec2 authorize-security-group-ingress --group-id $SG_EC2 --protocol tcp --port 80   --source-group $SG_ALB
-aws ec2 authorize-security-group-ingress --group-id $SG_EC2 --protocol tcp --port 8080 --source-group $SG_ALB
-```
+| Field | Value |
+|---|---|
+| Name / Description | `karbar-ec2` / `Karbar app server` |
+| VPC | the default VPC |
+| Inbound rule 1 | Type **SSH**, Source **My IP** |
+| Inbound rule 2 | Type **HTTP** (80), Source **Custom** → pick the `karbar-alb` security group |
+| Inbound rule 3 | Type **Custom TCP**, port **8080**, Source **Custom** → pick the `karbar-alb` security group |
 
-If `$VPC` is `None`, the account has no default VPC. Run `aws ec2 create-default-vpc`, then run the block again.
-
-**Console:** **EC2 → Security Groups → Create security group**, twice, in the default VPC, with the inbound rules from the table. For the 80 and 8080 rules on `karbar-ec2`, set **Source** to the `karbar-alb` group. For SSH, choose **My IP**.
+Leave the outbound rules as they are (all traffic allowed). Port 1433 (SQL Server) is **not** opened anywhere.
 
 ## Step 4 – Create the backup bucket and the server's IAM role
 
 The server uploads its nightly database backups to S3. The IAM role gives it permission to do that, without storing AWS keys on the server.
 
-**CLI:**
+**4.1 – Bucket.** **AWS console → S3 → Create bucket**
+- Name: `karbar-db-backups-<something-unique>`, e.g. `karbar-db-backups-2026x7`. Write it down.
+- Region: your region
+- **Block all public access**: ✅ on (the default)
+- **Create bucket**
 
-```powershell
-# Private bucket, backups deleted after 30 days
-aws s3 mb "s3://$BUCKET"
-aws s3api put-public-access-block --bucket $BUCKET `
-  --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
-Save-File "lifecycle.json" @"
-{ "Rules": [ { "ID": "expire-daily", "Status": "Enabled", "Filter": { "Prefix": "daily/" }, "Expiration": { "Days": 30 } } ] }
-"@
-aws s3api put-bucket-lifecycle-configuration --bucket $BUCKET --lifecycle-configuration file://lifecycle.json
+Then open the bucket → **Management → Create lifecycle rule**:
+- Name `expire-daily`, scope **Limit to prefix** `daily/`
+- ✅ *Expire current versions of objects* after **30** days → **Create rule**
 
-# Role for the server: may read/write this bucket only
-Save-File "trust.json" @"
-{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow", "Principal": { "Service": "ec2.amazonaws.com" }, "Action": "sts:AssumeRole" } ] }
-"@
-Save-File "s3-policy.json" @"
-{ "Version": "2012-10-17", "Statement": [ { "Effect": "Allow",
-  "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
-  "Resource": ["arn:aws:s3:::$BUCKET", "arn:aws:s3:::$BUCKET/*"] } ] }
-"@
-aws iam create-role --role-name karbar-ec2-role --assume-role-policy-document file://trust.json
-aws iam put-role-policy --role-name karbar-ec2-role --policy-name karbar-s3-backup --policy-document file://s3-policy.json
-aws iam create-instance-profile --instance-profile-name karbar-ec2-role
-aws iam add-role-to-instance-profile --instance-profile-name karbar-ec2-role --role-name karbar-ec2-role
-Start-Sleep 15        # IAM needs a few seconds before EC2 can use the new role
+**4.2 – IAM role.** **AWS console → IAM → Roles → Create role**
+- Trusted entity: **AWS service** → Use case **EC2** → **Next**
+- Skip the permissions list → **Next**
+- Role name: `karbar-ec2-role` → **Create role**
 
-"Bucket name: $BUCKET"     # you need this in Step 12
+Open `karbar-ec2-role` → **Add permissions → Create inline policy → JSON**, and paste this, with **your bucket name** in both places:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": ["s3:PutObject", "s3:GetObject", "s3:ListBucket"],
+    "Resource": [
+      "arn:aws:s3:::karbar-db-backups-2026x7",
+      "arn:aws:s3:::karbar-db-backups-2026x7/*"
+    ]
+  }]
+}
 ```
 
-**Console:**
-1. **S3 → Create bucket** → `karbar-db-backups-<random>`, **Block all public access** on. Then **Management → Create lifecycle rule** → prefix `daily/` → expire current versions after 30 days.
-2. **IAM → Roles → Create role** → AWS service → **EC2** → skip the policy list → name `karbar-ec2-role` → **Create**.
-3. Open the role → **Add permissions → Create inline policy → JSON**, paste the contents of `s3-policy.json` above with your bucket name, and name it `karbar-s3-backup`.
+**Next** → policy name `karbar-s3-backup` → **Create policy**.
 
 ## Step 5 – Launch the EC2 server
 
-| Setting        | Value |
-|----------------|-------|
-| Image          | Ubuntu Server 24.04 LTS, x86 |
-| Type           | **t3.large** (2 vCPU, 8 GB). SQL Server, the API and the Angular build share it. |
-| Disk           | 50 GB gp3, encrypted, tagged `Backup=karbar` for daily snapshots |
-| Network        | default VPC, security group `karbar-ec2`, public IP |
-| IAM role       | `karbar-ec2-role` |
-| Public IP      | an **Elastic IP**, so the address never changes |
+**5.1 – Launch.** **AWS console → EC2 → Instances → Launch instances**
 
-**CLI:**
+| Field | Value |
+|---|---|
+| Name | `karbar-app` |
+| Application and OS Images | **Ubuntu** → **Ubuntu Server 24.04 LTS (HVM), SSD Volume Type**, 64-bit (x86) |
+| Instance type | **t3.large** (2 vCPU, 8 GB). SQL Server, the API and the Angular build share it. |
+| Key pair | `karbar-key` |
+| Network settings → **Edit** | VPC: default · Auto-assign public IP: **Enable** · Firewall: **Select existing security group** → `karbar-ec2` |
+| Configure storage | **50** GiB, **gp3** (under *Advanced*, set *Encrypted* = Yes) |
+| Advanced details → IAM instance profile | `karbar-ec2-role` |
 
-```powershell
-# Latest Ubuntu 24.04 image in this region (published by Canonical)
-$AMI = aws ssm get-parameters --names /aws/service/canonical/ubuntu/server/24.04/stable/current/amd64/hvm/ebs-gp3/ami-id `
-         --query "Parameters[0].Value" --output text
+Click **Launch instance**, then **View all instances**. Wait until **Instance state** is *Running* and **Status check** is *2/2 checks passed*.
 
-$INSTANCE = aws ec2 run-instances `
-  --image-id $AMI --instance-type t3.large --key-name karbar-key `
-  --security-group-ids $SG_EC2 --subnet-id $SUBNETS[0] --associate-public-ip-address `
-  --iam-instance-profile Name=karbar-ec2-role `
-  --block-device-mappings "DeviceName=/dev/sda1,Ebs={VolumeSize=50,VolumeType=gp3,Encrypted=true}" `
-  --metadata-options "HttpTokens=required" `
-  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=karbar-app}]" "ResourceType=volume,Tags=[{Key=Name,Value=karbar-app},{Key=Backup,Value=karbar}]" `
-  --query "Instances[0].InstanceId" --output text
-aws ec2 wait instance-running --instance-ids $INSTANCE
+**5.2 – Fixed public IP.** **EC2 → Network & Security → Elastic IPs → Allocate Elastic IP address → Allocate.** Then **Actions → Associate Elastic IP address** → Instance `karbar-app` → **Associate**. Write the IP down. This is your server's address from now on, and it doesn't change when the server restarts.
 
-# Elastic IP
-$ALLOC = aws ec2 allocate-address --domain vpc --query AllocationId --output text
-aws ec2 associate-address --instance-id $INSTANCE --allocation-id $ALLOC
-$IP = aws ec2 describe-addresses --allocation-ids $ALLOC --query "Addresses[0].PublicIp" --output text
-"Instance: $INSTANCE   Server IP: $IP"
-```
-
-**Console:**
-1. **EC2 → Launch instance** → name `karbar-app` → **Ubuntu Server 24.04 LTS** → `t3.large` → key pair `karbar-key` → **Network settings: Edit** → select existing security group `karbar-ec2` → storage **50 GiB gp3** → **Advanced details → IAM instance profile** `karbar-ec2-role` → **Launch**.
-2. **Elastic IPs → Allocate Elastic IP address → Actions → Associate** → instance `karbar-app`.
-3. **Volumes** → the new volume → **Tags** → add `Backup` = `karbar`.
+**5.3 – Tag the disk for daily snapshots.** **EC2 → Elastic Block Store → Volumes** → the 50 GiB volume attached to `karbar-app` → **Tags → Manage tags → Add tag** → Key `Backup`, Value `karbar` → **Save**.
 
 ## Step 6 – Connect to the server with the `.pem` key
 
-Wait about a minute after the server starts, then from PowerShell, in the folder with `karbar-key.pem`:
+💻 **PC terminal.** Add a shortcut, so that from now on you can type just `ssh karbar`. Replace `13.250.xx.xx` with your Elastic IP:
 
-```powershell
-ssh -i .\karbar-key.pem ubuntu@$IP          # or ubuntu@<the Elastic IP>
+```bash
+cat >> ~/.ssh/config <<'EOF'
+
+Host karbar
+    HostName 13.250.xx.xx
+    User ubuntu
+    IdentityFile ~/.ssh/karbar-key.pem
+    ServerAliveInterval 60
+EOF
+chmod 600 ~/.ssh/config
 ```
 
-The first time, type `yes` to accept the server's fingerprint. Your prompt changes to `ubuntu@ip-…:~$`. You're now on the server.
+Connect:
+
+```bash
+ssh karbar
+```
+
+The first time, type `yes` to accept the server's fingerprint. Your prompt changes to `ubuntu@ip-172-…:~$`. You're now on the server ☁️. To go back to your PC, type `exit`.
+
+Without the shortcut, the full command is `ssh -i ~/.ssh/karbar-key.pem ubuntu@13.250.xx.xx`.
 
 | Problem | Fix |
 |---|---|
-| `UNPROTECTED PRIVATE KEY FILE` / `bad permissions` | Run the `icacls` command from Step 2. |
-| `Connection timed out` | Your IP changed, or you're on a different network. Run `$MYIP = (Invoke-RestMethod https://checkip.amazonaws.com).Trim()`, then `aws ec2 authorize-security-group-ingress --group-id $SG_EC2 --protocol tcp --port 22 --cidr "$MYIP/32"`. |
+| `UNPROTECTED PRIVATE KEY FILE` / `bad permissions` | Run `chmod 400 ~/.ssh/karbar-key.pem`, and keep the key in `~/.ssh`, not on `/mnt/c` or `/mnt/d` (Step 2). |
+| `Connection timed out` | Your internet IP changed. In the console: **Security Groups → `karbar-ec2` → Edit inbound rules** → SSH rule → Source **My IP** → Save. |
 | `Permission denied (publickey)` | Use user `ubuntu` (not `root` or `ec2-user`), and the `karbar-key.pem` from Step 2. |
-
-To exit the server, type `exit`. The rest of this guide marks each block with where it runs: **On the server** or **On your PC**.
 
 ## Step 7 – Install Docker on the server
 
-**On the server:**
+☁️ **Server terminal** (`ssh karbar`):
 
 ```bash
 sudo apt-get update && sudo apt-get -y upgrade
 curl -fsSL https://get.docker.com | sudo sh     # Docker Engine + Compose + Buildx
 sudo usermod -aG docker ubuntu                  # use docker without sudo
 sudo timedatectl set-timezone Asia/Dhaka        # logs and backup times in local time
-sudo snap install aws-cli --classic             # for uploading backups to S3
+sudo snap install aws-cli --classic             # used only by the backup script (Step 12)
 exit                                            # log out so the docker group applies
 ```
 
-Connect again (Step 6), then check:
+💻 Run `ssh karbar` again, then ☁️ check:
 
 ```bash
 docker --version && docker compose version
-aws s3 ls        # no error = the IAM role from Step 4 works
+aws s3 ls        # lists your bucket = the IAM role from Step 4 works
 ```
 
 ## Step 8 – Copy the code and the backup to the server
 
-**Code – option 1, Git (recommended).** Push this repo to GitHub or GitLab first. **On the server:**
+**Code – option 1, Git (recommended).** Push this repo to GitHub or GitLab first. ☁️ **Server terminal:**
 
 ```bash
 git clone <your-repo-url> ~/karbar
@@ -431,25 +391,26 @@ git clone <your-repo-url> ~/karbar
 
 For a private repo, use a personal access token as the password, or add a deploy key.
 
-**Code – option 2, copy from your PC.** **On your PC:**
+**Code – option 2, copy from your PC with `rsync`.** It only copies what changed, so you can use the same command for later updates. 💻 **PC terminal:**
 
-```powershell
-tar --exclude=node_modules --exclude=bin --exclude=obj --exclude=.angular --exclude=dist --exclude=*.bak `
-    -czf karbar.tgz KARBAR_Web_App_API KARBAR_Web_App_Frontend db docker-compose.yml .env.example
-scp -i .\karbar-key.pem karbar.tgz ubuntu@${IP}:~
-ssh -i .\karbar-key.pem ubuntu@$IP "mkdir -p ~/karbar && tar -xzf ~/karbar.tgz -C ~/karbar && rm ~/karbar.tgz"
+```bash
+cd /mnt/d/Personal/Karber-deply-AWS-Docker
+rsync -avz --delete \
+  --exclude node_modules --exclude bin --exclude obj --exclude .angular --exclude dist \
+  --exclude .git --exclude .env --exclude '*.bak' --exclude '*.pem' \
+  ./ karbar:~/karbar/
 ```
 
-**Backup file.** **On your PC:**
+**Backup file.** 💻 **PC terminal:**
 
-```powershell
-ssh -i .\karbar-key.pem ubuntu@$IP "mkdir -p ~/karbar/db/backups"
-scp -i .\karbar-key.pem .\db\backups\Karbar_DB.bak ubuntu@${IP}:~/karbar/db/backups/
+```bash
+ssh karbar "mkdir -p ~/karbar/db/backups"
+scp db/backups/Karbar_DB.bak karbar:~/karbar/db/backups/
 ```
 
 ## Step 9 – Create `.env` on the server
 
-**On the server:**
+☁️ **Server terminal:**
 
 ```bash
 cd ~/karbar
@@ -492,7 +453,7 @@ SQL_PORT=127.0.0.1:1433
 
 ## Step 10 – Restore the database
 
-**On the server.** Start SQL Server:
+☁️ **Server terminal.** Start SQL Server:
 
 ```bash
 cd ~/karbar
@@ -549,7 +510,7 @@ sql -d Karbar_DB -Q "SELECT COUNT(*) AS Tables FROM sys.tables" -W
 
 ## Step 11 – Build and start the app
 
-**On the server:**
+☁️ **Server terminal:**
 
 ```bash
 cd ~/karbar
@@ -567,25 +528,25 @@ curl -s -o /dev/null -w '%{http_code}\n' http://localhost:8080/swagger/v1/swagge
 docker compose logs api --tail 50                                                        # no SQL / login errors
 ```
 
-The API creates its `ApiLogs` table on first start. All containers restart automatically after a reboot. To prove it, run `sudo reboot`, reconnect after a minute, and run `docker compose ps`.
+The API creates its `ApiLogs` table on first start. All containers restart automatically after a reboot. To prove it, run `sudo reboot`, wait a minute, run `ssh karbar`, then `docker compose -f ~/karbar/docker-compose.yml ps`.
 
 ## Step 12 – Set up automatic backups
 
 The database lives only on this server's disk. **Don't skip this step.**
 
-**12.1 – Nightly database backup to S3.** **On the server:**
+**12.1 – Nightly database backup to S3.** ☁️ **Server terminal:**
 
 ```bash
 nano ~/karbar/backup-db.sh
 ```
 
-Paste this in, and set `BUCKET` to the bucket name from Step 4:
+Paste this in, and set `BUCKET` to your bucket name from Step 4:
 
 ```bash
 #!/bin/bash
 set -euo pipefail
 cd /home/ubuntu/karbar
-BUCKET=karbar-db-backups-XXXXXXXX
+BUCKET=karbar-db-backups-2026x7
 FILE=Karbar_DB_$(date +%F_%H%M).bak
 PASS=$(grep '^SQL_SA_PASSWORD=' .env | cut -d= -f2-)
 
@@ -602,156 +563,88 @@ Test it, then schedule it for 2 AM every night:
 ```bash
 chmod +x ~/karbar/backup-db.sh
 ~/karbar/backup-db.sh                       # should end with "OK Karbar_DB_....bak"
-aws s3 ls s3://karbar-db-backups-XXXXXXXX/daily/
 
 (crontab -l 2>/dev/null; echo "0 2 * * * /home/ubuntu/karbar/backup-db.sh >> /home/ubuntu/karbar/backup.log 2>&1") | crontab -
 crontab -l
 ```
 
-**12.2 – Daily snapshot of the whole disk.** This also covers uploaded images and the server setup. **On your PC:**
+In the console, **S3 → your bucket → `daily/`** should now show the file.
 
-```powershell
-aws dlm create-default-role --resource-type snapshot
-$DLM_ROLE = aws iam get-role --role-name AWSDataLifecycleManagerDefaultRole --query Role.Arn --output text
-Save-File "dlm.json" @"
-{ "PolicyType": "EBS_SNAPSHOT_MANAGEMENT", "ResourceTypes": ["VOLUME"],
-  "TargetTags": [ { "Key": "Backup", "Value": "karbar" } ],
-  "Schedules": [ { "Name": "Daily", "CopyTags": true,
-                   "CreateRule": { "Interval": 24, "IntervalUnit": "HOURS", "Times": ["21:00"] },
-                   "RetainRule": { "Count": 7 } } ] }
-"@
-aws dlm create-lifecycle-policy --description "Karbar daily snapshots" --state ENABLED `
-  --execution-role-arn $DLM_ROLE --policy-details file://dlm.json
-```
-
-`21:00` is UTC, which is 3 AM in Dhaka. Snapshots are kept for 7 days.
-
-**Console:** **EC2 → Lifecycle Manager → Create lifecycle policy** → EBS snapshot policy → target tag `Backup = karbar` → every 24 hours at 21:00 UTC → keep 7.
+**12.2 – Daily snapshot of the whole disk.** This also covers uploaded images and the server setup. **AWS console → EC2 → Elastic Block Store → Lifecycle Manager → Create lifecycle policy:**
+- **EBS snapshot policy** → Next
+- Target resource types: **Volume** · Target resource tags: `Backup` = `karbar`
+- IAM role: **Default role**
+- Schedule: every **24 hours**, starting at **21:00 UTC** (3 AM in Dhaka, one hour after the database backup)
+- Retention: **Count 7**
+- **Create policy**
 
 ## Step 13 – Request the HTTPS certificate
 
 The certificate from **AWS Certificate Manager (ACM)** is free and renews itself. It must be in the **same region** as the load balancer.
 
-**CLI – request it, and print the DNS record that proves you own the domain:**
+**AWS console → Certificate Manager → Request certificate**
+1. **Request a public certificate** → Next.
+2. Fully qualified domain name: `karbar.example.com`.
+3. Validation method: **DNS validation** → **Request**.
+4. Open the new certificate. Under **Domains** it shows a **CNAME name** and a **CNAME value**. Add that record to your DNS:
+   - **Domain in Route 53:** click **Create records in Route 53 → Create records**.
+   - **Other DNS provider:** add a CNAME record with that name and value in its control panel. Some providers want only the part before your domain in the name field.
+5. Wait until the status is **Issued**. Usually a few minutes; sometimes up to 30.
 
-```powershell
-$CERT = aws acm request-certificate --domain-name $DOMAIN --validation-method DNS `
-          --query CertificateArn --output text
-Start-Sleep 15
-$rr = (aws acm describe-certificate --certificate-arn $CERT `
-        --query "Certificate.DomainValidationOptions[0].ResourceRecord.[Name,Value]" --output text) -split "\s+"
-"Add this DNS record:  CNAME  $($rr[0])  ->  $($rr[1])"
-```
-
-**Add that record to your DNS.** If your domain is in **Route 53**:
-
-```powershell
-$ZONE_NAME = ($DOMAIN -split '\.', 2)[1]          # karbar.example.com → example.com
-$ZONE = ((aws route53 list-hosted-zones-by-name --dns-name $ZONE_NAME --query "HostedZones[0].Id" --output text) -split '/')[-1]
-Save-File "acm-dns.json" @"
-{ "Changes": [ { "Action": "UPSERT", "ResourceRecordSet": {
-    "Name": "$($rr[0])", "Type": "CNAME", "TTL": 300, "ResourceRecords": [ { "Value": "$($rr[1])" } ] } } ] }
-"@
-aws route53 change-resource-record-sets --hosted-zone-id $ZONE --change-batch file://acm-dns.json
-```
-
-With **another DNS provider**, add the CNAME printed above in its control panel.
-
-**Wait until it's issued.** Usually a few minutes; the command gives up after about 40:
-
-```powershell
-aws acm wait certificate-validated --certificate-arn $CERT
-"Certificate issued"
-```
-
-**Console:** **Certificate Manager → Request → Public certificate** → domain `karbar.example.com` → **DNS validation** → open the certificate → **Create records in Route 53**, or copy the CNAME to your DNS provider → wait for **Issued**.
+💻 Optional check from the PC terminal: `dig +short CNAME <the CNAME name>` should print the CNAME value.
 
 ## Step 14 – Create the load balancer
 
-This creates two **target groups** (the `web` and `api` containers on the server), the **load balancer**, its **listeners** (HTTPS 443, and HTTP 80 redirecting to HTTPS), and one **rule** that sends `/api/*` and `/Images/*` to the API.
+**14.1 – Target groups.** These are the `web` and `api` containers on the server. **AWS console → EC2 → Load Balancing → Target Groups → Create target group**, twice:
 
-**CLI:**
+| Field | First: web | Second: api |
+|---|---|---|
+| Target type | **Instances** | **Instances** |
+| Name | `karbar-web-tg` | `karbar-api-tg` |
+| Protocol : Port | HTTP : **80** | HTTP : **8080** |
+| VPC | default | default |
+| Health check path | `/health` | `/swagger/v1/swagger.json` |
 
-```powershell
-# Target groups + register the server
-$TG_WEB = aws elbv2 create-target-group --name karbar-web-tg --protocol HTTP --port 80 --vpc-id $VPC `
-            --target-type instance --health-check-path /health `
-            --query "TargetGroups[0].TargetGroupArn" --output text
-$TG_API = aws elbv2 create-target-group --name karbar-api-tg --protocol HTTP --port 8080 --vpc-id $VPC `
-            --target-type instance --health-check-path /swagger/v1/swagger.json `
-            --query "TargetGroups[0].TargetGroupArn" --output text
-aws elbv2 register-targets --target-group-arn $TG_WEB --targets "Id=$INSTANCE,Port=80"
-aws elbv2 register-targets --target-group-arn $TG_API --targets "Id=$INSTANCE,Port=8080"
+**Next** → tick `karbar-app` → check that the port is right (80 or 8080) → **Include as pending below** → **Create target group**.
 
-# Load balancer
-$ALB = aws elbv2 create-load-balancer --name karbar-alb --type application --scheme internet-facing `
-         --subnets $SUBNETS --security-groups $SG_ALB `
-         --query "LoadBalancers[0].LoadBalancerArn" --output text
-aws elbv2 wait load-balancer-available --load-balancer-arns $ALB
+**14.2 – Load balancer.** **EC2 → Load Balancing → Load Balancers → Create load balancer → Application Load Balancer → Create**
 
-# HTTPS 443 → Angular app by default
-$HTTPS = aws elbv2 create-listener --load-balancer-arn $ALB --protocol HTTPS --port 443 `
-           --certificates "CertificateArn=$CERT" --ssl-policy ELBSecurityPolicy-TLS13-1-2-2021-06 `
-           --default-actions "Type=forward,TargetGroupArn=$TG_WEB" `
-           --query "Listeners[0].ListenerArn" --output text
+| Field | Value |
+|---|---|
+| Name | `karbar-alb` |
+| Scheme | **Internet-facing**, IPv4 |
+| Network mapping | default VPC, tick **at least two** Availability Zones (including the one `karbar-app` is in) |
+| Security groups | **only** `karbar-alb` (remove `default`) |
+| Listener 1 | **HTTP : 80** → forward to `karbar-web-tg` (changed to a redirect in 14.4) |
+| **Add listener** | **HTTPS : 443** → forward to `karbar-web-tg` |
+| Secure listener settings | Certificate source **From ACM** → `karbar.example.com` (from Step 13) |
 
-# HTTP 80 → redirect to HTTPS
-aws elbv2 create-listener --load-balancer-arn $ALB --protocol HTTP --port 80 `
-  --default-actions "Type=redirect,RedirectConfig={Protocol=HTTPS,Port=443,StatusCode=HTTP_301}"
+**Create load balancer.** Wait until its state is **Active** (2–3 minutes).
 
-# /api/* and /Images/* → API
-Save-File "api-rule.json" @"
-[ { "Field": "path-pattern", "PathPatternConfig": { "Values": ["/api/*", "/Images/*"] } } ]
-"@
-aws elbv2 create-rule --listener-arn $HTTPS --priority 1 --conditions file://api-rule.json `
-  --actions "Type=forward,TargetGroupArn=$TG_API"
+**14.3 – Send `/api/*` and `/Images/*` to the API.** Open `karbar-alb` → **Listeners and rules** → **HTTPS:443** → **Manage rules → Add rule**:
+- Name: `api`
+- **Add condition → Path** → `/api/*` → **Add OR condition value** → `/Images/*` → Confirm
+- Action: **Forward to** `karbar-api-tg`
+- Priority: `1` → **Create**
 
-# Allow long reports/exports (default 60 s)
-aws elbv2 modify-load-balancer-attributes --load-balancer-arn $ALB --attributes "Key=idle_timeout.timeout_seconds,Value=300"
-```
+**14.4 – Redirect HTTP to HTTPS.** **Listeners and rules** → **HTTP:80** → **Actions → Edit listener** → default action **Redirect to URL** → **URI parts** → Protocol **HTTPS**, Port **443**, Status code **301** → **Save changes**.
 
-Check that both targets say **healthy**. It takes 1–2 minutes:
+**14.5 – Longer timeout for big reports.** `karbar-alb` → **Attributes → Edit** → **Connection idle timeout** `300` seconds → **Save changes**.
 
-```powershell
-aws elbv2 describe-target-health --target-group-arn $TG_WEB --query "TargetHealthDescriptions[].TargetHealth.State" --output text
-aws elbv2 describe-target-health --target-group-arn $TG_API --query "TargetHealthDescriptions[].TargetHealth.State" --output text
-```
-
-**Console:**
-1. **EC2 → Target groups → Create**, twice. Type **Instances**:
-   - `karbar-web-tg`: HTTP 80, health check `/health`
-   - `karbar-api-tg`: HTTP 8080, health check `/swagger/v1/swagger.json`
-
-   On **Register targets**, tick `karbar-app` → **Include as pending below** → **Create**.
-2. **Load balancers → Create → Application Load Balancer** → `karbar-alb`, **Internet-facing**, at least two Availability Zones, security group `karbar-alb` only. Listeners: **HTTPS 443** → `karbar-web-tg` with the certificate from Step 13. **HTTP 80** → `karbar-web-tg`, which you change in item 4.
-3. **Listener HTTPS:443 → Manage rules → Add rule** → condition **Path** `/api/*` and `/Images/*` → forward to `karbar-api-tg`, priority 1.
-4. **Listener HTTP:80 → Edit** → **Redirect to URL** → HTTPS, port 443, 301.
-5. **Attributes → Idle timeout** → 300.
+**14.6 – Check.** **Target Groups** → `karbar-web-tg` and `karbar-api-tg` → **Targets** tab. Both should be **healthy** after 1–2 minutes. If not, see [Troubleshooting](#troubleshooting).
 
 ## Step 15 – Point your domain at the load balancer
 
-**CLI:**
+Copy the load balancer's **DNS name** from `karbar-alb` → **Details**. It looks like `karbar-alb-123456.ap-southeast-1.elb.amazonaws.com`.
 
-```powershell
-$albInfo = (aws elbv2 describe-load-balancers --load-balancer-arns $ALB `
-              --query "LoadBalancers[0].[DNSName,CanonicalHostedZoneId]" --output text) -split "\s+"
-"Load balancer DNS name: $($albInfo[0])"
+- **Route 53:** **Hosted zones** → your domain → **Create record** → name `karbar` → type **A** → turn **Alias** on → *Alias to Application and Classic Load Balancer* → your region → `karbar-alb` → **Create records**.
+- **Other DNS provider:** add a **CNAME** record from `karbar` to the load balancer DNS name.
+
+💻 Check from the PC terminal. It should print one or more IP addresses:
+
+```bash
+dig +short karbar.example.com
 ```
-
-If your domain is in **Route 53** (uses `$ZONE` from Step 13):
-
-```powershell
-Save-File "site-dns.json" @"
-{ "Changes": [ { "Action": "UPSERT", "ResourceRecordSet": {
-    "Name": "$DOMAIN", "Type": "A",
-    "AliasTarget": { "HostedZoneId": "$($albInfo[1])", "DNSName": "dualstack.$($albInfo[0])", "EvaluateTargetHealth": true } } } ] }
-"@
-aws route53 change-resource-record-sets --hosted-zone-id $ZONE --change-batch file://site-dns.json
-```
-
-With **another DNS provider**, add a **CNAME** record from `karbar` to the load balancer DNS name printed above.
-
-**Console (Route 53):** **Hosted zones → your domain → Create record** → name `karbar` → type **A** → **Alias** on → Application Load Balancer → region → `karbar-alb`.
 
 DNS changes usually work within a few minutes. Some networks take up to an hour.
 
@@ -761,50 +654,16 @@ DNS changes usually work within a few minutes. Some networks take up to an hour.
 - [ ] `http://karbar.example.com` redirects to `https://`.
 - [ ] Login works. In the browser dev tools **Network** tab, API calls go to `https://karbar.example.com/api/...` and return 200.
 - [ ] Screens with item or user images show them, and image URLs start with `https://karbar.example.com/Images/...`.
-- [ ] Uploading an image works, and the image is still there after `docker compose --profile local-db restart api` (on the server).
+- [ ] Uploading an image works, and the image is still there after `docker compose --profile local-db restart api` (☁️ in `~/karbar`).
 - [ ] The data matches `projectdev`: open a few records and compare.
-- [ ] The next morning: `tail ~/karbar/backup.log` on the server shows `OK`, and `aws s3 ls "s3://$BUCKET/daily/"` lists the file.
+- [ ] The next morning: `tail ~/karbar/backup.log` (☁️) shows `OK`, and S3 shows the new file in `daily/`.
+- [ ] The day after: **EC2 → Snapshots** shows a snapshot of the `karbar-app` volume.
 
-## Step 17 – Save the IDs and tidy up
+## Step 17 – Tidy up
 
-**On your PC.** Save every resource ID so you can run CLI commands later, then delete the helper files:
-
-```powershell
-@"
-REGION=$REGION
-DOMAIN=$DOMAIN
-BUCKET=$BUCKET
-VPC=$VPC
-SUBNETS=$($SUBNETS -join ' ')
-SG_ALB=$SG_ALB
-SG_EC2=$SG_EC2
-INSTANCE=$INSTANCE
-ALLOC=$ALLOC
-IP=$IP
-CERT=$CERT
-TG_WEB=$TG_WEB
-TG_API=$TG_API
-ALB=$ALB
-HTTPS=$HTTPS
-ZONE=$ZONE
-"@ | Set-Content -Encoding ascii karbar-aws-ids.txt
-
-Remove-Item lifecycle.json, trust.json, s3-policy.json, dlm.json, acm-dns.json, api-rule.json, site-dns.json -ErrorAction SilentlyContinue
-```
-
-In any new PowerShell window, **reload them** with:
-
-```powershell
-cd d:\Personal\Karber-deply-AWS-Docker
-Get-Content karbar-aws-ids.txt | ForEach-Object { $k, $v = $_ -split '=', 2; Set-Variable $k $v }
-$SUBNETS = $SUBNETS -split ' '; $env:AWS_DEFAULT_REGION = $REGION
-function Save-File($name, $text) { [IO.File]::WriteAllText((Join-Path $PWD $name), $text) }
-```
-
-**Tidy up:**
-- On the server, delete the setup backup: `sudo rm ~/karbar/db/backups/Karbar_DB.bak`. On your PC, delete `karbar.tgz`.
+- ☁️ Delete the setup backup: `sudo rm ~/karbar/db/backups/Karbar_DB.bak`.
 - Remove real secrets (database password, JWT key, the unused `SapSettings` block) from `appsettings.json` in the repo. On AWS they come from `.env`.
-- Store `karbar-key.pem`, the server's `.env` and `karbar-aws-ids.txt` in a password manager.
+- Store `karbar-key.pem`, the server's `.env`, the Elastic IP and the bucket name in a password manager.
 
 ---
 
@@ -822,7 +681,7 @@ To switch users from `projectdev` to AWS without losing data:
 
 ## Daily operations
 
-**On the server**, in `~/karbar`:
+☁️ **Server terminal** (`ssh karbar`, then `cd ~/karbar`):
 
 | Task | Command |
 |---|---|
@@ -833,37 +692,46 @@ To switch users from `projectdev` to AWS without losing data:
 | Start everything | `docker compose --profile local-db up -d` |
 | Disk space | `df -h /` and `docker system df` |
 | Last backups | `tail ~/karbar/backup.log` |
+| List backups in S3 | `aws s3 ls s3://karbar-db-backups-2026x7/daily/` |
 | Run a SQL query | `sql -d Karbar_DB -Q "SELECT TOP 5 * FROM ApiLogs ORDER BY Id DESC"` |
 | OS updates | `sudo apt-get update && sudo apt-get -y upgrade` (then `sudo reboot` if asked) |
 
-**On your PC:**
+💻 **PC terminal:**
 
 | Task | Command |
 |---|---|
-| Log in to the server | `ssh -i .\karbar-key.pem ubuntu@$IP` |
-| Stop / start the server | `aws ec2 stop-instances --instance-ids $INSTANCE` / `aws ec2 start-instances --instance-ids $INSTANCE` |
-| List database backups | `aws s3 ls "s3://$BUCKET/daily/"` |
-| Download a backup | `aws s3 cp "s3://$BUCKET/daily/<file>.bak" .\db\backups\` |
-| Allow SSH from a new IP | `aws ec2 authorize-security-group-ingress --group-id $SG_EC2 --protocol tcp --port 22 --cidr "$((Invoke-RestMethod https://checkip.amazonaws.com).Trim())/32"` |
+| Log in to the server | `ssh karbar` |
+| Copy a file to the server | `scp <file> karbar:~` |
+| Copy a file from the server | `scp karbar:~/karbar/backup.log .` |
 
-**Open the server's database in SSMS on your PC.** Start an SSH tunnel and keep the window open:
+**AWS console:**
 
-```powershell
-ssh -i .\karbar-key.pem -N -L 14330:127.0.0.1:1433 ubuntu@$IP
+| Task | Where |
+|---|---|
+| Stop / start / reboot the server | **EC2 → Instances** → `karbar-app` → **Instance state** (the Elastic IP stays the same) |
+| SSH stopped working (new home/office IP) | **Security Groups → `karbar-ec2` → Edit inbound rules** → SSH → **My IP** |
+| Download a database backup | **S3** → bucket → `daily/` → file → **Download** |
+
+**Open the server's database in SSMS.** 💻 Start an SSH tunnel and keep the terminal open:
+
+```bash
+ssh -N -L 14330:127.0.0.1:1433 karbar
 ```
 
-In SSMS, connect to server `localhost,14330` with SQL Server Authentication (`sa` or `testuser`). Under **Options**, tick **Trust server certificate**.
+In SSMS on the same PC, connect to server `localhost,14330` with SQL Server Authentication (`sa` or `testuser`). Under **Options**, tick **Trust server certificate**.
 
 ## Updating the app
 
-**On the server:**
+**If you use Git.** ☁️ **Server terminal:**
 
 ```bash
 cd ~/karbar
-git pull                                             # or copy a new code archive as in Step 8
+git pull
 docker compose --profile local-db up -d --build      # rebuilds and restarts only what changed
 docker image prune -f                                # free disk space from old images
 ```
+
+**If you copy with `rsync`.** Run the 💻 `rsync` command from [Step 8](#step-8--copy-the-code-and-the-backup-to-the-server) again, then the two `docker` commands above on ☁️.
 
 The database and uploaded images live in Docker volumes and aren't affected.
 
@@ -873,18 +741,18 @@ Use this for go-live, or to recover from a nightly backup.
 
 **1. Get the backup onto the server, into the home folder:**
 
-```powershell
-# On your PC – a fresh backup from projectdev:
-scp -i .\karbar-key.pem .\db\backups\Karbar_DB.bak ubuntu@${IP}:~
+```bash
+# 💻 PC terminal – a fresh backup from projectdev:
+scp db/backups/Karbar_DB.bak karbar:~
 ```
 
 ```bash
-# Or on the server – a nightly backup from S3:
-aws s3 ls s3://karbar-db-backups-XXXXXXXX/daily/
-aws s3 cp s3://karbar-db-backups-XXXXXXXX/daily/<file>.bak ~/Karbar_DB.bak
+# ☁️ Server terminal – or a nightly backup from S3:
+aws s3 ls s3://karbar-db-backups-2026x7/daily/
+aws s3 cp s3://karbar-db-backups-2026x7/daily/<file>.bak ~/Karbar_DB.bak
 ```
 
-**2. Restore it. On the server:**
+**2. Restore it.** ☁️ **Server terminal:**
 
 ```bash
 cd ~/karbar
@@ -904,97 +772,73 @@ docker compose --profile local-db up -d api
 
 ## If the server is lost
 
-**Fastest: restore the latest disk snapshot.** In the console, go to **EC2 → Snapshots** → the latest `karbar-app` snapshot → **Create volume**, or **Create image** and launch from it. Then attach the Elastic IP, and register the new instance in both target groups (Step 14). Everything is back as of the snapshot. If you need newer data, restore that night's database backup on top.
+**Fastest: launch from the latest disk snapshot.** AWS console:
+1. **EC2 → Snapshots** → the latest `karbar-app` snapshot → **Actions → Create image from snapshot** → architecture x86_64, root device `/dev/sda1` → **Create image**.
+2. **AMIs** → the new image → **Launch instance from AMI**, with the same settings as [Step 5](#step-5--launch-the-ec2-server): `t3.large`, `karbar-key`, `karbar-ec2`, `karbar-ec2-role`.
+3. **Elastic IPs** → your IP → **Associate** with the new instance. `ssh karbar` keeps working.
+4. **Target Groups** → `karbar-web-tg` and `karbar-api-tg` → **Targets → Register targets** → the new instance (ports 80 / 8080). Then deregister the old one.
 
-**From scratch:**
-1. Steps 5–9: new server, Docker, code, and `.env` from your password-manager copy.
-2. Get the latest backup from S3 and restore it ([Restoring a newer backup](#restoring-a-newer-backup), then Step 10.3).
-3. Steps 11–12.1: start the app and set up the backup cron again.
-4. Register the new instance in both target groups, and remove the old one:
+Everything is back as of the snapshot. If you need newer data, restore that night's database backup on top ([Restoring a newer backup](#restoring-a-newer-backup)).
 
-   ```powershell
-   aws elbv2 register-targets   --target-group-arn $TG_WEB --targets "Id=<new-instance-id>,Port=80"
-   aws elbv2 register-targets   --target-group-arn $TG_API --targets "Id=<new-instance-id>,Port=8080"
-   aws elbv2 deregister-targets --target-group-arn $TG_WEB --targets "Id=$INSTANCE,Port=80"
-   aws elbv2 deregister-targets --target-group-arn $TG_API --targets "Id=$INSTANCE,Port=8080"
-   ```
+**From scratch:** Steps 5–12 (use your saved `.env`, and restore the latest backup from S3 in Step 10). Then do item 4 above.
 
 ## No domain yet?
 
 You can test with the load balancer's own address, over plain HTTP:
 
 1. Skip Steps 13 and 15.
-2. In Step 14, don't create the HTTPS listener or the redirect. Create the **HTTP 80** listener forwarding to `karbar-web-tg`, and add the `/api/*`, `/Images/*` rule to **that** listener:
+2. In Step 14.2, create only the **HTTP : 80** listener (forward to `karbar-web-tg`). Add the `/api/*` + `/Images/*` rule from 14.3 to **that** listener, and skip 14.4.
+3. ☁️ In `.env`, set `API_BASE_URL=http://<load balancer DNS name>/api/`, then run `docker compose --profile local-db up -d --build web`.
 
-   ```powershell
-   $HTTP = aws elbv2 create-listener --load-balancer-arn $ALB --protocol HTTP --port 80 `
-             --default-actions "Type=forward,TargetGroupArn=$TG_WEB" --query "Listeners[0].ListenerArn" --output text
-   aws elbv2 create-rule --listener-arn $HTTP --priority 1 --conditions file://api-rule.json --actions "Type=forward,TargetGroupArn=$TG_API"
-   aws elbv2 describe-load-balancers --load-balancer-arns $ALB --query "LoadBalancers[0].DNSName" --output text
-   ```
-
-3. On the server, set `API_BASE_URL=http://<load balancer DNS name>/api/` in `.env`, then run `docker compose --profile local-db up -d --build web`.
-
-Use this for testing only. Logins and data travel unencrypted.
+Use this for testing only. Logins and data travel unencrypted. Once you have a domain, do Steps 13–15 and change `API_BASE_URL` back.
 
 ## Troubleshooting
 
 | Problem | Fix |
 |---|---|
 | **Local:** `sqlserver` stops right after starting | `SQL_SA_PASSWORD` is too weak. Check `docker compose logs sqlserver`. |
-| **Local:** `docker exec` path errors in Git Bash | Use PowerShell, or put `MSYS_NO_PATHCONV=1` in front of the command. |
-| AWS CLI: *Unable to parse parameter* / *Invalid JSON* | An argument with commas wasn't in quotes, or a JSON file was saved with a BOM. Use `Save-File` from Step 0. |
-| AWS CLI: `"@` error | The closing `"@` must be at the very start of its line. |
-| SSH: *UNPROTECTED PRIVATE KEY FILE* | Run the `icacls` command from Step 2. |
-| SSH: *Connection timed out* | Your IP changed. Allow the new one ([Daily operations](#daily-operations)). |
+| **WSL:** `docker: command not found` | Docker Desktop → **Settings → Resources → WSL integration** → turn on your Ubuntu distro. |
+| SSH: *UNPROTECTED PRIVATE KEY FILE* | `chmod 400 ~/.ssh/karbar-key.pem`, and keep the key in `~/.ssh`, not on `/mnt/c` or `/mnt/d`. |
+| SSH: *Connection timed out* | Your IP changed. Update the SSH rule in `karbar-ec2` to **My IP**. |
+| `aws s3 ls` on the server: *Unable to locate credentials* | The IAM role isn't attached. **EC2 → `karbar-app` → Actions → Security → Modify IAM role** → `karbar-ec2-role`. |
 | `sqlserver` keeps restarting on the server | `docker compose logs sqlserver`. Usually the password is too weak, or the disk is full (`df -h`). |
 | API log: *network-related or instance-specific error* | SQL Server isn't running. You probably left out `--profile local-db`. |
 | API log: *Login failed for user 'testuser'* | Run Step 10.3 again. The password must match `DB_CONNECTION` in `.env`. |
-| RESTORE: *Operating system error 2* / *access denied* | The `.bak` isn't in `~/karbar/db/backups`, or isn't owned by user 10001. Run `sudo chown 10001:0 db/backups/*.bak`. |
+| RESTORE: *Operating system error 2* / *access denied* | The `.bak` isn't in `~/karbar/db/backups`, or isn't owned by user 10001. Run `sudo chown 10001:0 ~/karbar/db/backups/*.bak`. |
 | RESTORE: *backed up on a server running version …* | The backup is from a newer SQL Server. Use the `2025-latest` image (Step 1). |
 | RESTORE: *exceeds the license limit of 10240 MB* | The database is over 10 GB, which Express can't hold. See Step 1. |
 | RESTORE: *exclusive access could not be obtained* | Stop the API, and set `SINGLE_USER` first ([Restoring a newer backup](#restoring-a-newer-backup)). |
 | Build killed / *exit code 137* | Out of memory. Lower `MSSQL_MEMORY_LIMIT_MB`, or stop SQL Server while building. |
-| Certificate stays *Pending validation* | The ACM CNAME record is missing or mistyped (Step 13). Check it with `nslookup -type=CNAME <record name>`. |
-| Target **unhealthy** / site shows **502/503** | On the server, run `docker compose ps` and the `curl` checks from Step 11. `karbar-ec2` must allow 80 and 8080 **from `karbar-alb`**. |
+| Certificate stays *Pending validation* | The CNAME record is missing or mistyped (Step 13). Check with `dig +short CNAME <name>`. |
+| Target **unhealthy** / site shows **502/503** | ☁️ Run `docker compose ps` and the `curl` checks from Step 11. `karbar-ec2` must allow 80 and 8080 **from `karbar-alb`** (Step 3). |
 | Site loads but API calls go to the wrong URL | `API_BASE_URL` was wrong when `web` was built. Fix `.env`, run `docker compose --profile local-db up -d --build web`, then press Ctrl+F5 in the browser. |
-| API calls return HTML instead of JSON | The `/api/*` rule is missing, or it's on the wrong listener (it must be on HTTPS 443). |
+| API calls return HTML instead of JSON | The `/api/*` rule is missing, or it's on the wrong listener (it must be on HTTPS:443, Step 14.3). |
 | Images are `http://` or blocked | The API must see `X-Forwarded-Proto`. It's turned on in the API Dockerfile (`ASPNETCORE_FORWARDEDHEADERS_ENABLED=true`). Rebuild `api`. |
-| Backup script: *Unable to locate credentials* | The IAM role isn't attached to the server. Run `aws ec2 associate-iam-instance-profile --instance-id $INSTANCE --iam-instance-profile Name=karbar-ec2-role`. |
-| SSMS tunnel won't connect | Keep the SSH window open, and use `localhost,14330` (comma). `SQL_PORT` must be `127.0.0.1:1433`. |
+| SSMS tunnel won't connect | Keep the tunnel terminal open, and use `localhost,14330` (comma). `SQL_PORT` must be `127.0.0.1:1433`. |
 
 ## Delete everything
 
-This **permanently deletes** the server, its data and all backups. Download any backups you want to keep first. **On your PC**, with the IDs loaded (Step 17):
+This **permanently deletes** the server, its data and all backups. Download any backups you want to keep first. **AWS console**, in this order:
 
-```powershell
-aws elbv2 delete-load-balancer --load-balancer-arn $ALB
-aws elbv2 wait load-balancers-deleted --load-balancer-arns $ALB
-aws elbv2 delete-target-group --target-group-arn $TG_WEB
-aws elbv2 delete-target-group --target-group-arn $TG_API
-aws ec2 terminate-instances --instance-ids $INSTANCE
-aws ec2 wait instance-terminated --instance-ids $INSTANCE
-aws ec2 release-address --allocation-id $ALLOC
-aws ec2 delete-security-group --group-id $SG_EC2
-aws ec2 delete-security-group --group-id $SG_ALB
-aws acm delete-certificate --certificate-arn $CERT
-aws s3 rb "s3://$BUCKET" --force
-aws iam remove-role-from-instance-profile --instance-profile-name karbar-ec2-role --role-name karbar-ec2-role
-aws iam delete-instance-profile --instance-profile-name karbar-ec2-role
-aws iam delete-role-policy --role-name karbar-ec2-role --policy-name karbar-s3-backup
-aws iam delete-role --role-name karbar-ec2-role
-aws ec2 delete-key-pair --key-name karbar-key
-```
-
-Also delete these: the snapshot policy (`aws dlm get-lifecycle-policies`, then `aws dlm delete-lifecycle-policy --policy-id <id>`), old snapshots (**EC2 → Snapshots**), and the DNS records from Steps 13 and 15.
+1. **EC2 → Load Balancers** → `karbar-alb` → **Actions → Delete**.
+2. **Target Groups** → `karbar-web-tg`, `karbar-api-tg` → **Actions → Delete**.
+3. **Instances** → `karbar-app` → **Instance state → Terminate**.
+4. **Elastic IPs** → your IP → **Actions → Release**. An unattached Elastic IP still costs money.
+5. **Lifecycle Manager** → the snapshot policy → **Delete**. Then **Snapshots** → delete the `karbar-app` snapshots.
+6. **Security Groups** → `karbar-ec2`, then `karbar-alb` → **Delete**.
+7. **Key Pairs** → `karbar-key` → **Delete**.
+8. **Certificate Manager** → the certificate → **Delete**.
+9. **S3** → the bucket → **Empty**, then **Delete**.
+10. **IAM → Roles** → `karbar-ec2-role` → **Delete**.
+11. Remove the DNS records from Steps 13 and 15.
 
 ## Appendix – Moving the database to RDS later
 
 If the database grows past 10 GB, or you want AWS to handle database backups and patching, you can move it to **Amazon RDS for SQL Server** without changing the app:
 
-1. Create an RDS SQL Server instance with no public access, and a security group that allows port 1433 only from `karbar-ec2`. Attach an **option group** with `SQLSERVER_BACKUP_RESTORE`, and an IAM role that can read the backup bucket.
-2. On the server, run `~/karbar/backup-db.sh` to get a fresh backup into S3.
-3. Connect to RDS from SSMS, through an SSH tunnel to `<RDS endpoint>:1433`. Then restore and relink the login:
+1. **RDS → Create database** → SQL Server, no public access, with a security group that allows port 1433 only from `karbar-ec2`. Attach an **option group** with `SQLSERVER_BACKUP_RESTORE`, and an IAM role that can read the backup bucket.
+2. ☁️ Run `~/karbar/backup-db.sh` to get a fresh backup into S3.
+3. 💻 Open a tunnel with `ssh -N -L 14330:<RDS endpoint>:1433 karbar`, connect SSMS to `localhost,14330`, then restore and relink the login:
 
    ```sql
    EXEC msdb.dbo.rds_restore_database @restore_db_name='Karbar_DB',
@@ -1004,5 +848,5 @@ If the database grows past 10 GB, or you want AWS to handle database backups and
    USE Karbar_DB; ALTER USER testuser WITH LOGIN = testuser;
    ```
 
-4. In `.env`, set `DB_CONNECTION` to `Server=<RDS endpoint>,1433;...`. From then on, run `docker compose up -d` **without** `--profile local-db`, and run `docker compose stop sqlserver`.
-5. Remove the backup cron job (`crontab -e`). RDS automated backups replace it.
+4. ☁️ In `.env`, set `DB_CONNECTION` to `Server=<RDS endpoint>,1433;...`. From then on, run `docker compose up -d` **without** `--profile local-db`, and run `docker compose stop sqlserver`.
+5. ☁️ Remove the backup cron job (`crontab -e`). RDS automated backups replace it.
