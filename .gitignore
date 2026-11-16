@@ -1,2 +1,5 @@
 .env
 db/backups/*.bak
+*.pem
+karbar-aws-ids.txt
+*.tgz
