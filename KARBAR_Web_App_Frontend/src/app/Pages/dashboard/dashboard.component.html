@@ -1,0 +1,176 @@
+
+
+<div class="dashboard">
+  <!-- KPI row -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-title">Today's Sale</div>
+      <div class="kpi-value">
+        <span class="number">{{ format(todaySale) }}</span><span class="currency">৳</span>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-title">Today's Customer Due</div>
+      <div class="kpi-value">
+        <span class="number">{{ format(todayDue) }}</span><span class="currency">৳</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Today's Berger Purchase</div>
+      <div class="kpi-value">
+        <span class="number">{{ format(todayBergerPurchase) }}</span><span class="currency">৳</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-title">Today's Non Berger Purchase</div>
+      <div class="kpi-value">
+        <span class="number">{{ format(todayNonBergerPurchase) }}</span><span class="currency">৳</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- User manual downloads -->
+  <!-- <div class="manual-card">
+    <div class="manual-info">
+      <mat-icon class="manual-icon">menu_book</mat-icon>
+      <div>
+        <div class="manual-title">User Manual <span class="manual-title-bn">· ব্যবহার নির্দেশিকা</span></div>
+        <div class="manual-sub">Step-by-step guide to every Karbar screen. Download as PDF.</div>
+      </div>
+    </div>
+    <div class="manual-actions">
+      <a class="manual-btn" [href]="manualUrls.en" download="Karbar-User-Manual-EN.pdf">
+        <mat-icon>download</mat-icon>English
+      </a>
+      <a class="manual-btn" [href]="manualUrls.bn" download="Karbar-User-Manual-BN.pdf">
+        <mat-icon>download</mat-icon>বাংলা
+      </a>
+    </div>
+  </div> -->
+
+  <div class="lists-row">
+    <!-- <div class="list-card">
+  <div class="section-title">Sales Overview</div>
+
+  <div style="height:300px;">
+    <canvas id="salesChart"></canvas>
+  </div>
+</div> -->
+    <div class="list">
+      <div class="list-card">
+        <div class="list-header">
+          <div class="title">List of Receivable</div>
+        </div>
+        <div class="list-scroll">
+          <div class="list-item" *ngFor="let r of receivables">
+            <div class="name">{{ r.name }}</div>
+            <div class="amount">{{ format(r.amount) }}৳</div>
+            <div class="pill">{{ r.month }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Expense
+          <div>
+            <button [class.active]="selectedExpensePeriod === 'today'" (click)="selectExpensePeriod('today')">Today</button>
+            <button [class.active]="selectedExpensePeriod === '7days'" (click)="selectExpensePeriod('7days')">7 days</button>
+            <button [class.active]="selectedExpensePeriod === '30days'" (click)="selectExpensePeriod('30days')">30 days</button>
+          </div>
+        </div>
+
+        <div class="line-chart">
+          <div class="y-axis">
+            <span>{{ format(maxExpense) }}</span>
+            <span>{{ format(maxExpense * 0.75) }}</span>
+            <span>{{ format(maxExpense * 0.5) }}</span>
+            <span>{{ format(maxExpense * 0.25) }}</span>
+            <span>0</span>
+          </div>
+          <div class="line-plot">
+            <svg width="100%" height="200" viewBox="0 0 400 200" preserveAspectRatio="xMidYMid meet">
+              <defs>
+                <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:rgb(27, 86, 115);stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:rgb(27, 86, 115);stop-opacity:0" />
+                </linearGradient>
+              </defs>
+              
+              <line *ngFor="let i of [0,1,2,3,4]" 
+                    [attr.x1]="0" 
+                    [attr.y1]="i * 40" 
+                    [attr.x2]="400" 
+                    [attr.y2]="i * 40" 
+                    class="grid-line" />
+              
+              <line *ngFor="let point of getScatterPoints()"
+                    [attr.x1]="point.x"
+                    [attr.y1]="200"
+                    [attr.x2]="point.x"
+                    [attr.y2]="point.y"
+                    [class.stem-line]="true"
+                    [class.active-stem]="point.active" />
+              
+              <path 
+                [attr.d]="getLinePath()" 
+                class="line-path" />
+              
+              <path 
+                [attr.d]="getAreaPath()" 
+                class="area-path" />
+              
+              <g *ngFor="let point of getScatterPoints(); let i = index">
+                <circle 
+                  [attr.cx]="point.x" 
+                  [attr.cy]="point.y" 
+                  [attr.r]="point.active ? 10 : 6"
+                  [class.line-point]="true"
+                  [class.active-point]="point.active">
+                  <title>{{ point.label }}: {{ format(point.amount) }}৳</title>
+                </circle>
+                <text *ngIf="point.active" 
+                      [attr.x]="point.x" 
+                      [attr.y]="point.y - 20" 
+                      class="point-label">
+                  {{ format(point.amount) }}৳
+                </text>
+              </g>
+            </svg>
+            <div class="x-axis-labels">
+              <span>Today</span>
+              <span>7 Days</span>
+              <span>30 Days</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stock-card">
+      <div class="section-title">Low Stock</div>
+      <table class="stock-table">
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Material No</th>
+            <th>Warehouse</th>
+            <th>Current Stock</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of lowStockItems">
+            <td>{{ row.itemName }}</td>
+            <td>{{ row.materialNo }}</td>
+            <td>{{ row.warehouse }}</td>
+            <td>{{ row.currentStock }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-footer">
+        <!-- <button class="link" type="button">More >></button> -->
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,83 @@
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">Customer Receivable Report</h2>
+  </div>
+</div>
+
+<div class="header-card">
+
+  <div class="table-top">
+         <div class="material-filter">
+            <mat-form-field appearance="outline" class="material-search">
+                <mat-label>Customer Name/Invoice No</mat-label>
+
+                <input matInput [(ngModel)]="searchReq.searchText" (ngModelChange)="onFilter()"
+                    placeholder="Customer search..." />
+
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+        </div>
+        <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+  <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+  
+    </div>
+
+<div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>
+<div>
+   <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button></div>
+      
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+    <table>
+  <thead>
+    <tr>
+      <th>Sl No</th>
+      <th>Customer Code</th>
+      <th>Customer Name</th>
+      <th>Invoice No</th>
+      <th>Invoice Date</th>
+      <th>Due Date</th>
+      <th>Invoice Amount</th>
+      <th>Paid</th>
+      <th>Outstanding</th>
+      <th>Aging (Days)</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of lstReport; track $index) {
+    <tr>
+      <td>{{ row.slNo }}</td>
+      <td>{{ row.customerId }}</td>
+      <td>{{ row.customerName }}</td>
+      <td>{{ row.invoiceNo }}</td>
+      <td>{{ row.invoiceDate | date:'dd-MMM-yy' }}</td>
+      <td>
+        {{ row.dueDate ? (row.dueDate | date:'dd-MMM-yy') : '-' }}
+      </td>
+      <td>{{ row.invoiceAmount | number:'1.2-2' }}</td>
+      <td>{{ row.paid | number:'1.2-2' }}</td>
+      <td>{{ row.outstanding | number:'1.2-2' }}</td>
+      <td>{{ getAgingDays(row.dueDate) }}</td>
+    </tr>
+    }
+  </tbody>
+</table>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

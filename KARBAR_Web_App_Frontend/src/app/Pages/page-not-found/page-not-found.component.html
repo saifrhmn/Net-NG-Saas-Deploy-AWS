@@ -1,0 +1,19 @@
+<!-- not-found.component.html -->
+<div class="not-found-container">
+  <mat-icon class="not-found-icon">error_outline</mat-icon>
+  <h1>401</h1>
+  <h2>Unauthorized</h2>
+  <p>You are not authorized for this page. Please, contact with the administrator</p>
+
+  <div class="actions">
+    <!-- <button mat-raised-button color="primary" (click)="goHome()">
+      <mat-icon class="material-icons-outlined">home</mat-icon>
+      Back to Home
+    </button> -->
+
+    <button mat-stroked-button color="warn" (click)="logout()">
+      <mat-icon class="material-icons-outlined">logout</mat-icon>
+      Logout
+    </button>
+  </div>
+</div>

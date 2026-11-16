@@ -1,0 +1,489 @@
+/* ==========================================================================
+   GLOBAL MOBILE / TABLET RESPONSIVE LAYER
+   --------------------------------------------------------------------------
+   Loaded last from src/styles.scss so it can correct desktop-first component
+   styles. Component stylesheets are injected after the global bundle, so most
+   overrides here need !important to win at equal specificity.
+
+   Breakpoints
+     <= 1199px  small laptop / large tablet
+     <=  991px  tablet + phone (sidenav becomes an overlay drawer)
+     <=  599px  phone
+     <=  400px  small phone
+   ========================================================================== */
+
+/* ---------- Tablet / small laptop ---------- */
+@media (max-width: 1199px) {
+  :root {
+    --table-scroll-height: calc(100dvh - 400px);
+  }
+
+  .header-card {
+    padding: 14px 16px !important;
+  }
+
+  /* The order/purchase summary pane stops being a fixed-width sticky column. */
+  .summary-card-fixed {
+    width: 100% !important;
+    position: static !important;
+  }
+}
+
+/* ---------- Tablet & phone ---------- */
+@media (max-width: 991px) {
+  :root {
+    --table-scroll-height: calc(100dvh - 330px);
+    --table-scroll-min-height: 220px;
+  }
+
+  html,
+  body {
+    /* Never let a wide table push the whole page sideways - tables scroll
+       inside their own container instead. */
+    overflow-x: hidden;
+  }
+
+  /* ----- Toolbar ----- */
+  mat-toolbar,
+  .mat-toolbar,
+  mat-toolbar-row,
+  .mat-toolbar-row {
+    height: 56px !important;
+    min-height: 56px !important;
+    padding: 0 4px !important;
+  }
+
+  /* ----- Page headers & filter bars ----- */
+  .header-card,
+  .header-div-card,
+  .tabs-card {
+    padding: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .header-content,
+  .card-header-search,
+  .table-top,
+  .section-header,
+  .modal-actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .header-content > *,
+  .card-header-search > * {
+    width: 100%;
+  }
+
+  .page-title,
+  .section-title {
+    font-size: 18px !important;
+    text-align: left;
+  }
+
+  .table-filters,
+  .filter-row,
+  .material-filter,
+  .button-wrapper,
+  .table-search,
+  .view-toggle {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  .total-invoice-amount-summary,
+  .total-value {
+    width: 100% !important;
+    box-sizing: border-box;
+    margin-top: 0 !important;
+    padding: 12px !important;
+    font-size: 14px;
+  }
+
+  /* ----- Form controls: nothing keeps a desktop fixed width ----- */
+  mat-form-field,
+  .mat-mdc-form-field,
+  .category-dropdown,
+  .type-dropdown,
+  .status-select,
+  .tax-select,
+  .dropdown-field,
+  .mat-dropdown-with-add,
+  .customer-search-wrapper,
+  .customer-search-field,
+  .search-wrapper,
+  .search-container,
+  .material-search,
+  .form-input,
+  .floating-label-group,
+  .form-group,
+  .form-group-modal,
+  .detail-field,
+  app-input,
+  app-select,
+  app-typeable-selection-dropdown {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .filter-date {
+    flex: 1 1 140px;
+    min-width: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Multi-column input grids collapse to a single column. */
+  .form-row,
+  .form-grid,
+  .info-grid,
+  .details-grid,
+  .purchase-info,
+  .purchase-container,
+  .kpi-row,
+  .lists-row,
+  .bottom-row {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* ----- Tables: keep the desktop table, scroll it horizontally ----- */
+  .table__body,
+  .items-table-container,
+  .table-card,
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table__body {
+    min-height: 0 !important;
+  }
+
+  table th,
+  table td {
+    font-size: 12px !important;
+    width: auto !important;
+    min-width: 96px !important;
+    height: auto !important;
+    min-height: 34px;
+    line-height: 1.35 !important;
+    padding: 6px !important;
+  }
+
+  .payment-scroller,
+  .scroller {
+    max-height: var(--table-scroll-height) !important;
+  }
+
+  /* Grid-based "tables" (order / purchase / sales summary panes). */
+  .summary-header,
+  .summary-row {
+    gap: 4px !important;
+    font-size: 11px !important;
+  }
+
+  .summary-header h4 {
+    font-size: 11px !important;
+  }
+
+  /* ----- Modals: sheet style ----- */
+  .modal-overlay {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  .modal-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 94dvh !important;
+    border-radius: 14px 14px 0 0 !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modal-header {
+    padding: 14px 16px !important;
+  }
+
+  .modal-title {
+    font-size: 15px !important;
+  }
+
+  .modal-content {
+    padding: 16px !important;
+    max-height: none !important;
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-actions {
+    padding: 12px 16px !important;
+    flex-direction: column-reverse !important;
+  }
+
+  .modal-actions button,
+  .modal-actions .cancel-btn,
+  .modal-actions .submit-btn,
+  .modal-actions .pay-btn,
+  .modal-actions .print-btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  .detail-row,
+  .payment-detail-row,
+  .calc-row {
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  /* Material dialogs / overlays */
+  .cdk-overlay-pane {
+    max-width: 96vw !important;
+  }
+
+  /* Material tabs scroll instead of squeezing. */
+  .mat-mdc-tab-header {
+    --mat-tab-header-label-text-size: 13px;
+  }
+
+  .mat-mdc-tab-body-content {
+    padding: 0 !important;
+  }
+
+  .tab-content {
+    padding: 12px !important;
+  }
+
+  /* Paginator wraps on narrow screens. */
+  .mat-mdc-paginator-container {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    row-gap: 4px;
+    padding: 4px !important;
+  }
+
+  /* Dropdown panels must fit the viewport. */
+  .mat-mdc-select-panel,
+  .mat-mdc-autocomplete-panel {
+    max-width: 92vw !important;
+  }
+
+  .customer-dropdown,
+  .dropdown-options {
+    max-width: 100% !important;
+  }
+}
+
+/* ---------- Phone ---------- */
+@media (max-width: 599px) {
+  :root {
+    --table-scroll-height: calc(100dvh - 290px);
+    --table-scroll-min-height: 180px;
+  }
+
+  .header-card,
+  .header-div-card,
+  .payment-card,
+  .tabs-card {
+    border-radius: 10px !important;
+    padding: 10px !important;
+    margin: 0 0 10px 0 !important;
+  }
+
+  .page-title {
+    font-size: 16px !important;
+  }
+
+  /* Primary actions become full-width, thumb-friendly targets. */
+  .download-button,
+  .create-btn,
+  .theme-button,
+  .submit-btn,
+  .cancel-btn,
+  .print-btn,
+  .pay-btn,
+  .add,
+  .view-toggle-btn {
+    width: 100% !important;
+    min-height: 42px;
+    justify-content: center !important;
+  }
+
+  /* Icon-only row actions stay compact. */
+  .action-button,
+  .qty-btn,
+  button.mat-mdc-icon-button {
+    width: auto !important;
+    min-height: 0;
+  }
+
+  .table-filters,
+  .filter-row {
+    flex-direction: column !important;
+  }
+
+  .filter-date,
+  .status-select,
+  .category-dropdown {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+  }
+
+  table th,
+  table td {
+    font-size: 11px !important;
+    min-width: 88px !important;
+    padding: 5px !important;
+  }
+
+  .card-content {
+    padding: 12px !important;
+  }
+
+  .card-header {
+    padding: 12px !important;
+  }
+
+  .card-header h3 {
+    font-size: 15px !important;
+  }
+
+  .detail-row,
+  .payment-detail-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  .modal-container {
+    max-height: 96dvh !important;
+  }
+
+  /* Avoid iOS zoom-on-focus: inputs need >= 16px text. */
+  input,
+  select,
+  textarea,
+  .form-input,
+  .mat-mdc-input-element {
+    font-size: 16px !important;
+  }
+}
+
+/* ---------- Small phone ---------- */
+@media (max-width: 400px) {
+  table th,
+  table td {
+    font-size: 10.5px !important;
+    min-width: 78px !important;
+    padding: 4px !important;
+  }
+
+  .page-title {
+    font-size: 15px !important;
+  }
+}
+
+/* ==========================================================================
+   SPECIFICITY ESCALATION
+   Angular injects component stylesheets after this bundle, and several of them
+   pin desktop widths with !important (table cells at 121.93px, dropdowns at
+   350-380px). Equal-specificity !important loses to the later sheet, so these
+   rules repeat the selectors with extra specificity to win on mobile.
+   ========================================================================== */
+@media (max-width: 991px) {
+  body table[class][class] th,
+  body table[class][class] td,
+  body table[class][class] th[class],
+  body table[class][class] td[class] {
+    width: auto !important;
+    min-width: 96px !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 34px;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    padding: 6px !important;
+  }
+
+  body mat-form-field[class][class],
+  body .mat-mdc-form-field[class][class],
+  body .category-dropdown.category-dropdown,
+  body .type-dropdown.type-dropdown,
+  body .status-select.status-select,
+  body .tax-select.tax-select,
+  body .material-search.material-search,
+  body .table-search.table-search,
+  body .customer-search-wrapper.customer-search-wrapper,
+  body .customer-search-field.customer-search-field,
+  body .search-container.search-container,
+  body .search-wrapper.search-wrapper,
+  body .dropdown-field.dropdown-field,
+  body .form-input.form-input,
+  body .filter-date.filter-date,
+  body .summary-card-fixed.summary-card-fixed,
+  body .modal-container.modal-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin-right: 0 !important;
+    box-sizing: border-box;
+  }
+
+  body .summary-card-fixed.summary-card-fixed {
+    position: static !important;
+    top: auto !important;
+  }
+
+  body .items-table-container.items-table-container,
+  body .table__body.table__body {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Images never overflow their card (the toolbar logo keeps its own size). */
+  body img[class]:not(.logo-img),
+  body [class] img:not(.logo-img) {
+    max-width: 100% !important;
+  }
+
+  body .item-container img {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  /* Select/autocomplete panels are in an overlay outside the page container. */
+  body .cdk-overlay-pane .mat-mdc-select-panel,
+  body .cdk-overlay-pane .mat-mdc-autocomplete-panel {
+    min-width: 0 !important;
+    max-width: 92vw !important;
+  }
+}
+
+@media (max-width: 599px) {
+  body table[class][class] th,
+  body table[class][class] td {
+    font-size: 11px !important;
+    min-width: 88px !important;
+    padding: 5px !important;
+  }
+}
+
+@media (max-width: 400px) {
+  body table[class][class] th,
+  body table[class][class] td {
+    font-size: 10.5px !important;
+    min-width: 78px !important;
+    padding: 4px !important;
+  }
+}

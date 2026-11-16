@@ -1,0 +1,480 @@
+<div class="header-card">
+    <div class="header-content">
+        @if(selectedType === 1){
+            <div class="card-header"><mat-icon >person</mat-icon> <h3 >Customer Payment</h3></div>
+        }@else{
+            <div class="card-header"><mat-icon>person</mat-icon> <h3 >Supplier Payment</h3></div>
+        }
+        <div>
+            <div>
+                <mat-form-field appearance="outline" class="type-dropdown">
+                    <mat-label>Select Type</mat-label>
+                    <mat-select [(ngModel)]="selectedType" (selectionChange)="onTypeChange($event)">
+                        <mat-option *ngFor="let type of paymentTypes" [value]="type.value">
+                            {{ type.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Cumulative due (all pages): selected customer, search matches, or everyone -->
+<ng-template #totalDueStat>
+    <div class="total-due-stat" [class.has-due]="customerTotalDue > 0" [class.loading]="isTotalDueLoading">
+        <div class="total-due-icon-wrap">
+            <mat-icon class="total-due-icon">
+                {{ customerTotalDue > 0 ? 'account_balance_wallet' : 'verified' }}
+            </mat-icon>
+        </div>
+        <div class="total-due-text">
+            <div class="total-due-top">
+                <span class="total-due-label">Total Due</span>
+                <span class="total-due-scope">{{ totalDueCaption }}</span>
+            </div>
+            <span class="total-due-amount">
+                @if (isTotalDueLoading) {
+                <span class="total-due-skeleton"></span>
+                } @else {
+                {{ customerTotalDue | currency:'BDT':'৳ ' }}
+                }
+            </span>
+        </div>
+    </div>
+</ng-template>
+
+<!-- User Payment Card -->
+<div class="payment-card user-card" *ngIf="selectedType === 1">
+    <div class="card-header-search">
+        <div class="card-header">
+            <!-- <mat-icon>person</mat-icon>
+            <h3>Customer Payment</h3> -->
+            <ng-container *ngTemplateOutlet="totalDueStat"></ng-container>
+        </div>
+        <div>
+            <!-- Multipurpose Search - Invoice No, Name, Phone -->
+            <div class="customer-search-wrapper">
+                <mat-form-field appearance="outline" class="customer-search-field">
+                    <mat-label>Search</mat-label>
+                    <input matInput type="text" [(ngModel)]="customerSearch" (input)="onSearchChange()"
+                        (focus)="onSearchFocus()" (blur)="hideSearchDropdown()" placeholder="Invoice No, Name, Phone" />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+
+                <!-- Search Results Dropdown -->
+                <div class="customer-dropdown" *ngIf="showSearchDropdown && filteredResults.length > 0">
+                    <div class="customer-dropdown-option" *ngFor="let result of filteredResults"
+                        (mousedown)="selectSearchResult(result)">
+                        <div class="result-invoice">{{ result.orderInvoiceNo }}</div>
+                        <div class="customer-option-name">{{ result.customerName }}</div>
+                        <div class="customer-option-phone">{{ result.customerPhone }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-content">
+        <div class="table-card">
+            <!-- Customer Info Table -->
+         
+            <div class="items-table-container">
+                <div class="payment-scroller">
+                    <table >
+                        <thead class="sticky-header">
+                            <tr>
+                                <th>Sells Date</th>
+                                <th>Sell Invoice No</th>
+                                <th>Customer Name</th>
+                                <th>Phone Number</th>
+                                <th>Total Amount</th>
+                                <th>Paid Amount</th>
+                                <th>Due Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of lstPayment">
+                                <td>{{ row.createdDate | date:'mediumDate' }}</td>
+                                <td>{{ row.orderInvoiceNo }}</td>
+                                <td>{{ row.userName }}</td>
+                                <td>{{ row.userPhone }}</td>
+                                <td>{{ row.totalAmount | currency:'BDT':'৳' }}</td>
+                                <td>{{ row.paidAmount | currency:'BDT':'৳' }}</td>
+                                <td>
+                                    @if(row.dueAmount > 0){
+                                    <span class="due">{{ row.dueAmount | currency:'BDT':'৳' }}</span>
+                                    }@else{
+                                    {{ row.dueAmount | currency:'BDT':'৳' }}
+                                    }
+                                </td>
+                                <td>
+                                    <ng-container *ngIf="row.dueAmount > 0; else noDue">
+                                        <button mat-icon-button color="primary" (click)="openPaymentDetails(row)"
+                                            title="View Details">
+                                            <mat-icon>arrow_forward</mat-icon>
+                                        </button>
+                                    </ng-container>
+
+                                    <ng-template #noDue>
+                                        <button mat-icon-button class="no-due-btn" title="No Due">
+                                            <!-- <mat-icon>check</mat-icon> -->
+                                            <mat-icon (click)="print(row)" >print</mat-icon>
+                                        </button>
+                                    </ng-template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+      <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+<!-- Payment Details Modal -->
+<!-- <div class="modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()" (keydown)="onModalKeydown($event)"> -->
+<div class="modal-overlay" *ngIf="showPaymentModal" (click)="closePaymentModal()">
+    <div class="modal-container payment-modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <mat-icon>receipt_long</mat-icon>
+                <span>Payment Details</span>
+            </div>
+            <button mat-icon-button class="close-btn" (click)="closePaymentModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="modal-content" *ngIf="selectedPayment">
+            <!-- Invoice Info -->
+            <div class="detail-section">
+                <h4 class="section-label">Invoice Information</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Invoice No:</span>
+                    <span class="detail-value">{{ selectedPayment.invoiceNo }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Order Date:</span>
+                    <span class="detail-value">{{ selectedPayment.createdDate | date:'mediumDate' }}</span>
+                </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="detail-section">
+                <h4 class="section-label">{{ selectedType === 1 ? 'Customer' : 'Supplier' }} Information</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <!-- <span class="detail-value">{{ selectedPayment.customerName || '—' }}</span> -->
+                    <span class="detail-value">{{ selectedCustomer.name || '—' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <!-- <span class="detail-value">{{ selectedPayment.customerPhone || '—' }}</span> -->
+                    <span class="detail-value">{{ selectedCustomer.phone || '—' }}</span>
+                </div>
+            </div>
+
+            <!-- Payment Info -->
+            <div class="detail-section">
+                <h4 class="section-label">Payment Summary</h4>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method</span>
+                    @if(selectedPayment.paymentMethod == 1){
+                    <span class="detail-value">Cash</span>
+                    }@else if (selectedPayment.paymentMethod == 2) {
+                    <span class="detail-value">Credit Card</span>
+                    }@else if (selectedPayment.paymentMethod == 3) {
+                    <span class="detail-value">Mobile Banking</span>
+                    }@else if (selectedPayment.paymentMethod == 4) {
+                    <span class="detail-value">Discount</span>
+                    }@else{
+                    <span class="detail-value">Bank</span>
+                    }
+                </div>
+                @if(selectedPayment.paymentMethod === 3){
+                <div class="detail-row">
+                    <span class="detail-label">Mobile Bank</span>
+                    <span class="detail-value">{{ selectedPayment.mobileBankMethod }}</span>
+                </div>
+                }@else if(selectedPayment.paymentMethod === 4){
+                <div class="detail-row">
+                    <span class="detail-label">Bank Card Number</span>
+                    <span class="detail-value">{{ selectedPayment.cardNumber }}</span>
+                </div>
+                }
+                <div class="detail-row">
+                    <span class="detail-label">Total Amount:</span>
+                    <span class="detail-value">{{ selectedPayment.totalAmount | currency:'BDT':'৳' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Paid Amount:</span>
+                    <span class="detail-value paid">{{ selectedPayment.paidAmount | currency:'BDT':'৳' }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Due Amount:</span>
+                    <span class="detail-value" [class.due]="selectedPayment.dueAmount > 0">{{ selectedPayment.dueAmount
+                        | currency:'BDT':'৳' }}</span>
+                </div>
+                <!-- <div class="detail-row">
+                    <span class="detail-label">Discount:</span>
+                    <span class="detail-value">{{ selectedPayment.discountAmount   | currency:'BDT':'৳' }}</span>
+                </div> -->
+                <div class="detail-row">
+  <span class="detail-label">Previous Discount:</span>
+  <span class="detail-value">{{ selectedPayment.existingDiscount | currency:'BDT':'৳' }}</span>
+</div>
+<div class="detail-row">
+  <span class="detail-label">Additional Discount:</span>
+   <span class="detail-value">{{ selectedPayment.discountAmount | currency:'BDT':'৳' }}</span>
+</div>
+                <div class="detail-row" *ngIf="selectedPayment.tax">
+                    <span class="detail-label">Tax:</span>
+                    <span class="detail-value">{{ selectedPayment.tax }}%</span>
+                </div>
+                <div class="detail-row" *ngIf="selectedPayment.vat">
+                    <span class="detail-label">VAT:</span>
+                    <span class="detail-value">{{ selectedPayment.vat }}%</span>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="detail-section"
+                *ngIf="selectedPayment.salesOrderDetails?.length || selectedPayment.purchaseOrderDetails?.length > 0">
+                <h4 class="section-label">Order Items</h4>
+                <!-- Own horizontal scroller so the top scrollbar sits right above this table -->
+                <div class="items-detail-scroll">
+                <table class="items-detail-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Payment Method</th>
+                            <th>Discount</th>
+                            <th>Total</th>
+                            <th>Paid</th>
+                            <th>Due</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of selectedPayment.salesOrderDetails; let i = index; let isFirst = first">
+                            <td>{{ item.itemName }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell">
+                                <mat-form-field appearance="outline" class="payment-method-dropdown">
+                                    <mat-select [(ngModel)]="item.paymentType"
+                                        (selectionChange)="onItemPaymentMethodChange(item)">
+                                        <mat-option [value]="1">Cash</mat-option>
+                                        <mat-option [value]="2">Credit Card</mat-option>
+                                        <mat-option [value]="3">Mobile Banking</mat-option>
+                                        <mat-option [value]="4">Bank</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Mobile Banking Fields - shown when paymentType is 3 -->
+                                <div *ngIf="item.paymentType === 3" class="mobile-banking-fields">
+                                    <mat-form-field appearance="outline" class="mobile-bank-dropdown">
+                                        <mat-label>Mobile Banking Provider</mat-label>
+                                        <mat-select [(ngModel)]="item.mobileBankMethod">
+                                            <mat-option value=1>bKash</mat-option>
+                                            <mat-option value=2>Nagad</mat-option>
+                                            <mat-option value=3>Rocket</mat-option>
+                                            <mat-option value=4>Upay</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="mobile-number-field">
+                                        <mat-label>Mobile Number</mat-label>
+                                        <input matInput type="text" [(ngModel)]="item.phoneNumber" maxlength="11"
+                                            placeholder="01XXXXXXXXX" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Bank Fields - shown when paymentType is 4 -->
+                                <div *ngIf="item.paymentType === 4" class="bank-fields">
+                                    <mat-form-field appearance="outline" class="detail-field">
+                                        <mat-label>Bank Name</mat-label>
+                                        <mat-select [(ngModel)]="item.bankName">
+                                            <mat-option value="BRAC Bank">BRAC Bank</mat-option>
+                                            <mat-option value="Dutch-Bangla Bank">Dutch-Bangla Bank</mat-option>
+                                            <mat-option value="City Bank">City Bank</mat-option>
+                                            <mat-option value="Standard Chartered">Standard Chartered</mat-option>
+                                            <mat-option value="HSBC">HSBC</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="account-number-field">
+                                        <mat-label>Account/Card Number</mat-label>
+                                        <input matInput type="text" [(ngModel)]="item.accountNumber"
+                                            placeholder="Enter account number" />
+                                    </mat-form-field>
+
+                                </div>
+
+                            </td>
+                            <!-- Total, Paid, Due columns merged - only show on first row -->
+                            <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell">
+                                <input type="number" class="discount-input" [(ngModel)]="currentDiscountAmount"
+                                    (blur)="onDiscountChange(currentDiscountAmount)" [min]="0" step="0.01" />
+                            </td>
+                            <!-- <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell">
+                                <input type="number" class="discount-input" [(ngModel)]="selectedPayment.discountAmount"
+                                    (blur)="onDiscountChange(selectedPayment.discountAmount)" [min]="0" step="0.01" />
+                            </td> -->
+
+                            <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell">
+                                {{ selectedPayment.totalAmount | currency:'BDT':'৳' }}
+                            </td>
+                            <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell paid-cell">
+                                <!-- <input type="number" class="due-input" [(ngModel)]="selectedPayment.paymentAmount" (keydown)="onPaymentKeydown($event)"
+                                    (change)="onPaymentAmountChange()" [min]="0" [max]="selectedPayment.totalAmount"
+                                    step="0.01" /> -->
+                                <input type="number" class="due-input" [(ngModel)]="selectedPayment.paymentAmount"
+                                    (blur)="onPaymentAmountChange(selectedPayment)" [min]="0" [max]="selectedPayment.dueAmount"
+                                    step="0.01" />
+                                    <!-- (blur)="onPaymentAmountChange($event)" [min]="0" [max]="selectedPayment.dueAmount" -->
+                                <!-- {{ selectedPayment.paidAmount | currency:'BDT':'৳' }} -->
+                            </td>
+                            <td *ngIf="isFirst" [attr.rowspan]="selectedPayment.salesOrderDetails.length"
+                                class="merged-cell" [class.due-cell]="selectedPayment.dueAmount > 0">
+                                {{ selectedPayment.dueAmount | currency:'BDT':'৳' }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button mat-raised-button color="primary" class="submit-btn" [disabled]="isdisable"
+                (click)="submitPayment()" *ngIf="!showPrintButton">
+                Submit
+            </button>
+            <button mat-raised-button color="accent" class="print-btn" (click)="printReceipt()" *ngIf="showPrintButton">
+                <mat-icon>print</mat-icon>
+                Print Receipt
+            </button>
+            <button mat-raised-button (click)="closePaymentModal()" *ngIf="showPrintButton">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Supplier Payment Card -->
+<div class="payment-card supplier-card" *ngIf="selectedType === 2">
+    <div class="card-header-search">
+        <div class="card-header">
+            <!-- <mat-icon>person</mat-icon>
+            <h3>Supplier Payment</h3> -->
+            <ng-container *ngTemplateOutlet="totalDueStat"></ng-container>
+        </div>
+        <div>
+            <!-- Multipurpose Search - Invoice No, Name, Phone -->
+            <div class="customer-search-wrapper">
+                <mat-form-field appearance="outline" class="customer-search-field">
+                    <mat-label>Search</mat-label>
+                    <input matInput type="text" [(ngModel)]="customerSearch" (input)="onSearchChange()"
+                        (focus)="onSearchFocus()" (blur)="hideSearchDropdown()" placeholder="Invoice No, Name, Phone" />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+
+                <!-- Search Results Dropdown -->
+                <div class="customer-dropdown" *ngIf="showSearchDropdown && filteredResults.length > 0">
+                    <div class="customer-dropdown-option" *ngFor="let result of filteredResults"
+                        (mousedown)="selectSearchResult(result)">
+                        <div class="result-invoice">{{ result.orderInvoiceNo }}</div>
+                        <div class="customer-option-name">{{ result.customerName }}</div>
+                        <div class="customer-option-phone">{{ result.customerPhone }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-content">
+        <div class="table-card">
+            <!-- Customer Info Table -->
+           
+            <div class="items-table-container">
+                <div class="payment-scroller">
+                    <table >
+                        <thead class="sticky-header">
+                            <tr>
+                                <th>Sells Date</th>
+                                <th>Sell Invoice No</th>
+                                <th>Supplier Name</th>
+                                <th>Phone Number</th>
+                                <th>Total Amount</th>
+                                <th>Paid Amount</th>
+                                <th>Due Amount</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let row of lstPayment">
+                                <td>{{ row.createdDate | date:'mediumDate' }}</td>
+                                <td>{{ row.orderInvoiceNo }}</td>
+                                <td>{{ row.userName }}</td>
+                                <td>{{ row.userPhone }}</td>
+                                <td>{{ row.totalAmount | currency:'BDT':'৳' }}</td>
+                                <td>{{ row.paidAmount | currency:'BDT':'৳' }}</td>
+                                <td>
+                                    @if(row.dueAmount > 0){
+                                    <span class="due">{{ row.dueAmount | currency:'BDT':'৳' }}</span>
+                                    }@else{
+                                    {{ row.dueAmount | currency:'BDT':'৳' }}
+                                    }
+                                </td>
+                                <!-- <td>
+                                    <ng-container *ngIf="row.dueAmount > 0; else noDue">
+                                        <button mat-icon-button color="primary" (click)="openPaymentDetails(row)"
+                                            title="View Details">
+                                            <mat-icon>arrow_forward</mat-icon>
+                                        </button>
+                                    </ng-container>
+                                    
+                                    <ng-template #noDue>
+                                        <button mat-icon-button class="no-due-btn" title="No Due">
+                                            <mat-icon>check</mat-icon>
+                                        </button>
+                                    </ng-template>
+                                </td> -->
+                                
+                                    <td>
+                                    <ng-container *ngIf="row.dueAmount > 0; else noDue">
+                                        <button mat-icon-button color="primary" (click)="openPaymentDetails(row)"
+                                            title="View Details">
+                                            <mat-icon>arrow_forward</mat-icon>
+                                        </button>
+                                    </ng-container>
+
+                                    <ng-template #noDue>
+                                        <button mat-icon-button class="no-due-btn" title="No Due">
+                                            <!-- <mat-icon>check</mat-icon> -->
+                                            <mat-icon (click)="print(row)" >print</mat-icon>
+                                        </button>
+                                    </ng-template>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+      <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+</div>

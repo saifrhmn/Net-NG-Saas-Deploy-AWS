@@ -1,0 +1,77 @@
+
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">User Login Report</h2>  </div>
+</div>
+
+<div class="header-card">
+ <div class="table-top">
+        <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+  <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+  
+    </div>
+
+<div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>
+<div>
+   <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button></div>
+      
+  </div>
+
+
+<div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+    <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+    <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+</div>
+<div class="table__body" *ngIf="!isLoading">
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No.</th>
+        <th>User Name</th>
+        <th>User Role</th>
+        <th>Dealer Name</th>
+        <th>Depot Code</th>
+        <th>Login Date</th>
+        <th>Login Time</th>
+        <th>Logout Date</th>
+        <th>Logout Time</th>
+        <th>Last Activity</th>
+        <th>No. of Invoices</th>
+        <th>Invoice Value</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      @for (row of lstReport; track $index) {
+        <tr>
+          <td>{{ $index + 1 }}</td>
+          <td>{{ row.userName }}</td>
+          <td>{{ row.userRole }}</td>
+          <td>{{ row.dealerName }}</td>
+          <td>{{ row.depotCode }}</td>
+          <td>{{ row.loginDate ? (row.loginDate | date:'dd-MMM-yy') : '-' }}</td>
+          <td>{{ row.loginTime ?? '-' }}</td>
+          <td>{{ row.logoutDate ? (row.logoutDate | date:'dd-MMM-yy') : '—' }}</td>
+          <td>{{ row.logoutTime ?? '—' }}</td>
+          <td>{{ row.lastActivity ?? '-' }}</td>
+          <td>{{ row.noOfInvoices }}</td>
+          <td>{{ row.invoiceValue | number:'1.0-0' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

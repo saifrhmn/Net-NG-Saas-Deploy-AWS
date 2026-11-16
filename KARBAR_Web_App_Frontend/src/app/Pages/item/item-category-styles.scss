@@ -1,0 +1,176 @@
+// Category Section Styles
+.category-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.category-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.category-title {
+  color: #1B5673;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.category-dropdown {
+  width: 200px;
+}
+
+.category-add-btn {
+  width: 48px;
+  height: 56px;
+  background: #0694C5;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+  
+  &:hover {
+    background: #057a9e;
+  }
+}
+
+// Items Grid
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.item-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.item-image {
+  width: 100%;
+  height: 140px;
+  background: #f8fafc;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  overflow: hidden;
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.item-info {
+  text-align: center;
+}
+
+.item-price {
+  color: #1B5673;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.item-name {
+  color: #0694C5;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.item-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  
+  &.badge-a {
+    background: #d4f4dd;
+    color: #16a34a;
+  }
+  
+  &.badge-b {
+    background: #fed7aa;
+    color: #ea580c;
+  }
+  
+  &.badge-c {
+    background: #fecaca;
+    color: #dc2626;
+  }
+}
+
+.item-delete-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  color: #dc2626;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background: #fee2e2;
+    border-color: #dc2626;
+  }
+}

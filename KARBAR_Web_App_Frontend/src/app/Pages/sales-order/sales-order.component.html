@@ -1,0 +1,1323 @@
+<div class="sales-container">
+  <!-- Header Card -->
+  <div class="header-card">
+    <div class="header-content">
+      <div>
+        <h2 class="page-title">Sales Order</h2>
+      </div>
+      <div class="date-field">
+        <div class="invoice-wrapper" *ngIf="check != 1">
+          <button mat-icon-button class="sync-btn" (click)="syncInvoice()" aria-label="Generate Invoice">
+            <mat-icon>sync</mat-icon>
+          </button>
+
+          <mat-form-field appearance="outline" class="reference-field">
+            <mat-label>Invoice No</mat-label>
+            <input matInput type="text" [(ngModel)]="model.invoiceNo" name="invoiceNo" maxlength="50"
+              placeholder="Auto / Manual" />
+          </mat-form-field>
+        </div>
+        <div>
+          <mat-form-field appearance="outline" *ngIf="check != 1">
+            <mat-label>Date</mat-label>
+            <input matInput [matDatepicker]="picker" [(ngModel)]="model.salesOrderDate" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Tab Navigation Card -->
+    <div class="tabs-card">
+      <mat-tab-group #salesTabGroup class="sales-tabs" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+        <!-- Completed Sales Tab -->
+
+        <mat-tab label="New Sales">
+          <div class="tab-content">
+            <!-- Form Section -->
+            <div class="new-sales">
+              <div class="table-card">
+                <!-- <h3 class="section-title">Sales Items</h3> -->
+
+                <div class="form-section">
+                  <div class="form-row">
+                    <div class="customer-field" style="position:relative;">
+
+                      <mat-form-field appearance="outline" class="dropdown-field">
+                        <mat-label>Customer</mat-label>
+
+                        <input matInput [(ngModel)]="customerSearch" (input)="onCustomerSearchChange()"
+                          (focus)="onCustomerSearchFocus()" (blur)="hideCustomerDropdown()"
+                          (keydown)="onCustomerDropdownKeydown($event)" autocomplete="off"
+                          placeholder="Search by name, phone or address" />
+
+                        <mat-icon matSuffix>search</mat-icon>
+
+                        <button mat-icon-button matSuffix class="customer-icon-btn" (click)="openCustomerModal()"
+                          type="button" tabindex="-1">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </mat-form-field>
+
+                      <!-- FIXED DROPDOWN -->
+                      <div class="item-dropdown customer-dropdown" (mouseenter)="preventClose = true"
+                        (mouseleave)="preventClose = false"
+                        *ngIf="showCustomerDropdown && filteredCustomers?.length > 0">
+
+                        <div class="item-dropdown-option" *ngFor="let c of filteredCustomers; let i = index"
+                          (click)="selectCustomer(c)" (mouseenter)="selectedCustomerDropdownIndex = i"
+                          [class.selected]="i === selectedCustomerDropdownIndex">
+
+                          <div class="item-option-code">{{ c.name }}</div>
+                          <div class="item-option-name">{{ c.contact || c.phone || '—' }} • {{ c.address ||
+                            c.addressLine1 || c.addressLine2 || 'No address' }}</div>
+
+                        </div>
+                      </div>
+
+                    </div>
+
+
+                    <div class="form-group">
+                      <div class="mat-dropdown-with-add">
+                        <mat-form-field appearance="outline" class="dropdown-field">
+                          <mat-label>Warehouse</mat-label>
+                          <mat-select [(ngModel)]="selectedWarehouseId"
+                            (selectionChange)="onWarehouseChange($event.value)">
+                            <mat-option *ngFor="let warehouse of lstWarehouses" [value]="warehouse.id">
+                              {{ warehouse.name }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+
+                    <div class="item-search-field">
+
+                      <mat-form-field appearance="outline" class="item-search">
+                        <mat-label>Item Code, Name .....</mat-label>
+                        <input matInput [(ngModel)]="itemSearch" (input)="onItemSearchChange()"
+                          (focus)="onItemSearchFocus()" (blur)="hideItemDropdown()"
+                          (keydown)="onItemSearchKeydown($event)" autocomplete="off" />
+                        <mat-icon matSuffix>search</mat-icon>
+                      </mat-form-field>
+
+                      <!-- DROPDOWN -->
+                      <div class="item-dropdown" *ngIf="showItemDropdown && filteredItems.length > 0">
+
+                        <div class="item-dropdown-option" *ngFor="let item of filteredItems; let i = index"
+                          [class.selected]="i === selectedDropdownIndex" (mousedown)="selectItem(item)"
+                          (mouseenter)="selectedDropdownIndex = i">
+
+                          <div class="item-option-code">{{ item.name }}</div>
+                          <div class="item-option-mat">{{ item.materialNumber }}</div>
+                          <div class="item-option-name">{{ item.categoryName }}</div>
+                          <div class="item-option-brand">{{ item.brandName }}</div>
+
+                          <!-- SHOW ONLY SELECTED WAREHOUSE STOCK -->
+                          <div class="item-stock">
+                            <div class="warehouse-badges">
+                              <button type="button" class="warehouse-badge active"
+                                *ngFor="let wh of perWarehouseStocks(item)">
+                                {{ wh.name }}: {{ wh.qty }}
+                              </button>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+
+                      <!-- NO DATA -->
+                      <div class="item-dropdown no-data" *ngIf="showItemDropdown && filteredItems.length === 0">
+                        No items available in this warehouse
+                      </div>
+
+                    </div>
+
+
+                  </div>
+                </div>
+
+                <div class="items-table-container">
+                  <table mat-table [dataSource]="salesItems">
+
+                    <ng-container matColumnDef="serialNo">
+                      <th mat-header-cell *matHeaderCellDef>SI No</th>
+                      <td mat-cell *matCellDef="let item; let i = index">
+                        {{ i + 1 }}
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="materialNumber">
+                      <th mat-header-cell *matHeaderCellDef>Material Number</th>
+                      <td mat-cell *matCellDef="let item">{{ item.materialNumber}}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="itemName">
+                      <th mat-header-cell *matHeaderCellDef>Item Name</th>
+                      <td mat-cell *matCellDef="let item">{{ item.itemName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="shadesName">
+                      <th mat-header-cell *matHeaderCellDef>Shades Name</th>
+                      <td mat-cell *matCellDef="let item">
+                        <input class="shades-input" [(ngModel)]="item.shadesName" />
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="warehouse">
+                      <th mat-header-cell *matHeaderCellDef>Store Name</th>
+                      <td mat-cell *matCellDef="let item">{{ item.warehouse }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="brandName">
+                      <th mat-header-cell *matHeaderCellDef>Brand Name</th>
+                      <td mat-cell *matCellDef="let item">{{ item.brandName }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="category">
+                      <th mat-header-cell *matHeaderCellDef>Category</th>
+                      <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="stock">
+                      <th mat-header-cell *matHeaderCellDef>Available Stock</th>
+                      <!-- <td></td> -->
+                      <td mat-cell *matCellDef="let item">{{ item.availableStock }} <span
+                          class="unit">{{item.unit}}</span></td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="purchasePrice">
+                      <th mat-header-cell *matHeaderCellDef>Selling Price</th>
+                      <td mat-cell *matCellDef="let item">{{ item.sellingPrice }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="quantity">
+                      <th mat-header-cell *matHeaderCellDef>Selected Quantity</th>
+                      <!-- <td></td> -->
+                      <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+                    </ng-container>
+
+
+                    <ng-container matColumnDef="total">
+                      <th mat-header-cell *matHeaderCellDef>Sub Total</th>
+                      <td mat-cell *matCellDef="let item">{{ getItemTotal(item) }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  </table>
+                </div>
+              </div>
+
+              <div class="customer-info">
+
+                <div class="customer-card">
+                  <h3 class="section-title">Customer Information</h3>
+                  <mat-chip-listbox class="customer-chip-list" aria-label="Selected customer">
+                    <mat-chip-option selected color="primary">
+                      {{ selectedCustomer?.name || 'No Customer' }}
+                    </mat-chip-option>
+
+                    <mat-chip-option>
+                      {{ selectedCustomer?.contact || 'No Phone' }}
+                    </mat-chip-option>
+                    <!-- <mat-chip-option>
+                      {{ selectedCustomer?.contact || selectedCustomer?.phone || 'No Phone' }}
+                    </mat-chip-option> -->
+                    <!-- <mat-chip-option>
+                      {{ selectedCustomer?.address || 'No Address' }}
+                    </mat-chip-option> -->
+                    <!-- <mat-chip-option>
+                      {{ selectedCustomer?.addressLine1 ? selectedCustomer.addressLine1 : (selectedCustomer?.addressLine2 ? selectedCustomer.addressLine2 : 'No Address') }}
+                    </mat-chip-option> -->
+                    <mat-chip-option [color]="selectedCustomer?.totalDueAmount > 0 ? 'warn' : 'accent'"
+                      selected><b>Due:</b>
+                      {{ selectedCustomer?.totalDueAmount || 'No Due' }}
+                    </mat-chip-option>
+
+                  </mat-chip-listbox>
+
+                </div>
+
+                <div class="summary-card-fixed">
+                  <div class="summary-header">
+                    <h4>SI</h4>
+                    <!-- <h4>Name</h4> -->
+                    <h4>Quantity</h4>
+                    <h4>MRP</h4>
+                    <h4>Price</h4>
+                    <h4>W. price</h4>
+                    <h4>Total</h4>
+                    <!-- <h4>Action</h4> -->
+                  </div>
+
+                  <div class="summary-scroller">
+                    <div class="summary-rows">
+                      <div class="summary-row" *ngFor="let item of summaryItems; let i = index">
+                        <span class="item-name-count">{{ i + 1 }}</span>
+                        <!-- <span class="item-name">{{ getShortName(item.name) }}</span> -->
+
+                        <div class="quantity-control">
+                          <button mat-icon-button class="qty-btn minus-btn" (click)="decreaseQuantity(item)">
+                            <mat-icon>remove</mat-icon>
+                          </button>
+
+                          <input type="number" class="qty-input" [min]="1" [step]="1" [(ngModel)]="item.quantity"
+                            (ngModelChange)="onQuantityInput(item, $event)" placeholder="1" />
+
+                          <button mat-icon-button class="qty-btn plus-btn" (click)="increaseQuantity(item)">
+                            <mat-icon>add</mat-icon>
+                          </button>
+                        </div>
+
+                        <input type="number" class="price-input" [(ngModel)]="item.mrp" (ngModelChange)="onItemChange()"
+                          placeholder="0" min="0">
+
+                        <input type="number" class="price-input" [(ngModel)]="item.sellingPrice"
+                          (ngModelChange)="onItemChange()" placeholder="0" min="0">
+
+                        <span class="total-value">
+                                {{ item.weightedPrice | number:'1.2-2' }}
+                              </span>
+                          <span class="total-value">{{ getItemTotal(item) }}</span>
+
+                        <!-- <button mat-icon-button class="delete-btn" (click)="deleteFromSummary(item)" -->
+                        <button mat-icon-button (click)="deleteFromSummary(i)" class="dlt-btn"
+                          title="Remove item">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="summary-calculations">
+                      <div class="calc-row">
+                        <span>Remarks</span>
+                        <mat-form-field appearance="outline" class="tax-select">
+                          <input matInput type="text" [(ngModel)]="CBremarks">
+                        </mat-form-field>
+                      </div>
+                      <div class="calc-row">
+                        <span>Total</span>
+                        <span>{{ total }}</span>
+                      </div>
+                      <div class="calc-row">
+                        <span class="text-blue">Discount</span>
+                        <div class="discount-input-group">
+                          <mat-form-field appearance="outline" class="discount-input">
+                            <!-- <input matInput type="number" [(ngModel)]="discount" (ngModelChange)="onDiscountChange()" -->
+                            <input matInput type="number" [(ngModel)]="discount" (blur)="onDiscountChange()"
+                              (focus)="discount === 0 && (discount = null)" (blur)="!discount && (discount = 0)"
+                              placeholder="0" min="0" [max]="discountType === '%' ? 100 : 999999">
+                          </mat-form-field>
+                          <mat-form-field appearance="outline" class="discount-type">
+                            <mat-select [(value)]="discountType" (selectionChange)="onDiscountTypeChange()"
+                              panelClass="tax-dropdown-panel">
+                              <mat-option value="%">%</mat-option>
+                              <mat-option value="৳">৳</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      <div class="calc-row">
+                        <span>Final Amount</span>
+                        <mat-form-field appearance="outline" class="tax-select">
+                          <input matInput type="number" (focus)="finalAmount === 0 && (finalAmount = null)"
+                            (blur)="!finalAmount && (finalAmount = 0)" [(ngModel)]="finalAmount"
+                            (ngModelChange)="onFinalAmountChange()" placeholder="0" min="0">
+                        </mat-form-field>
+                      </div>
+
+                      <div class="calc-row">
+                        <span>TAX (%)</span>
+                        <div class="d-flex align-center gap-1">
+                          &#2547; {{this.taxAmount}}
+                          <mat-form-field appearance="outline" class="tax-select">
+                            <mat-select [(value)]="tax" (selectionChange)="onTaxChange()"
+                              panelClass="tax-dropdown-panel">
+                              <mat-option [value]="0">0%</mat-option>
+                              <mat-option [value]="5">5%</mat-option>
+                              <mat-option [value]="10">10%</mat-option>
+                              <mat-option [value]="15">15%</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+                      </div>
+                      <div class="calc-row">
+                        <span>Total Payable</span>
+                        <span>{{ totalPayable | number:'1.2-2' }}</span>
+                      </div>
+                      <div class="calc-row">
+                        <span class="text-blue">Payment</span>
+                        <mat-form-field appearance="outline" class="tax-select">
+                          <input matInput type="number" [(ngModel)]="payment"
+                            (focus)="payment === 0 && (payment = null)" (blur)="!payment && (payment = 0)"
+                            (ngModelChange)="onPaymentChange()" placeholder="0" min="0" class="text-blue">
+                        </mat-form-field>
+                      </div>
+                      <div class="calc-row">
+                        @if(due < 0){ <span class="text-blue">Return</span>
+                          <span class="text-blue">{{ math.abs(due) | number:'1.2-2' }}</span>
+                          } @else{
+                          <span class="text-blue">Due</span>
+                          <span class="text-blue">{{ due | number:'1.2-2' }}</span>
+                          }
+
+                      </div>
+                      <div class="calc-row">
+                        <span>Delivery Charge</span>
+                        <mat-form-field appearance="outline" class="tax-select">
+                          <input matInput type="number" [(ngModel)]="deliveryCharge"
+                            (focus)="deliveryCharge === 0 && (deliveryCharge = null)"
+                            (blur)="!deliveryCharge && (deliveryCharge = 0)" (ngModelChange)="onDeliveryChargeChange()"
+                            placeholder="0" min="0">
+                        </mat-form-field>
+                      </div>
+                      <div class="calc-row">
+                        <span>Sub Total</span>
+                        <span>{{ subTotal }}</span>
+                      </div>
+                      <div class="toggle-payment-section" (click)="togglePaymentDetails()">
+                        <mat-icon class="toggle-icon" [class.expanded]="showPaymentDetails">
+                          {{ showPaymentDetails ? 'expand_less' : 'expand_more' }}
+                        </mat-icon>
+                      </div>
+
+                      <div *ngIf="showPaymentDetails" class="payment-details-container">
+                        <div class="payment-method">
+                          <mat-form-field appearance="outline">
+                            <mat-label>Payment Method</mat-label>
+                            <mat-select [(value)]="model.paymentMethod"
+                              (selectionChange)="onPaymentMethodChange($event.value)">
+                              <mat-option [value]="1">Cash</mat-option>
+                              <mat-option [value]="2">Credit</mat-option>
+                              <mat-option [value]="3">Mobile Banking</mat-option>
+                              <mat-option [value]="4">Bank Transfer</mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Cash Payment Fields -->
+                        <!-- <div *ngIf="selectedPaymentMethod === 1" class="cash-payment-fields">
+                          <div class="calc-row">
+                            <span class="text-blue">Received</span>
+                            <mat-form-field appearance="outline" class="tax-select">
+                              <input matInput type="number" [(ngModel)]="receivedAmount"
+                                (focus)="receivedAmount === 0 && (receivedAmount = null)"
+                                (blur)="!receivedAmount && (receivedAmount = 0)" (blur)="onReceivedAmountChange()"
+                                placeholder="0" min="0">
+                            </mat-form-field>
+                          </div>
+                          <div class="calc-row">
+                            <span class="text-blue">Return</span>
+                            <span class="text-blue">{{ returnAmount }}</span>
+                          </div>
+                        </div> -->
+
+                        <div *ngIf="selectedPaymentMethod === 3" class="payment-details-fields">
+                          <div class="mobile-banking-methods">
+                            <label class="method-label">Choose Method</label>
+                            <mat-radio-group [(ngModel)]="model.mobileBankMethod" class="method-options">
+                              <mat-radio-button [value]="1">
+                                <span class="method-name">bKash</span>
+                              </mat-radio-button>
+                              <mat-radio-button [value]="2">
+                                <span class="method-name">Nagad</span>
+                              </mat-radio-button>
+                              <mat-radio-button [value]="3">
+                                <span class="method-name">Rocket</span>
+                              </mat-radio-button>
+                              <mat-radio-button [value]="4">
+                                <span class="method-name">Upay</span>
+                              </mat-radio-button>
+                            </mat-radio-group>
+                          </div>
+                          <div class="payment-detail-row">
+                            <mat-form-field appearance="outline" class="detail-field">
+                              <mat-label>Phone Number</mat-label>
+                              <input matInput type="text" [(ngModel)]="model.phoneNumber" placeholder="01923899989"
+                                maxlength="11">
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                        <!-- Bank Transfer Fields -->
+                        <div *ngIf="selectedPaymentMethod === 4" class="payment-details-fields">
+                          <div class="payment-detail-row">
+                            <mat-form-field appearance="outline" class="detail-field">
+                              <mat-label>Account Number</mat-label>
+                              <input matInput type="text" [(ngModel)]="model.accountNumber" placeholder="112234444444"
+                                maxlength="16">
+                            </mat-form-field>
+                          </div>
+                          <div class="payment-detail-row">
+                            <mat-form-field appearance="outline" class="detail-field">
+                              <mat-label>Bank Name</mat-label>
+                              <mat-select [(ngModel)]="model.bankName">
+                                <mat-option value="BRAC Bank">BRAC Bank</mat-option>
+                                <mat-option value="Dutch-Bangla Bank">Dutch-Bangla Bank</mat-option>
+                                <mat-option value="City Bank">City Bank</mat-option>
+                                <mat-option value="Standard Chartered">Standard Chartered</mat-option>
+                                <mat-option value="HSBC">HSBC</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                      </div>
+                      <div class="save-section">
+                        <!-- <button mat-raised-button class="save-btn"  (click)="onSave()">Save</button> -->
+                        <button mat-raised-button class="save-btn"
+                          [disabled]="!summaryItems || summaryItems.length === 0" (click)="onSave()">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Draft" class="draft">
+          <div class="tab-content">
+            <div class="table-card-purchase">
+              <h3 class="section-title">Draft</h3>
+              <div class="items-table-container">
+                <div class="scroller" *ngIf="!isLoadingOrderList">
+                <table>
+                  <thead class="sticky-header">
+                    <tr>
+
+                      <th>Invoice No</th>
+                      <th>Date</th>
+                      <th>Customer</th>
+                      <th>Warehouse</th>
+                      <th>Items</th>
+                      <th>Shades Name</th>
+                      <!-- <th></th> -->
+                      <th>Quantity</th>
+                      <th>Total Amount</th>
+                      <th>Discount Amount</th>
+                      <th>Tax</th>
+                      <!-- <th>VAT</th> -->
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    @for (row of lstPurchase; track $index) {
+
+                    @if (row.salesOrderDetails.isReturn == null) {
+
+                    @for (detail of getDetailsNotReturned(row.salesOrderDetails); track detail.id; let i = $index) {
+
+                    <tr>
+
+                      <!-- Invoice -->
+                      @if (i === 0) {
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.invoiceNo }}
+                      </td>
+
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.orderDate | date:'MM-dd-yyyy' }}
+                      </td>
+
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.customerName || '—' }}
+                      </td>
+                      }
+
+                      <!-- Warehouse -->
+                      <td>
+                        {{ 'w-' + detail.warehouseName }}
+                      </td>
+
+                      <!-- Item -->
+                      <td>
+                        {{ detail.itemName }}
+                      </td>
+
+                      <!-- Shade -->
+                      <td>
+                        {{ detail.shadesName }}
+                      </td>
+
+                      <!-- Quantity -->
+                      <td>
+                        {{ detail.quantity }}
+                      </td>
+
+                      <!-- Total -->
+                      @if (i === 0) {
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.totalAmount }}
+                      </td>
+
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.discountAmount }}
+                      </td>
+
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+                        {{ row.tax }}
+                      </td>
+
+                      <td [attr.rowspan]="getDetailsNotReturned(row.salesOrderDetails).length">
+
+                        @if(row.isDraft == true){
+                        <button mat-icon-button class="edit-btn" (click)="editDraft(row)" title="Edit draft">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+
+                        <button mat-icon-button class="send-btn" (click)="draftToSalesOrder(row)" title="Send to Sales">
+                          <mat-icon>send</mat-icon>
+                        </button>
+
+                        <button mat-icon-button class="delete-btn" (click)="deleteDraft(row)" title="Delete draft">
+                          <mat-icon style="color:red">delete</mat-icon>
+                        </button>
+                        }
+
+                      </td>
+                      }
+
+                    </tr>
+
+                    }
+
+                    }
+
+                    }
+                  </tbody>
+
+                </table>
+                </div>
+
+
+              </div>
+              <mat-paginator [length]="draftPage.total" [pageIndex]="draftPage.pageIndex - 1"
+                [pageSize]="draftPage.pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                (page)="onDraftPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Completed Sales" class="completed-sales">
+          <div class="tab-content">
+
+            <div class="table-card-purchase">
+              <div class="section">
+                <div>
+                  <h3 class="section-title">Completed Sales Items</h3>
+                </div>
+
+                <div class="table-filters">
+                  <input type="text" [(ngModel)]="invoiceSearch" (input)="onCompletedSearch()"
+                    placeholder="Search name, number, invoice no" class="filter-date">
+                  <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+                  <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+                  <!-- <button type="button" class="theme-button" (click)="onFilter()">Filter</button> -->
+                  <button type="button" class="theme-button" (click)="clearFilter()">Clear</button>
+                </div>
+              </div>
+              <!-- <h3 class="section-title">Completed Sales Items</h3> -->
+              <div class="items-table-container">
+                <!-- Loader shown while fetching -->
+                <div *ngIf="isLoadingOrderList"
+                  style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+                  <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+                  <span style="margin-left: 20px; font-size: 16px;">Loading orders...</span>
+                </div>
+
+                <!-- Table shown when not loading -->
+                <div class="scroller" *ngIf="!isLoadingOrderList">
+                  <table>
+                    <thead class="sticky-header">
+                      <tr>
+
+                        <th>Invoice No</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Warehouse</th>
+                        <th>Items</th>
+                        <th>Shades Name</th>
+                        <th></th>
+                        <th>Quantity</th>
+                        <th>Change Quantity</th>
+                        <th>Price</th>
+                        <th>Total Amount</th>
+                        <th>Discount Amount</th>
+                        <th>Tax</th>
+                        <th>View</th>
+                        <th>Return</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+
+                      <ng-container *ngFor="let row of lstPurchase">
+
+                        <ng-container
+                          *ngFor="let detail of getReturnOrderDetails(row.salesOrderDetails); let i = index">
+
+                          <tr>
+
+                            <!-- Invoice -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.invoiceNo }}
+                            </td>
+
+                            <!-- Date -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.orderDate | date:'MM-dd-yyyy' }}
+                            </td>
+
+                            <!-- Customer -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.customerName || '—' }}
+                            </td>
+
+                            <!-- Warehouse -->
+                            <td>{{ 'w-' + detail.warehouseName }}</td>
+
+                            <!-- Item -->
+                            <td>{{ detail.itemName }}</td>
+
+                            <!-- Shade -->
+                            <td>{{ detail.shadesName }}</td>
+
+                            <!-- Select -->
+                            <td>
+                              <ng-container *ngIf="!row.isReturn; else returnedIcon">
+                                <mat-checkbox [(ngModel)]="detail.isSelected"
+                                  (change)="onDetailSelectionChange(row, detail)">
+                                </mat-checkbox>
+                              </ng-container>
+
+                              <ng-template #returnedIcon>
+                                <mat-icon class="icon">check_circle</mat-icon>
+                              </ng-template>
+                            </td>
+
+                            <!-- Quantity -->
+                            <td>
+                              {{ detail.actualSalesQuantity }}
+                            </td>
+
+                            <!-- Change Quantity -->
+                            <td>
+                              <input type="number" class="quantity-input" placeholder="0"
+                                [(ngModel)]="detail.salesreturnQuantity" (blur)="onReturnQuantityChange(detail)"
+                                [max]="detail.quantity" [title]="'Max: ' + detail.quantity">
+                            </td>
+
+                            <!-- Price -->
+                            <td>
+                              {{
+                              ((detail.returnQuantity || 0) > 0
+                              ? (detail.quantity - detail.returnQuantity)
+                              : detail.quantity) * detail.unitPrice
+                              | number:'1.2-2'
+                              }}
+                            </td>
+
+                            <!-- Total Amount -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.totalAmount - row.totalReturnAmount }}
+                            </td>
+
+                            <!-- Discount -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.discountAmount }}
+                            </td>
+
+                            <!-- Tax -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              {{ row.tax }}
+                            </td>
+
+                            <!-- View -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+                              <button mat-icon-button class="view-btn" (click)="openViewModal(row)">
+                                <mat-icon>visibility</mat-icon>
+                              </button>
+                            </td>
+
+                            <!-- Return -->
+                            <td *ngIf="i === 0" [attr.rowspan]="getReturnOrderDetails(row.salesOrderDetails).length">
+
+                              <ng-container *ngIf="!row.isReturn; else returnedText">
+                                <button mat-icon-button class="return-btn" (click)="openRemarkModal(row)"
+                                  [disabled]="isdisablebtn">
+                                  <mat-icon>undo</mat-icon>
+                                </button>
+                              </ng-container>
+
+                              <ng-template #returnedText>
+                                <span class="returned-label">Returned</span>
+                              </ng-template>
+
+                            </td>
+
+                          </tr>
+
+                        </ng-container>
+
+                      </ng-container>
+
+                    </tbody>
+
+                  </table>
+                </div>
+              </div>
+              <mat-paginator [length]="completedPage.total" [pageIndex]="completedPage.pageIndex - 1"
+                [pageSize]="completedPage.pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                (page)="onCompletedPageChange($event)">
+              </mat-paginator>
+
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Sales Return" class="return-sales">
+          <div class="tab-content">
+
+            <div class="table-card-purchase">
+              <div class="section">
+                <div>
+                  <h3 class="section-title">Returned Sales Items</h3>
+                </div>
+                <div class="table-filters">
+                  <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilterReturn()" class="filter-date">
+                  <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilterReturn()" class="filter-date">
+                  <!-- <button type="button" class="theme-button" (click)="onFilter()">Filter</button> -->
+                  <button type="button" class="theme-button" (click)="clearFilterReturn()">Clear</button>
+                </div>
+              </div>
+              <!-- <h3 class="section-title">Completed Sales Items</h3> -->
+              <div class="items-table-container">
+                <div class="scroller">
+                  <table>
+                    <thead class="sticky-header">
+                      <tr>
+
+                        <th>Invoice No</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Warehouse</th>
+                        <th>Items</th>
+                        <th>Shades Name</th>
+                        <th>Quantity</th>
+                        <th>Total Amount</th>
+                        <th>Discount Amount</th>
+                        <th>Tax</th>
+                        <!-- <th>View</th> -->
+                      </tr>
+                    </thead>
+
+                    <tbody>
+
+  <ng-container *ngFor="let row of lstReturnedSales">
+
+    <ng-container *ngFor="let detail of getReturnOrderDetails(row.returnOrderDetails); let i = index">
+
+      <tr>
+
+        <!-- Invoice -->
+        <td *ngIf="i === 0"
+            [attr.rowspan]="getReturnOrderDetails(row.returnOrderDetails).length">
+          {{ row.salesInvoiceNo }}
+        </td>
+
+        <!-- Sales Date -->
+        <td *ngIf="i === 0"
+            [attr.rowspan]="getReturnOrderDetails(row.returnOrderDetails).length">
+          {{ row.salesDate | date:'MM-dd-yyyy' }}
+        </td>
+
+        <!-- Customer -->
+        <td *ngIf="i === 0"
+            [attr.rowspan]="getReturnOrderDetails(row.returnOrderDetails).length">
+          {{ row.customerName || '—' }}
+        </td>
+
+        <!-- Warehouse -->
+        <td>
+          {{ 'w-' + detail.warehouseName }}
+        </td>
+
+        <!-- Item -->
+        <td>
+          {{ detail.itemName }}
+        </td>
+
+        <!-- Shade -->
+        <td>
+          {{ detail.shadesName }}
+        </td>
+
+        <!-- Quantity -->
+        <td>
+          {{ detail.quantity }}
+        </td>
+
+        <!-- Amount -->
+        <td>
+          {{ detail.totalAmount | number:'1.2-2' }}
+        </td>
+
+        <!-- Discount -->
+        <td *ngIf="i === 0"
+            [attr.rowspan]="getReturnOrderDetails(row.returnOrderDetails).length">
+          {{ row.discountAmount }}
+        </td>
+
+        <!-- Tax -->
+        <td *ngIf="i === 0"
+            [attr.rowspan]="getReturnOrderDetails(row.returnOrderDetails).length">
+          {{ row.tax }}
+        </td>
+
+      </tr>
+
+    </ng-container>
+
+  </ng-container>
+
+</tbody>
+
+                  </table>
+                </div>
+
+              </div>
+              <mat-paginator [length]="returnPage.total" [pageIndex]="returnPage.pageIndex - 1"
+                [pageSize]="returnPage.pageSize" [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                (page)="onReturnPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+        </mat-tab>
+
+
+      </mat-tab-group>
+    </div>
+  </div>
+
+
+  <!-- Create customer Modal -->
+  <!-- <div class="modal-overlay" *ngIf="showCustomerModal" (click)="closeCustomerModal()"> -->
+  <div class="modal-overlay" *ngIf="showCustomerModal">
+    <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+      (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+      <div class="modal-header">
+        <div id="modalTitle" class="modal-title">
+          <mat-icon>store</mat-icon>
+          <span>{{ isEditMode ? 'Edit Customer' : 'Create New Customer' }}</span>
+        </div>
+        <button mat-icon-button (click)="closeCustomerModal()" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-content">
+        <div class="form-group-modal">
+          <div class="floating-label-group">
+            <input #firstModalField type="text" class="form-input" [(ngModel)]="customer.name" placeholder=" " required>
+            <label class="floating-label">Customer Name</label>
+          </div>
+        </div>
+
+        <!-- <div class="form-group-modal">
+          <div class="floating-label-group">
+            <input type="text" class="form-input" maxlength="11" [(ngModel)]="customer.contact" placeholder=" "   (keyup.enter)="customerCheck()"
+              required>
+            <label class="floating-label">Contact</label>
+          </div>
+        </div> -->
+
+        <div class="form-group-modal">
+          <div class="floating-label-group input-wrapper">
+
+            <input type="text" class="form-input" maxlength="11" [(ngModel)]="customer.contact" placeholder=" "
+              (input)="onCustomerInputChange()" (keyup.enter)="customerCheck()" (blur)="customerCheck()"
+              [class.input-error]="customerExist" required />
+
+            <label class="floating-label">Contact No</label>
+
+            <!-- Dropdown for suggestions -->
+            <ul *ngIf="customerSuggestions.length" class="suggestions-dropdown">
+              <li *ngFor="let suggestion of customerSuggestions" (click)="selectCustomerSuggestion(suggestion.contact)">
+                {{ suggestion.contact }}
+              </li>
+            </ul>
+
+            <!-- Message inside input -->
+            <small *ngIf="customerExist" class="input-tooltip">
+              Contact already exists!
+            </small>
+
+          </div>
+        </div>
+
+
+        <div class="form-group-modal">
+          <div class="floating-label-group">
+            <textarea class="form-input" [(ngModel)]="customer.address" rows="3" placeholder=" " required></textarea>
+            <label class="floating-label">Address</label>
+          </div>
+        </div>
+
+        <!-- <div class="form-group-modal">
+          <div class="floating-label-group">
+            <textarea class="form-input" [(ngModel)]="customer.addressLine2" rows="3" placeholder=" " required></textarea>
+            <label class="floating-label">Address</label>
+          </div>
+        </div> -->
+
+        <div class="form-group-modal">
+          <mat-form-field appearance="outline" class="status-select">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="customer.status">
+              <mat-option [value]="1">Active</mat-option>
+              <mat-option [value]="0">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="cancel-btn" (click)="closeCustomerModal()">Cancel</button>
+        <!-- <button class="create-btn" (click)="savecustomer()"> -->
+        <button class="create-btn" (click)="createCustomer(customer)">
+          <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+          {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Sales Summary Modal -->
+  <div class="modal-overlay" id="printModal" *ngIf="showSalesOrderSummaryModal" (click)="closeSalesOrderSummaryModal()">
+
+    <div class="invoice-container" id="printSection" (click)="$event.stopPropagation()">
+
+      <!-- ===== Header ===== -->
+      <div class="invoice-header text-center">
+        <!-- @if(authenticatedUser.tenantId == 67){
+          <img style="height: 115px; width: auto;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+            alt="User Logo" class="company-logo company-logo-lg">
+        }@else{
+          <img style="height: 60px; width: auto;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+            alt="User Logo" class="company-logo">
+        } -->
+          <img style="height: auto; width: 100%;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+          alt="User Logo" class="company-logo company-logo-lg" /> 
+        
+        <h1 class="title">{{ authenticatedUser?.unique_name }}</h1>
+        <p>{{ authenticatedUser?.address }}</p>
+        <p>Mobile: {{ authenticatedUser?.phoneNumber }}</p>
+        <p><b>SALES INVOICE</b></p>
+      </div>
+
+
+      <!-- ===== Top Info Row ===== -->
+      <div class="invoice-info">
+        <!-- Left -->
+        <div class="left-info">
+          <p><b>Invoice No :</b> {{ model.invoiceNo }}</p>
+          <p><b>Customer :</b> {{ selectedCustomer?.name }}</p>
+          <p><b>Address :</b> {{ selectedCustomer?.address }}</p>
+          <!-- <p><b>Address :</b> {{ model?.customerAddress || model?.addressLine1 || model?.addressLine2 || '—' }}</p> -->
+          <p><b>Phone :</b> {{ selectedCustomer?.contact }}</p>
+          <!-- <p><b>Phone :</b> {{ selectedCustomer?.contact || selectedCustomer?.phone }}</p> -->
+        </div>
+
+        <!-- Right -->
+        <div class="right-info">
+          <p><b>Date :</b> {{ today | date:'dd-MMM-yyyy' }}</p>
+          <p><b>Time :</b> {{ today | date:'hh:mm a' }}</p>
+          <p><b>Served By :</b> {{ authenticatedUser?.name }}</p>
+        </div>
+
+      </div>
+
+
+      <!-- ===== Table ===== -->
+      <div class="invoice-table-scroll">
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Sl</th>
+              <th>Item</th>
+              <th>Shades Name (if any)</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of getDetailsNotReturned(model.salesOrderDetails); let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.itemName }}</td>
+              <td>{{ item.shadesName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+              <td>{{ item.unitPrice * item.quantity | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <!-- ===== Totals ===== -->
+      <div class="totals">
+        <!-- <p>Sub Total : {{ subTotal | number:'1.2-2' }}</p> -->
+        @if(CBremarks != "" && CBremarks != null){
+        <p>Remarks : {{ CBremarks }}</p>
+        }
+        <p>Total : {{ total | number:'1.2-2' }}</p>
+        <p>Discount : {{ model.discountAmount | number:'1.2-2' }}{{discountType}}</p>
+        <p>Tax : {{ taxAmount | number:'1.2-2' }}%</p>
+        <p>Paid : {{ payment | number:'1.2-2' }}</p>
+        <p class="payment-method-line">
+          Payment Method :
+          <span class="payment-method-chip">{{ getPaymentMethodLabel(selectedPaymentMethod, model.mobileBankMethod) }}</span>
+        </p>
+        @if(selectedPaymentMethod == 3 && model.phoneNumber){
+        <p>Phone Number : {{ model.phoneNumber }}</p>
+        }
+        @if(selectedPaymentMethod == 4){
+        @if(model.bankName){
+        <p>Bank Name : {{ model.bankName }}</p>
+        }
+        @if(model.accountNumber){
+        <p>Account Number : {{ model.accountNumber }}</p>
+        }
+        }
+
+        <p><b>
+            <!-- Due : {{ due | number:'1.2-2' }} -->
+            @if(due < 0){ <span class="text-blue">Return : </span>
+              <span class="text-blue">{{ math.abs(due) | number:'1.2-2' }}</span>
+              } @else{
+              <span class="text-blue">Due : </span>
+              <span class="text-blue">{{ due | number:'1.2-2' }}</span>
+              }
+          </b>
+        </p>
+        <p>Total Amount: {{ model.totalAmount | number:'1.2-2' }}</p>
+        <p><b>Total Amount in Words:</b> {{ model.totalAmount | numberToWords }}</p>
+        <p>Delivery Charge : {{ deliveryCharge | number:'1.2-2' }}</p>
+        <!-- <h6>Grand Total : {{ subTotal | number:'1.2-2' }}</h6> -->
+      </div>
+
+      <div class="signature">
+        <div class="signature-block">
+          <img *ngIf="getCurrentUserSignature()" [src]="getCurrentUserSignature()" alt="User Signature"
+            class="signature-image" />
+          <div class="signature-line"></div>
+          <p>Approved By</p>
+        </div>
+      </div>
+      <!-- ===== Buttons (hide when print) ===== -->
+      <div class="btn">
+        <!-- <div> -->
+        <button mat-stroked-button (click)="saveAsDraft()">Draft</button>
+        <!-- </div> -->
+        <!-- <div> -->
+        <button mat-flat-button color="primary" (click)="submitSalesOrder()" [disabled]="isSubmitButtonDisabled">Submit
+          & Print</button>
+        <!-- </div> -->
+      </div>
+      <div>
+        <p style="text-align:center; font-style: italic; margin-top:50px;padding-top:50px ; color:#939393">** Color Bank products are
+          non-returnable.</p>
+        <p class="powered-by" style="text-align:center; margin-top:10px; font-size:12px; color:#939393">Powered by
+          Berger Tech Consulting Limited</p>
+      </div>
+    </div>
+
+
+  </div>
+
+  <div class="modal-overlay" *ngIf="showRemarkModal">
+    <div class="modal-container" role="dialog" aria-modal="true">
+      <div class="modal-content">
+        <h5>Save Changes</h5>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Remarks</mat-label>
+          <textarea matInput rows="2" [(ngModel)]="remarks" placeholder="Enter remarks..."></textarea>
+        </mat-form-field>
+
+        <div class="modal-actions">
+          <button mat-stroked-button (click)="cancelRemark()">Cancel</button>
+          <button mat-flat-button color="primary" (click)="updateReturnAmount()">
+            Submit
+          </button>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Sales Order Modal -->
+  <div class="modal-overlay" id="viewModal" *ngIf="showViewModal" (click)="closeViewModal()">
+    <div class="invoice-container" id="viewSection" (click)="$event.stopPropagation()">
+
+      <!-- Header with close button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <!-- <h2 style="margin: 0;">Sales Order Details</h2> -->
+        <button mat-icon-button (click)="closeViewModal()" style="color: #666;">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <!-- ===== Header ===== -->
+      <div class="invoice-header text-center">
+         <!-- @if(authenticatedUser.tenantId == 67){
+           <img style="height: 115px; width: auto;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+          alt="User Logo" class="company-logo company-logo-lg" />
+         }@else{
+           <img style="height: 60px; width: auto;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+          alt="User Logo" class="company-logo" />
+         } -->
+        
+          <img style="height: auto; width: 100%;" *ngIf="getCurrentUserImage()" [src]="getCurrentUserImage()"
+          alt="User Logo" class="company-logo company-logo-lg" />
+
+        <h1 class="title">{{ authenticatedUser?.unique_name }}</h1>
+        <p>{{ authenticatedUser?.address }}</p>
+        <p>Mobile: {{ authenticatedUser?.phoneNumber }}</p>
+        <p><b>SALES INVOICE</b></p>
+      </div>
+
+      <!-- ===== Top Info Row ===== -->
+      <div class="invoice-info">
+        <!-- Left -->
+        <div class="left-info">
+          <p><b>Invoice No :</b> {{ viewSalesOrder?.invoiceNo }}</p>
+          <p><b>Customer :</b> {{ viewSalesOrder?.customerName }}</p>
+          <p><b>Address :</b> {{ viewSalesOrder?.customerAddress || '—' }}</p>
+          <p><b>Phone :</b> {{ viewSalesOrder?.customerPhone || '—' }}</p>
+        </div>
+
+        <!-- Right -->
+        <div class="right-info">
+          <p><b>Date :</b> {{ viewSalesOrder?.orderDate | date:'dd-MMM-yyyy' }}</p>
+          <p><b>Time :</b> {{ viewSalesOrder?.orderDate | date:'hh:mm a' }}</p>
+          <p><b>Served By :</b> {{ authenticatedUser?.name }}</p>
+        </div>
+      </div>
+
+      <!-- ===== Table ===== -->
+      <div class="invoice-table-scroll">
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>Sl</th>
+              <th>Item</th>
+              <th>Shades Name (if any)</th>
+              <th>Warehouse</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let item of getDetailsNotReturned(viewSalesOrder?.salesOrderDetails); let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ item.itemName }}</td>
+              <td>{{ item.shadesName }}</td>
+              <td>{{ item.warehouseName }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.unitPrice | number:'1.2-2' }}</td>
+              <td>{{ item.unitPrice * item.quantity | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== Returned Items ===== -->
+      <div class="totals" *ngIf="getReturnedItemsForView(viewSalesOrder?.salesOrderDetails).length > 0">
+        <h4 style="color: red; margin-top: 20px;">Returned Items</h4>
+        <div *ngFor="let item of getReturnedItemsForView(viewSalesOrder?.salesOrderDetails)">
+          <p>{{ item.itemName }} - Qty: {{ item.returnQuantity }} × {{ item.unitPrice | number:'1.2-2' }} = <strong
+              style="color: red;">{{ (item.returnQuantity * item.unitPrice) | number:'1.2-2' }}</strong></p>
+        </div>
+        <p style="border-top: 1px solid red; padding-top: 10px;"><strong style="color: red;">Total Return Amount: {{
+            getTotalReturnAmountForView(viewSalesOrder?.salesOrderDetails) | number:'1.2-2' }}</strong></p>
+      </div>
+
+      <!-- ===== Totals ===== -->
+      <div class="totals">
+        @if(viewSalesOrder?.remarks){
+        <p>Remarks : {{ viewSalesOrder?.remarks }}</p>
+        }
+        <p>Sub Total : {{ viewSalesOrder?.subTotal | number:'1.2-2' }}</p>
+        <p>Delivery Charge : {{ viewSalesOrder?.deliveryCharge || 0 | number:'1.2-2' }}</p>
+        <p>Discount : {{ viewSalesOrder?.discountAmount | number:'1.2-2' }}{{ viewSalesOrder?.discountType || '%' }}</p>
+        <p style="color: red;" *ngIf="getTotalReturnAmountForView(viewSalesOrder?.salesOrderDetails) > 0">Return
+          Deduction : -{{ getTotalReturnAmountForView(viewSalesOrder?.salesOrderDetails) | number:'1.2-2' }}</p>
+        <p>Tax : {{ viewSalesOrder?.tax | number:'1.2-2' }}</p>
+        <h4>Total : {{ (viewSalesOrder?.totalAmount - getTotalReturnAmountForView(viewSalesOrder?.salesOrderDetails)) |
+          number:'1.2-2' }}</h4>
+        <p><b>Total Amount in Words:</b> {{ viewSalesOrder?.totalAmount | numberToWords }}</p>
+        <!-- <h4>Total : {{ viewSalesOrder?.totalAmount | number:'1.2-2' }}</h4> -->
+        <p>Paid : {{ viewSalesOrder?.paidAmount | number:'1.2-2' }}</p>
+        <p class="payment-method-line">
+          Payment Method :
+          <span class="payment-method-chip">
+            {{ getPaymentMethodLabel(viewSalesOrder?.paymentMethod, viewSalesOrder?.mobileBankMethod) }}
+          </span>
+        </p>
+        @if(viewSalesOrder?.paymentMethod == 3 && viewSalesOrder?.phoneNumber){
+        <p>Phone Number : {{ viewSalesOrder?.phoneNumber }}</p>
+        }
+        @if(viewSalesOrder?.paymentMethod == 4){
+        @if(viewSalesOrder?.bankName){
+        <p>Bank Name : {{ viewSalesOrder?.bankName }}</p>
+        }
+        @if(viewSalesOrder?.accountNumber){
+        <p>Account Number : {{ viewSalesOrder?.accountNumber }}</p>
+        }
+        }
+        @if(viewSalesOrder?.paidAmount > viewSalesOrder?.totalAmount){
+        <p>Return : {{ (viewSalesOrder?.paidAmount - viewSalesOrder?.totalAmount) | number:'1.2-2' }}</p>
+        }@else{
+        <p>Due : {{ (viewSalesOrder?.dueAmount - getTotalReturnAmountForView(viewSalesOrder?.salesOrderDetails)) |
+          number:'1.2-2' }}</p>
+        }
+
+      </div>
+
+
+
+      <div class="signature">
+        <div class="signature-block">
+          <img *ngIf="getCurrentUserSignature()" [src]="getCurrentUserSignature()" alt="User Signature"
+            class="signature-image" />
+          <div class="signature-line"></div>
+          <p>Approved By</p>
+        </div>
+      </div>
+      <div>
+        <p style="text-align:center; margin-top:50px; font-style: italic; color:#939393">** Color Bank products are
+          non-returnable.</p>
+        <p class="powered-by" style="text-align:center; margin-top:10px; font-size:12px; color:#939393">Powered by
+          Berger Tech Consulting Limited</p>
+      </div>
+      <!-- Print Button -->
+      <div class="btn">
+        <button mat-flat-button color="primary" (click)="printViewInvoice()">Print</button>
+      </div>
+
+    </div>
+  </div>

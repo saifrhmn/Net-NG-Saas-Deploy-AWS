@@ -1,0 +1,70 @@
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">Stock Transfer Report</h2>
+  </div>
+</div>
+
+<div class="header-card">
+  <div class="table-top">
+        <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+  <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+  
+    </div>
+
+<div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>
+<div>
+   <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button></div>
+      
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+    <table>
+  <thead>
+    <tr>
+      <th>Sl No</th>
+      <th>Transfer Date</th>
+      <th>Transfer Ref No</th>
+      <th>From Warehouse</th>
+      <th>To Warehouse</th>
+      <th>Item Code</th>
+      <th>Item Name</th>
+      <th>Brand</th>
+      <th>Qty Transferred</th>
+      <th>Remarks</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of lstReport; track $index) {
+    <tr>
+      <td>{{ row.slNo }}</td>
+      <td>{{ row.transferDate | date:'dd-MMM-yy' }}</td>
+      <td>{{ row.transferRefNo }}</td>
+      <td>{{ row.fromWarehouseName }}</td>
+      <td>{{ row.toWarehouseName }}</td>
+      <td>{{ row.itemCode }}</td>
+      <td>{{ row.itemName }}</td>
+      <td>{{ row.brand }}</td>
+      <td>{{ row.qtyTransferred | number:'1.0-0' }}</td>
+      <td>{{ row.remarks || '-' }}</td>
+    </tr>
+    }
+  </tbody>
+</table>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

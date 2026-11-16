@@ -1,0 +1,666 @@
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Settings</h2>
+  </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="main-content">
+  <!-- Tab Navigation Card -->
+  <div class="tabs-card">
+    <mat-tab-group class="purchase-tabs" (selectedTabChange)="onTabChange($event)">
+      <ng-container *ngIf="canShowRoleTab">
+        <mat-tab label="Role">
+          <div class="tab-content">
+            <!-- <p>Role content will be here</p> -->
+            <div class="content">
+              <div class="table-top">
+                <div class="table-search">
+                  <input type="text" name="table-search" id="table-serach" [(ngModel)]="searchText"
+                    placeholder="Search by name, phoneNumber, address ..." (keyup)="onSearch($event)">
+                  <mat-icon>search</mat-icon>
+                </div>
+                <button type="button" class="theme-button add" (click)="openCreateRole()">
+                  <mat-icon class="material-icons-outlined">add</mat-icon>
+                  Create Role
+                </button>
+
+              </div>
+              <div class="table__body">
+                <div class="scroller">
+                  <table>
+                  <thead class="sticky-header">
+                    <tr>
+                      <th>Role Name</th>
+                      <th>Is Admin</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (role of lstRole; track $index) {
+                    <tr>
+                      <td>{{role.name}}</td>
+                      <td>{{role.isAdmin}}</td>
+                      <td>
+                        <span class="activity-badge" [ngClass]="{
+              'success': role.status === 1,
+              'danger': role.status === 0
+            }">{{statusEnum[role.status]}}</span>
+                      </td>
+                      <td>
+                        <div class="button-wrapper">
+                          <button class="action-button text-primary" (click)="editRole(role)">
+                            <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                          </button>
+                          <button class="action-button text-danger" (click)="deleteRole(role)">
+                            <mat-icon class="material-icons-outlined">delete</mat-icon>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+                </div>
+              </div>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+
+            <!-- Create Role Modal -->
+            <div class="modal-overlay" *ngIf="showRoleModal" (click)="closeRoleModal()">
+              <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+                (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+                <div class="modal-header">
+                  <div id="modalTitle" class="modal-title">
+                    <mat-icon>store</mat-icon>
+                    <span>{{ isEditRoleModel ? 'Edit Role' : 'Create New Role' }}</span>
+                  </div>
+                  <button mat-icon-button (click)="closeRoleModal()" class="close-btn">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+
+                <div class="modal-content">
+                  <div class="form-group">
+                    <div class="floating-label-group">
+                      <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name"
+                        placeholder=" " required>
+                      <label class="floating-label">Role Name</label>
+                    </div>
+                  </div>
+
+
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="status-select">
+                      <mat-label>Is Admin</mat-label>
+                      <mat-select [(ngModel)]="searchModel.isAdmin">
+                        <mat-option [value]="true">Yes</mat-option>
+                        <mat-option [value]="false">No</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-group">
+                    <mat-form-field appearance="outline" class="status-select">
+                      <mat-label>Status</mat-label>
+                      <mat-select [(ngModel)]="searchModel.status">
+                        <mat-option [value]="1">Active</mat-option>
+                        <mat-option [value]="0">Inactive</mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+                <div class="modal-actions">
+                  <button class="cancel-btn" (click)="closeRoleModal()">Cancel</button>
+                  <!-- <button class="create-btn" (click)="savecustomer()"> -->
+                  <button class="create-btn" (click)="createRole(searchModel)">
+                    <mat-icon>{{ isEditRoleModel ? 'save' : 'add' }}</mat-icon>
+                    {{ isEditRoleModel ? 'Update' : 'Create' }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </mat-tab>
+      </ng-container>
+
+      <mat-tab label="UOM">
+        <div class="tab-content">
+          <div class="content">
+            <div class="table-top">
+              <div class="table-search">
+                <input type="text" name="table-search" [(ngModel)]="searchText" placeholder="Search by name..."
+                  (keyup)="onSearch($event)">
+                <mat-icon>search</mat-icon>
+              </div>
+              <button type="button" class="theme-button add" (click)="openCreateUOM()">
+                <mat-icon class="material-icons-outlined">add</mat-icon>
+                Create UOM
+              </button>
+            </div>
+            <div class="table__body">
+              <div class="scroller">
+                <table >
+                  <thead class="sticky-header">
+                    <tr>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody class="scroller">
+                    @for (uom of lstUOM; track $index) {
+                    <tr>
+                      <td>{{uom.name}}</td>
+                      <td>
+                        <span class="activity-badge" [ngClass]="{
+                            'success': uom.status === 1,
+                            'danger': uom.status === 0
+                          }">{{statusEnum[uom.status]}}</span>
+                      </td>
+                      <td>
+                        <div class="button-wrapper">
+                          <button class="action-button text-primary" (click)="editUOM(uom)">
+                            <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                          </button>
+                          <button class="action-button text-danger" (click)="deleteUOM(uom)">
+                            <mat-icon class="material-icons-outlined">delete</mat-icon>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+
+          <!-- UOM Modal -->
+          <div class="modal-overlay" *ngIf="showUOMModal" (click)="closeUOMModal()">
+            <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="uomModalTitle" tabindex="-1"
+              (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+              <div class="modal-header">
+                <div id="uomModalTitle" class="modal-title">
+                  <mat-icon>inventory_2</mat-icon>
+                  <span>{{ isEditUOMModel ? 'Edit UOM' : 'Create New UOM' }}</span>
+                </div>
+                <button mat-icon-button (click)="closeUOMModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+              </div>
+              <div class="modal-content">
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <!-- <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name"
+                     pattern="^[A-Za-z\s]+$"
+                      placeholder=" " required> -->
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name"
+                      (keypress)="allowOnlyText($event)" (paste)="preventPasteNumbers($event)" placeholder=" " required>
+                    <label class="floating-label">UOM Name</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="searchModel.status">
+                      <mat-option [value]="1">Active</mat-option>
+                      <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="cancel-btn" (click)="closeUOMModal()">Cancel</button>
+                <button class="create-btn" (click)="createUOM(searchModel)"><mat-icon>{{ isEditUOMModel ? 'save' : 'add'
+                    }}</mat-icon>{{ isEditUOMModel ? 'Update' : 'Create' }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Brand">
+        <div class="tab-content">
+          <div class="content">
+            <div class="table-top">
+              <div class="table-search">
+                <input type="text" name="table-search" [(ngModel)]="searchText" placeholder="Search by name..."
+                  (keyup)="onSearch($event)">
+                <mat-icon>search</mat-icon>
+              </div>
+              <button type="button" class="theme-button add" (click)="openCreateBrand()">
+                <mat-icon class="material-icons-outlined">add</mat-icon>
+                Create Brand
+              </button>
+            </div>
+            <div class="table__body">
+              <div class="scroller">
+               <table>
+                <thead class="sticky-header">
+                  <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (brand of lstBrand; track $index) {
+                  <tr>
+                    <td>{{brand.name}}</td>
+                    <td>
+                      <span class="activity-badge" [ngClass]="{
+                          'success': brand.status === 1,
+                          'danger': brand.status === 0
+                        }">{{statusEnum[brand.status]}}</span>
+                    </td>
+                    <td>
+                      <div class="button-wrapper">
+                        <button class="action-button text-primary" (click)="editBrand(brand)">
+                          <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                        </button>
+                        <button class="action-button text-danger" (click)="deleteBrand(brand)">
+                          <mat-icon class="material-icons-outlined">delete</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              </div>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+
+          <!-- Brand Modal -->
+          <div class="modal-overlay" *ngIf="showBrandModal" (click)="closeBrandModal()">
+            <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="brandModalTitle" tabindex="-1"
+              (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+              <div class="modal-header">
+                <div id="brandModalTitle" class="modal-title">
+                  <mat-icon>branding_watermark</mat-icon>
+                  <span>{{ isEditBrandMode ? 'Edit Brand' : 'Create New Brand' }}</span>
+                </div>
+                <button mat-icon-button (click)="closeBrandModal()"
+                  class="close-btn"><mat-icon>close</mat-icon></button>
+              </div>
+              <div class="modal-content">
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name"
+                      placeholder=" " required>
+                    <label class="floating-label">Brand Name</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="searchModel.status">
+                      <mat-option [value]="1">Active</mat-option>
+                      <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="cancel-btn" (click)="closeBrandModal()">Cancel</button>
+                <button class="create-btn" (click)="createBrand(searchModel)"><mat-icon>{{ isEditBrandMode ? 'save' :
+                    'add' }}</mat-icon>{{ isEditBrandMode ? 'Update' : 'Create' }}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="WareHouse">
+        <div class="tab-content">
+          <div class="content">
+            <div class="table-top">
+              <div class="table-search">
+                <input type="text" name="table-search" [(ngModel)]="searchText" placeholder="Search by name..."
+                  (keyup)="onSearch($event)">
+                <mat-icon>search</mat-icon>
+              </div>
+              <button type="button" class="theme-button add" (click)="openCreateWarehouse()">
+                <mat-icon class="material-icons-outlined">add</mat-icon>
+                Create Warehouse
+              </button>
+            </div>
+            <div class="table__body">
+              <div class="scroller">
+                <table>
+                  <thead class="sticky-header">
+                    <tr>
+                      <th>Name</th>
+                      <th>Location</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (wh of lstWarehouse; track $index) {
+                    <tr>
+                      <td>{{wh.name}}</td>
+                      <td>{{wh.location}}</td>
+                      <td>
+                        <span class="activity-badge" [ngClass]="{
+                            'success': wh.status === 1,
+                            'danger': wh.status === 0
+                          }">{{statusEnum[wh.status]}}</span>
+                      </td>
+                      <td>
+                        <div class="button-wrapper">
+                          <button class="action-button text-primary" (click)="editWarehouse(wh)">
+                            <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                          </button>
+                          <button class="action-button text-danger" (click)="deleteWarehouse(wh)">
+                            <mat-icon class="material-icons-outlined">delete</mat-icon>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+
+
+        </div>
+        <!-- Warehouse Modal -->
+        <div class="modal-overlay" *ngIf="showWarehouseModal" (click)="closeWarehouseModal()">
+          <div class="modal-container small-modal" role="dialog" aria-modal="true" aria-labelledby="whModalTitle"
+            tabindex="-1" (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+            <div class="modal-header">
+              <div id="whModalTitle" class="modal-title">
+                <mat-icon>warehouse</mat-icon>
+                <span>{{ isEditWarehouseModel ? 'Edit Warehouse' : 'Create New Warehouse' }}</span>
+              </div>
+              <button mat-icon-button (click)="closeWarehouseModal()"
+                class="close-btn"><mat-icon>close</mat-icon></button>
+            </div>
+            <div class="modal-content">
+              <div class="form-group">
+                <div class="floating-label-group">
+                  <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name" placeholder=" "
+                    required>
+                  <label class="floating-label">Warehouse Name</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <div class="floating-label-group">
+                  <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.location"
+                    placeholder=" " required>
+                  <label class="floating-label">Location</label>
+                </div>
+              </div>
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="status-select">
+                  <mat-label>Status</mat-label>
+                  <mat-select [(ngModel)]="searchModel.status">
+                    <mat-option [value]="1">Active</mat-option>
+                    <mat-option [value]="0">Inactive</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="modal-actions">
+              <button class="cancel-btn" (click)="closeWarehouseModal()">Cancel</button>
+              <button class="create-btn" (click)="createWarehouse(searchModel)"><mat-icon>{{ isEditWarehouseModel ?
+                  'save' : 'add' }}</mat-icon>{{ isEditWarehouseModel ? 'Update' : 'Create' }}</button>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <mat-tab label="Category">
+        <div class="tab-content">
+          <div class="content">
+            <div class="table-top">
+              <div class="table-search">
+                <input type="text" name="table-search" [(ngModel)]="searchText" placeholder="Search by name..."
+                  (keyup)="onSearch($event)">
+                <mat-icon>search</mat-icon>
+              </div>
+              <button type="button" class="theme-button add" (click)="openCreateCategory()">
+                <mat-icon class="material-icons-outlined">add</mat-icon>
+                Create Category
+              </button>
+            </div>
+            <div class="table__body">
+              <div class="scroller">
+                <table>
+                  <thead class="sticky-header">
+                    <tr>
+                      <th>Name</th>
+                      <th>Is Parent</th>
+                      <th>Status</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (category of lstCategory; track $index) {
+                    <tr>
+                      <td>{{category.name}}</td>
+                      <td>{{category.hasParent ? 'Yes' : 'No'}}</td>
+                      <td>
+                        <span class="activity-badge" [ngClass]="{
+                            'success': category.status === 1,
+                            'danger': category.status === 0
+                          }">{{statusEnum[category.status]}}</span>
+                      </td>
+                      <td>
+                        <div class="button-wrapper">
+                          <button class="action-button text-primary" (click)="editCategory(category)">
+                            <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                          </button>
+                          <button class="action-button text-danger" (click)="deleteCategory(category)">
+                            <mat-icon class="material-icons-outlined">delete</mat-icon>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+
+          <!-- Category Modal -->
+          <div class="modal-overlay" *ngIf="showCategoryModal" (click)="closeCategoryModal()">
+            <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="catModalTitle" tabindex="-1"
+              (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+              <div class="modal-header">
+                <div id="catModalTitle" class="modal-title">
+                  <mat-icon>category</mat-icon>
+                  <span>{{ isEditCategoryModel ? 'Edit Category' : 'Create New Category' }}</span>
+                </div>
+                <button mat-icon-button (click)="closeCategoryModal()"
+                  class="close-btn"><mat-icon>close</mat-icon></button>
+              </div>
+              <div class="modal-content">
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name"
+                      placeholder=" " required>
+                    <label class="floating-label">Category Name</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="haveParent" [(ngModel)]="hasParentCategory">
+                    <label for="haveParent" class="checkbox-label">Have parent?</label>
+                  </div>
+                </div>
+                <div class="form-group" *ngIf="hasParentCategory">
+                  <mat-form-field appearance="outline" class="category-select" class="status-select">
+                    <mat-select [(ngModel)]="searchModel.parentCategoryId" placeholder="Select Parent Category">
+                      <!-- <mat-option [value]="null">Select Parent Category</mat-option> -->
+                      <mat-option *ngFor="let category of lstCategory" [value]="category.categoryId">
+                        {{ category.name }}
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+                <div class="form-group">
+                  <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="searchModel.status">
+                      <mat-option [value]="1">Active</mat-option>
+                      <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="cancel-btn" (click)="closeCategoryModal()">Cancel</button>
+                <button class="create-btn" (click)="createCategory(searchModel)"><mat-icon>{{ isEditCategoryModel ?
+                    'save' : 'add' }}</mat-icon>{{ isEditCategoryModel ? 'Update' : 'Create' }}</button>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </mat-tab>
+      <mat-tab label="Bank Information">
+        <div class="tab-content">
+          <div class="content">
+            <div class="table-top">
+              <div class="table-search">
+                <input type="text" name="table-search" [(ngModel)]="searchText" placeholder="Search by name..."
+                  (keyup)="onSearch($event)">
+                <mat-icon>search</mat-icon>
+              </div>
+              <button type="button" class="theme-button add" (click)="openCreateBank()">
+                <mat-icon class="material-icons-outlined">add</mat-icon>
+                Create Bank Information
+              </button>
+            </div>
+            <div class="table__body">
+              <table>
+                <thead class="sticky-header">
+                  <tr>
+                    <th>Account Name</th>
+                    <th>Account Number</th>
+                    <th>Bank Name</th>
+                    <th>Branch Name</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (bank of lstBank; track $index) {
+                  <tr>
+                    <td>{{bank.accountName}}</td>
+                    <td>{{bank.accountNumber}}</td>
+                    <td>{{bank.bankName}}</td>
+                    <td>{{bank.branchName}}</td>
+                    <td>
+                      <span class="activity-badge" [ngClass]="{
+                          'success': bank.status === 1,
+                          'danger': bank.status === 0
+                        }">{{statusEnum[bank.status]}}</span>
+                    </td>
+                    <td>
+                      <div class="button-wrapper">
+                        <button class="action-button text-primary" (click)="editBank(bank)">
+                          <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                        </button>
+                        <button class="action-button text-danger" (click)="deleteBank(bank)">
+                          <mat-icon class="material-icons-outlined">delete</mat-icon>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+                (page)="onPageChange($event)">
+              </mat-paginator>
+            </div>
+          </div>
+
+          <!-- Bank Modal -->
+          <div class="modal-overlay" *ngIf="showBankModal" (click)="closeBankModal()">
+            <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="bankModalTitle" tabindex="-1"
+              (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+              <div class="modal-header">
+                <div id="bankModalTitle" class="modal-title">
+                  <mat-icon>account_balance</mat-icon>
+                  <span>{{ isEditBankModel ? 'Edit Bank Information' : 'Create New Bank Information' }}</span>
+                </div>
+                <button mat-icon-button (click)="closeBankModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+              </div>
+              <div class="modal-content">
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.accountName"
+                      placeholder=" " required>
+                    <label class="floating-label">Account Name</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.accountNumber"
+                      placeholder=" " required>
+                    <label class="floating-label">Account Number</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.bankName"
+                      placeholder=" " required>
+                    <label class="floating-label">Bank Name</label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="floating-label-group">
+                    <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.branchName"
+                      placeholder=" " required>
+                    <label class="floating-label">Branch Name</label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="searchModel.status">
+                      <mat-option [value]="1">Active</mat-option>
+                      <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="modal-actions">
+                <button class="cancel-btn" (click)="closeBankModal()">Cancel</button>
+                <button class="create-btn" (click)="createBank(searchModel)"><mat-icon>{{ isEditBankModel ?
+                    'save' : 'add' }}</mat-icon>{{ isEditBankModel ? 'Update' : 'Create' }}</button>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

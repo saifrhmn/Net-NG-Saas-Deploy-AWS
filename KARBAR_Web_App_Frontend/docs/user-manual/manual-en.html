@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Berger Karbar User Manual</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans:wght@400;600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="manual.css">
+<style>@page { @bottom-left { content: "Berger Karbar · User Manual (English)"; } }</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="logo"><img src="../../src/assets/img/Karbar_Logo.png" alt="Berger Karbar"></div>
+  <div class="kicker">User Manual · English</div>
+  <h1>Berger Karbar</h1>
+  <p class="sub">Step-by-step guide to selling, buying, ordering from Berger, managing stock, collecting dues and reading reports.</p>
+  <div class="foot">
+    <span>Powered by Berger Tech Consulting Limited</span>
+    <img src="../../src/assets/img/BTCL-logo.png" alt="BTCL">
+  </div>
+</div>
+
+<div class="toc">
+  <h2>Contents</h2>
+  <ol>
+    <li class="part">Start here</li>
+    <li><span>1</span><a href="#login">Signing in</a></li>
+    <li><span>2</span><a href="#layout">Finding your way</a></li>
+    <li><span>3</span><a href="#roles">What your role can see</a></li>
+    <li><span>4</span><a href="#dashboard">Dashboard</a></li>
+    <li class="part">Daily work</li>
+    <li><span>5</span><a href="#sales">Sales</a></li>
+    <li><span>6</span><a href="#returns">Sales returns</a></li>
+    <li><span>7</span><a href="#purchase">Purchase</a></li>
+    <li><span>8</span><a href="#sap">Berger SAP invoices</a></li>
+    <li><span>9</span><a href="#order">Order from Berger</a></li>
+    <li><span>10</span><a href="#payment">Payments and dues</a></li>
+    <li><span>11</span><a href="#expense">Expenses</a></li>
+    <li class="part">Inventory</li>
+    <li><span>12</span><a href="#stock">Stock Management</a></li>
+    <li><span>13</span><a href="#item">Items</a></li>
+    <li class="part">Setup</li>
+    <li><span>14</span><a href="#parties">Suppliers and customers</a></li>
+    <li><span>15</span><a href="#users">Users</a></li>
+    <li><span>16</span><a href="#settings">Settings</a></li>
+    <li class="part">Reference</li>
+    <li><span>17</span><a href="#reports">Reports</a></li>
+    <li><span>18</span><a href="#messages">Messages and fixes</a></li>
+  </ol>
+  <div class="note" style="margin-top:14mm"><b>How to read this manual</b>Words in <span class="ui">blue boxes</span> are exactly what you see on screen: menu items, buttons and field names. Icons such as <span class="mi">edit</span> are shown the same way they appear in Karbar. All amounts are in Taka (৳).</div>
+</div>
+
+<section id="login">
+  <h2><span class="n">1</span>Signing in</h2>
+  <p class="where">Opens automatically when you are not signed in.</p>
+  <ol class="steps">
+    <li>Enter your <span class="ui">Phone Number Or Email</span> and <span class="ui">Password</span>. Press <span class="mi">visibility</span> to show the password while you type.</li>
+    <li>Press <span class="ui">Login</span>. The button shows <em>Loading…</em> while Karbar checks your details, then the Dashboard opens.</li>
+  </ol>
+  <p>If the details are wrong you will see <em>*** Phone Number or Password is incorrect</em> under the password box.</p>
+  <h3>Forgot your password</h3>
+  <ol class="steps">
+    <li>Press <span class="ui">Forgot Password?</span> under the password box.</li>
+    <li>Enter your <span class="ui">Phone Number</span>, a <span class="ui">New Password</span>, and the same password again in <span class="ui">Confirm Password</span>.</li>
+    <li>Press <span class="ui">Reset Password</span>. The button stays disabled until both passwords match.</li>
+  </ol>
+  <div class="note"><b>Sessions</b>Karbar signs you out when your session expires. Sign in again and carry on; anything not yet saved on the open screen must be entered again.</div>
+</section>
+
+<section id="layout">
+  <h2><span class="n">2</span>Finding your way</h2>
+  <ul>
+    <li><b>Left menu.</b> Every screen opens from here. The <span class="mi">menu</span> button at the top left shrinks the menu to icons or opens it again. Hover over an icon to see its name. On a phone, the menu slides in from the left.</li>
+    <li><b>Reports.</b> Click <span class="ui">Reports</span> to unfold the list of reports underneath it.</li>
+    <li><b>Your name</b> appears at the top right. Click it and choose <span class="ui">Logout</span> to sign out. <span class="ui">Logout</span> is also at the bottom of the left menu.</li>
+    <li><b>Tabs.</b> Sales, Purchase, Order and Settings split their work into tabs across the top, for example <span class="ui">New Sales</span> and <span class="ui">Completed Sales</span>.</li>
+    <li><b>Lists</b> have a search box above and page controls below. Choose 10, 25, 50 or 100 rows per page.</li>
+    <li><b>Icons in lists.</b> <span class="mi">border_color</span> or <span class="mi">edit</span> opens a record for changes, <span class="mi">delete</span> removes it, <span class="mi">visibility</span> shows it read-only.</li>
+    <li><b>Messages</b> appear briefly in the corner of the screen after you save, or when something needs fixing.</li>
+  </ul>
+</section>
+
+<section id="roles">
+  <h2><span class="n">3</span>What your role can see</h2>
+  <p>The left menu shows only the screens your role may use. Your administrator sets your role when creating your user account. Role names are defined in Settings → Role, so the names in your system may differ from the headings below.</p>
+  <table>
+    <thead><tr><th>Screen</th><th>Administrators</th><th>Dealer</th><th>Shop staff</th><th>Berger SCM admin</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Order, Purchase, Sales, Stock Management</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">–</td></tr>
+      <tr><td>Expense, Supplier, Customer, Settings, Item, Payment</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">–</td><td class="no">–</td></tr>
+      <tr><td>Users</td><td class="yes">✓</td><td class="no">–</td><td class="no">–</td><td class="no">–</td></tr>
+      <tr><td>Reports</td><td class="yes">All</td><td class="c">All except User Login History</td><td class="no">–</td><td class="c">Sales, Purchase, Inventory</td></tr>
+    </tbody>
+  </table>
+  <p>Administrators also get a few extra controls inside screens: changing a Berger order's status, uploading items from Excel, and choosing a dealer in reports.</p>
+</section>
+
+<section id="dashboard">
+  <h2><span class="n">4</span>Dashboard</h2>
+  <p class="where">Menu: <b>Dashboard</b>. Opens after you sign in.</p>
+  <ul>
+    <li><b>Today's figures:</b> <span class="ui">Today's Sale</span>, <span class="ui">Today's Customer Due</span>, <span class="ui">Today's Berger Purchase</span> and <span class="ui">Today's Non Berger Purchase</span>.</li>
+    <li><b>List of Receivable:</b> customers who owe you money, with amount and month.</li>
+    <li><b>Expense chart:</b> press <span class="ui">Today</span>, <span class="ui">7 days</span> or <span class="ui">30 days</span> to compare spending. Point at a dot to see its exact amount.</li>
+    <li><b>Low Stock:</b> items running low, with current stock in each warehouse. Reorder them through Order or Purchase.</li>
+    <li><b>User Manual:</b> download this manual in English or Bangla at any time.</li>
+  </ul>
+</section>
+
+<section id="sales">
+  <h2><span class="n">5</span>Sales</h2>
+  <p class="where">Menu: <b>Sales</b>. Tabs: <b>New Sales</b>, <b>Draft</b>, <b>Completed Sales</b>, <b>Sales Return</b>.</p>
+  <div class="flow">
+    <span class="box">New Sales</span><span class="arr">→</span>
+    <span class="box">Save → invoice preview</span><span class="arr">→</span>
+    <span class="box">Submit &amp; Print or Draft</span><span class="arr">→</span>
+    <span class="box">Completed Sales</span><span class="arr">→</span>
+    <span class="box">Return, if needed</span>
+  </div>
+  <h3>Make a sale</h3>
+  <ol class="steps">
+    <li>On <span class="ui">New Sales</span>, check the <span class="ui">Invoice No</span> at the top. Leave it to be generated, type your own, or press <span class="mi">sync</span> to generate a new number. Change the <span class="ui">Date</span> if the sale was not made today.</li>
+    <li>In <span class="ui">Customer</span>, type a name, phone number or address and pick the customer. For a new customer press <span class="mi">add</span>, fill in <span class="ui">Customer Name</span>, <span class="ui">Contact No</span> and <span class="ui">Address</span>, and save. Karbar warns <em>Contact already exists!</em> if that phone number is already registered.</li>
+    <li>Choose the <span class="ui">Warehouse</span> the goods leave from.</li>
+    <li>In <span class="ui">Item Code, Name …</span>, type part of the material number or name and click the item. It is added with its available stock and selling price. Type the <span class="ui">Shades Name</span> for tinted paint if needed.</li>
+    <li>In the summary on the right, set each line's <span class="ui">Quantity</span> with <span class="mi">remove</span> / <span class="mi">add</span> or by typing. You can change the <span class="ui">Price</span> per line. Remove a line with <span class="mi">delete</span>.</li>
+    <li>Fill in <span class="ui">Discount</span> (choose <b>%</b> or <b>৳</b>), <span class="ui">TAX (%)</span>, <span class="ui">Delivery Charge</span> and any <span class="ui">Remarks</span>. Karbar calculates <span class="ui">Final Amount</span> and <span class="ui">Total Payable</span>.</li>
+    <li>Enter what the customer pays in <span class="ui">Payment</span>. Karbar shows the <b>Due</b>, or the <b>Return</b> (change to give back) if they paid more.</li>
+    <li>Open the payment details and choose a <span class="ui">Payment Method</span>: Cash, Credit, Mobile Banking (pick bKash, Nagad, Rocket or Upay and enter the phone number) or Bank Transfer (pick the bank and enter the account number).</li>
+    <li>Press <span class="ui">Save</span>. The sales invoice preview opens. Check it, then press <span class="ui">Submit &amp; Print</span> to complete the sale, or <span class="ui">Draft</span> to finish it later.</li>
+  </ol>
+  <div class="note warn"><b>Not enough stock</b>If you see <em>One or more items do not have sufficient stock in the selected warehouse</em>, lower the quantity, choose another warehouse, or move stock first with Shift Stock (section 12).</div>
+  <p>The printed invoice shows your shop logo, address and signature from your user profile, the amount in words, and the line “Color Bank products are non-returnable.”</p>
+  <h3>Work with drafts</h3>
+  <p>The <span class="ui">Draft</span> tab lists saved, unfinished sales. For each draft:</p>
+  <ul>
+    <li><span class="mi">edit</span> <b>Edit draft</b> loads it back into New Sales to change it.</li>
+    <li><span class="mi">send</span> <b>Send to Sales</b> completes it as a sale.</li>
+    <li><span class="mi">delete</span> <b>Delete draft</b> removes it.</li>
+  </ul>
+  <h3>Find a completed sale</h3>
+  <p>On <span class="ui">Completed Sales</span>, set the From and To dates to narrow the list, or press <span class="ui">Clear</span> to show everything. Press <span class="mi">visibility</span> on a row to open its invoice, then <span class="ui">Print</span> to reprint it. Reprinted invoices list returned items and deduct them from the total.</p>
+</section>
+
+<section id="returns">
+  <h2><span class="n">6</span>Sales returns</h2>
+  <p class="where">Menu: <b>Sales</b> → <b>Completed Sales</b> tab.</p>
+  <ol class="steps">
+    <li>Find the invoice and tick the item lines the customer is bringing back.</li>
+    <li>In <span class="ui">Change Quantity</span>, enter how many units come back. It cannot be more than the quantity sold.</li>
+    <li>Press <span class="mi">undo</span> in the <span class="ui">Return</span> column, write the reason in <span class="ui">Remarks</span>, and press <span class="ui">Submit</span>.</li>
+  </ol>
+  <p>Returned lines show <em>Returned</em> with <span class="mi">check_circle</span>, and the stock goes back to the warehouse. All returns are listed on the <span class="ui">Sales Return</span> tab and in the Sales Return report.</p>
+</section>
+
+<section id="purchase">
+  <h2><span class="n">7</span>Purchase</h2>
+  <p class="where">Menu: <b>Purchase</b>. Tabs: <b>New Purchase</b>, <b>Completed Purchase</b>. Use this for stock bought without a Berger SAP invoice.</p>
+  <ol class="steps">
+    <li>Make sure the switch at the top (tooltip <em>Berger SAP invoice</em>) is <b>off</b>. Turned on, it takes you to Berger SAP invoices (section 8).</li>
+    <li>Enter the supplier's <span class="ui">Invoice No</span>. It is required.</li>
+    <li>Choose the <span class="ui">Supplier</span>. For a new supplier press <span class="mi">add</span> and fill in <span class="ui">Supplier Name</span>, <span class="ui">Contact</span>, <span class="ui">Address</span> and <span class="ui">Status</span>.</li>
+    <li>Choose the <span class="ui">Warehouse</span> receiving the goods, then search for and click each item.</li>
+    <li>In the summary, set <span class="ui">Quantity</span>, <span class="ui">MRP</span> and <span class="ui">PR. Price</span> (the price you paid) for each line.</li>
+    <li>Fill in <span class="ui">Discount</span> (% or ৳), <span class="ui">TAX (%)</span> and <span class="ui">VAT (%)</span>, the amount paid in <span class="ui">Payment</span>, and the <span class="ui">Payment Method</span>.</li>
+    <li>Press <span class="ui">Save</span>, check the purchase summary, and press <span class="ui">Submit</span>. The stock is added to the chosen warehouse.</li>
+  </ol>
+  <p>Saved purchases appear on <span class="ui">Completed Purchase</span> with quantity, price, discount, tax and VAT for each line. Pay any remaining supplier due from Payment (section 10).</p>
+</section>
+
+<section id="sap">
+  <h2><span class="n">8</span>Berger SAP invoices</h2>
+  <p class="where">Menu: <b>Purchase</b>, then turn <b>on</b> the switch at the top. The title changes to <b>Purchase Details</b>. Karbar remembers the switch position next time.</p>
+  <p>Use this when goods arrive from Berger against an SAP invoice. The invoice lines are already in Karbar; you confirm what actually arrived.</p>
+  <ol class="steps">
+    <li>Type the invoice number in <span class="ui">Berger Invoice No</span> and pick it from the suggestions.</li>
+    <li>On <span class="ui">Purchase List</span>, choose the <span class="ui">Warehouse</span> for every line. The invoice cannot be received until every line has a warehouse.</li>
+    <li>Enter the <span class="ui">Receive Quantity</span> for each line, up to the invoiced quantity, and check the <span class="ui">Unit Price</span>.</li>
+    <li>Press <span class="mi">arrow_forward</span> on the row to receive it. You will see <em>Received quantity updated</em>.</li>
+  </ol>
+  <p>If only part of an invoice arrived, the rest waits on <span class="ui">Pending Purchase</span> with its <span class="ui">Remaining Quantity</span>. Receive it there with <span class="mi">arrow_forward</span> when it arrives. Fully received invoices move to <span class="ui">Completed Purchase</span>.</p>
+</section>
+
+<section id="order">
+  <h2><span class="n">9</span>Order from Berger</h2>
+  <p class="where">Menu: <b>Order</b>. Tabs: <b>New Order</b>, <b>Order List</b>.</p>
+  <p>Use this to request stock from Berger. The supplier is fixed to Berger.</p>
+  <ol class="steps">
+    <li>On <span class="ui">New Order</span>, choose the <span class="ui">Warehouse</span> the goods should go to. It is required.</li>
+    <li>Search for items and click to add them. The table shows each item's current stock to help you decide how much to order.</li>
+    <li>Set the <span class="ui">Quantity</span> per line. The purchase price is fixed and filled in for you.</li>
+    <li>Press <span class="ui">Save</span>, check the order summary, and press <span class="ui">Submit</span>.</li>
+  </ol>
+  <p><span class="ui">Order List</span> shows each order's items and status: <b>Pending</b> until it is received, then <b>Received</b>. Administrators see the dealer name on each order and change the status from the drop-down. A Received order can no longer be changed.</p>
+</section>
+
+<section id="payment">
+  <h2><span class="n">10</span>Payments and dues</h2>
+  <p class="where">Menu: <b>Payment</b>.</p>
+  <p>Collect money customers owe you, or pay what you owe suppliers.</p>
+  <ol class="steps">
+    <li>In <span class="ui">Select Type</span>, choose <b>Customer</b> (money coming in) or <b>Supplier</b> (money going out).</li>
+    <li>Search by <span class="ui">Invoice No, Name, Phone</span> and pick the result. The list shows each invoice's total, paid and due amounts.</li>
+    <li>On an invoice with a due amount, press <span class="mi">arrow_forward</span> (View Details).</li>
+    <li>In <span class="ui">Payment Details</span>, choose the payment method, enter any additional discount, and enter the amount being paid. It cannot be more than the due amount.</li>
+    <li>Press <span class="ui">Submit</span>, then <span class="ui">Print Receipt</span> if a receipt is needed.</li>
+  </ol>
+  <p>Fully paid invoices show <span class="mi">print</span> instead, for reprinting.</p>
+</section>
+
+<section id="expense">
+  <h2><span class="n">11</span>Expenses</h2>
+  <p class="where">Menu: <b>Expense Information</b>.</p>
+  <ol class="steps">
+    <li>Press <span class="ui">Create Expense</span>.</li>
+    <li>Set the <span class="ui">Expense Date</span>. The entry date is filled in as today.</li>
+    <li>Choose the <span class="ui">Expense Category</span>. To add one, press <span class="mi">add</span>, enter a <span class="ui">Category Name</span>, and tick <span class="ui">Have parent?</span> if it belongs under another category (for example “Electricity” under “Utilities”).</li>
+    <li>Enter the <span class="ui">Expense Amount</span> and <span class="ui">Expense Purpose</span>, then save.</li>
+  </ol>
+  <p>Use <span class="mi">border_color</span> or <span class="mi">delete</span> to correct or remove an entry. Expenses also appear in the Dashboard expense chart.</p>
+</section>
+
+<section id="stock">
+  <h2><span class="n">12</span>Stock Management</h2>
+  <p class="where">Menu: <b>Stock Management</b>.</p>
+  <p>One row per item, one column per warehouse, and a <span class="ui">Total Quantity</span> column.</p>
+  <ul>
+    <li><b>Find items</b> with the search box. Use <span class="ui">Sort / Filter</span> for A→Z, Z→A, Low Stock, High Stock or Safety Stock, and tick <span class="ui">Not Include 0 stock</span> to hide empty items.</li>
+    <li><b>History:</b> each item shows its <b>Last Purchase</b> (supplier, quantity, amount) and <b>Last Sell</b> (customer, quantity, amount).</li>
+  </ul>
+  <h3>Correct a stock count</h3>
+  <ol class="steps">
+    <li>Double-click the quantity in the warehouse column and type the counted figure.</li>
+    <li>Press <span class="ui">Save</span> on that row, enter <span class="ui">Remarks</span> (for example “Physical count 12 Jan”), and press <span class="ui">Submit</span>.</li>
+  </ol>
+  <h3>Move stock between warehouses</h3>
+  <ol class="steps">
+    <li>Press <span class="mi">compare_arrows</span> beside the search box to open <span class="ui">Shift Stock</span>. (Not available to shop staff.)</li>
+    <li>Choose the <span class="ui">Item Name</span>. Karbar shows how much is in each warehouse.</li>
+    <li>Choose <span class="ui">From Ware House</span> and <span class="ui">To Ware House</span>, enter the <span class="ui">Quantity</span> and <span class="ui">Remarks</span>, and press <span class="ui">Submit</span>.</li>
+  </ol>
+  <p>Every transfer appears in the Stock Transfer report.</p>
+</section>
+
+<section id="item">
+  <h2><span class="n">13</span>Items</h2>
+  <p class="where">Menu: <b>Item</b>.</p>
+  <p>Your product list. Switch between cards and a table with <span class="mi">view_list</span> / <span class="mi">grid_view</span>. Search by item code, and narrow by <span class="ui">Choose Brand</span> and <span class="ui">Choose Category</span>.</p>
+  <h3>Add an item</h3>
+  <ol class="steps">
+    <li>Press <span class="mi">add</span> beside the search box.</li>
+    <li>Enter <span class="ui">Item Name</span>, <span class="ui">Item Description</span> and <span class="ui">Material Number</span>. Karbar suggests existing names and numbers as you type, to help avoid duplicates.</li>
+    <li>Choose the brand, category and <span class="ui">Unit</span>. If one is missing, press <span class="mi">add</span> beside it to create it.</li>
+    <li>Enter <span class="ui">Safety Stock</span> (the minimum level you want to keep), <span class="ui">MRP</span>, <span class="ui">Purchase Price</span> and <span class="ui">Selling Price</span>. <span class="ui">Weighted Average Price</span> is calculated by Karbar.</li>
+    <li>Optionally upload a product image, then save.</li>
+  </ol>
+  <h3>Upload many items at once (administrators)</h3>
+  <ol class="steps">
+    <li>Press <span class="mi">cloud_download</span> to download the Excel template.</li>
+    <li>Fill in one item per row. Rows without an item name or material number are skipped.</li>
+    <li>Press <span class="mi">upload</span> and pick the file (.xlsx, .xls or .csv). Karbar reports how many items it uploaded.</li>
+  </ol>
+  <h3>View prices</h3>
+  <p>Press <span class="mi">visibility</span> on an item to see its details. Prices are hidden: press <span class="ui">View Price Details</span> and enter your password to show MRP, selling, purchase and weighted average prices.</p>
+</section>
+
+<section id="parties">
+  <h2><span class="n">14</span>Suppliers and customers</h2>
+  <p class="where">Menu: <b>Supplier</b> or <b>Customer</b>.</p>
+  <p>Both screens work the same way. Press <span class="ui">Create Supplier</span> or <span class="ui">Create Customer</span> and fill in:</p>
+  <table>
+    <thead><tr><th>Field</th><th>Supplier</th><th>Customer</th></tr></thead>
+    <tbody>
+      <tr><td>Name</td><td>Required</td><td>Required</td></tr>
+      <tr><td>Contact number</td><td>Contact No 1 (required), Contact No 2</td><td>Contact No (required)</td></tr>
+      <tr><td>Email</td><td>Optional</td><td>–</td></tr>
+      <tr><td>Address</td><td>Required</td><td>Required</td></tr>
+      <tr><td>Status</td><td>Active / Inactive</td><td>Active / Inactive</td></tr>
+    </tbody>
+  </table>
+  <p>Phone numbers are 11 digits (for example 01712345678). Set a supplier or customer to <b>Inactive</b> to stop using them without losing their history. Both can also be added on the spot from the Purchase and Sales screens.</p>
+</section>
+
+<section id="users">
+  <h2><span class="n">15</span>Users</h2>
+  <p class="where">Menu: <b>Users</b>. Administrators only.</p>
+  <ol class="steps">
+    <li>Press <span class="ui">Create User</span>.</li>
+    <li>Enter <span class="ui">User Name</span>, <span class="ui">Address Line 1</span>, <span class="ui">Address Line 2</span> and <span class="ui">Phone Number</span>. The user signs in with this phone number.</li>
+    <li>Choose the <span class="ui">Role</span>. For dealers, enter their <span class="ui">SAP Code</span>.</li>
+    <li>Upload a <span class="ui">Logo</span> and <span class="ui">Signature</span>. These print on the user's sales invoices.</li>
+    <li>Set a <span class="ui">Password</span> and <span class="ui">Status</span>, then save.</li>
+  </ol>
+  <p>To give someone a new password, press <span class="mi">lock_outline</span> on their row, enter it twice and press <span class="ui">Reset Password</span>.</p>
+</section>
+
+<section id="settings">
+  <h2><span class="n">16</span>Settings</h2>
+  <p class="where">Menu: <b>Settings</b>. Each tab is a list with a Create button, edit and delete.</p>
+  <table>
+    <thead><tr><th>Tab</th><th>What it holds</th><th>Fields</th></tr></thead>
+    <tbody>
+      <tr><td>Role</td><td>User roles that control the menu</td><td>Role Name, Is Admin, Status</td></tr>
+      <tr><td>UOM</td><td>Units of measure such as Litre, Kg or Pcs</td><td>UOM Name (letters only), Status</td></tr>
+      <tr><td>Brand</td><td>Product brands</td><td>Brand Name, Status</td></tr>
+      <tr><td>WareHouse</td><td>Your stores and godowns</td><td>Warehouse Name, Location, Status</td></tr>
+      <tr><td>Category</td><td>Product categories, nested if needed</td><td>Category Name, Have parent?, Status</td></tr>
+      <tr><td>Bank Information</td><td>Your own bank accounts</td><td>Account Name, Account Number, Bank Name, Branch Name, Status</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>Set up first</b>Create warehouses, units, brands and categories before adding items. Items, purchases and sales all depend on them.</div>
+</section>
+
+<section id="reports" class="new-page">
+  <h2><span class="n">17</span>Reports</h2>
+  <p class="where">Menu: <b>Reports</b>, then pick a report.</p>
+  <p>Every report has the same controls at the top:</p>
+  <ul>
+    <li><b>From</b> and <b>To</b> dates set the period. <span class="mi">backspace</span> clears the filter.</li>
+    <li><span class="mi">download</span> saves the report as an Excel file.</li>
+    <li><span class="mi">refresh</span> reloads the latest data.</li>
+  </ul>
+  <p>Administrators can also choose a dealer to see that dealer's figures.</p>
+  <table>
+    <thead><tr><th>Report</th><th>Shows</th><th>Extra filters</th></tr></thead>
+    <tbody>
+      <tr><td>Stock Report</td><td>Quantity and value of every item in each warehouse, with MRP, selling, purchase and weighted average prices</td><td>Warehouse, brand, category, material number</td></tr>
+      <tr><td>Inventory Report</td><td>Opening stock, purchases, sales and closing stock per item</td><td>Item, dealer, brand, category</td></tr>
+      <tr><td>Top Sold Items</td><td>Best sellers ranked by quantity and sales value</td><td>Brand, category</td></tr>
+      <tr><td>Slow Moving</td><td>Slow-moving, non-moving and dead stock: days since last sale, sales over 30/60/90 days, suggested action</td><td>–</td></tr>
+      <tr><td>Stock Transfer</td><td>Moves between warehouses with reference number and remarks</td><td>–</td></tr>
+      <tr><td>Sales Report</td><td>Each invoice line: gross sales, discount, net sales, tax, VAT, salesperson, warehouse</td><td>Dealer, warehouse, brand, category, invoice number, material</td></tr>
+      <tr><td>Sales Return</td><td>Returned items, original invoice, return value and remarks</td><td>Invoice number or customer</td></tr>
+      <tr><td>Customer Receivable</td><td>Unpaid customer invoices with outstanding amount and age in days</td><td>Customer name or invoice number</td></tr>
+      <tr><td>Customer Statement</td><td>A customer's sales (debit), payments (credit) and running balance</td><td>Customer name or phone</td></tr>
+      <tr><td>Purchase Report</td><td>Each purchase line with gross, discount, net, tax, VAT and invoice total, plus period totals</td><td>Berger / Non Berger, dealer, warehouse, brand, category, invoice number, material code</td></tr>
+      <tr><td>Supplier Payable</td><td>What you still owe each supplier, by invoice</td><td>Supplier name, phone or invoice</td></tr>
+      <tr><td>Supplier Statement</td><td>A supplier's purchases (credit), payments (debit) and running balance</td><td>Supplier or receipt number</td></tr>
+      <tr><td>Profit/Loss</td><td>Income against costs for the period</td><td>–</td></tr>
+      <tr><td>Payment Collection</td><td>Money received or paid: receipt number, mode, who collected it, balance after</td><td>Customer or supplier, name or number</td></tr>
+      <tr><td>User Login History</td><td>When each user signed in and out, with invoice count and value (administrators only)</td><td>–</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="messages">
+  <h2><span class="n">18</span>Messages and fixes</h2>
+  <table>
+    <thead><tr><th>Message</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td>Phone Number or Password is incorrect</td><td>Check the number or email, or use Forgot Password?</td></tr>
+      <tr><td>Invoice number is required</td><td>Fill in Invoice No at the top of Purchase or Order.</td></tr>
+      <tr><td>WareHouse selection is required</td><td>Choose a warehouse before saving an order.</td></tr>
+      <tr><td>One or more items do not have sufficient stock in the selected warehouse</td><td>Lower the quantity, pick another warehouse, or shift stock first.</td></tr>
+      <tr><td>Please select a warehouse for all items before receiving</td><td>On Purchase Details, give every invoice line a warehouse.</td></tr>
+      <tr><td>Payment amount cannot exceed due amount</td><td>Enter no more than the Due Amount shown.</td></tr>
+      <tr><td>Please select a payment method and enter a valid amount</td><td>Choose how the money is paid and enter an amount above zero.</td></tr>
+      <tr><td>Please select at least one item for return</td><td>Tick the item lines being returned first.</td></tr>
+      <tr><td>Please enter remarks for the return</td><td>Write a reason in Remarks before submitting the return.</td></tr>
+      <tr><td>Contact already exists!</td><td>That phone number belongs to an existing customer. Search for them instead.</td></tr>
+      <tr><td>Please select category, brand, and unit of measure</td><td>Complete those three choices on the item form.</td></tr>
+      <tr><td>No data found to export</td><td>Widen the report dates or clear filters, then download again.</td></tr>
+    </tbody>
+  </table>
+  <p>Karbar is built and supported by Berger Tech Consulting Limited. For problems not listed here, contact your administrator.</p>
+</section>
+
+</body>
+</html>

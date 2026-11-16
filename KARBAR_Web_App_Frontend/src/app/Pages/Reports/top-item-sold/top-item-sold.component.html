@@ -1,0 +1,89 @@
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">Top Item Sold</h2>
+  </div>
+</div>
+
+<div class="header-card">
+  <div class="table-top">
+        <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+  <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+    </div>
+    <div>
+      <app-typeable-selection-dropdown [label]="'Choose Brand'" [placeholder]="'Type to search...'"
+        [options]="lstBrands" [displayProperty]="'name'" [valueProperty]="'id'" [selectedValue]="selectedBrandName"
+        [cssClass]="'category-dropdown'" (selectionChanged)="onBrandOptionSelected($event)"
+        (searchChanged)="onBrandSearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+
+    <div>
+      <app-typeable-selection-dropdown [label]="'Choose Category'" [placeholder]="'Type to search...'"
+        [options]="lstCategories" [displayProperty]="'name'" [valueProperty]="'id'"
+        [selectedValue]="selectedCategoryName" [cssClass]="'category-dropdown'"
+        (selectionChanged)="onCategoryOptionSelected($event)" (searchChanged)="onCategorySearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+
+<div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>
+<div>
+   <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button></div>
+      
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+        <table>
+  <thead>
+    <tr>
+      <th>Sl No</th>
+      <th>Item Code</th>
+      <th>Item Name</th>
+      <th>Brand</th>
+      <th>Total Quantity Sold</th>
+      <th>Total Sales Value</th>
+      <th>Rank</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (row of lstReport; track $index) {
+    <tr>
+      <td>{{ row.slNo }}</td>
+      <td>{{ row.itemCode }}</td>
+      <td>{{ row.itemName }}</td>
+      <td>{{ row.brand }}</td>
+      <td>{{ row.totalQuantitySold | number:'1.0-0' }}</td>
+      <td>{{ row.totalSalesValue | number:'1.2-2' }}</td>
+      <td>
+
+  @if (row.rank === 1) {
+   {{ row.rank }} <span class="gold-stars">★★★</span> 
+  } @else if (row.rank === 2) {
+   {{ row.rank }} <span class="silver-stars">★★</span> 
+  } @else if (row.rank === 3) {
+   {{ row.rank }} <span class="bronze-stars">★</span> 
+  } @else {
+    {{ row.rank }}
+  }
+</td>
+    </tr>
+    }
+  </tbody>
+</table>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

@@ -1,0 +1,578 @@
+.main-content {
+  // padding: 20px;
+}
+.table-top .table-search {
+    width: 50%;
+}
+.table-top{
+  display: flex;
+  justify-content: flex-start;
+}
+// .checkbox-wrapper{
+//   display: flex;
+//   gap:10px;
+// }
+/* Header card similar to Purchase page */
+.header-card {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+  // margin-left: 15px;
+  width: calc(100% - 30px);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.content{
+  overflow: auto;
+  // height: 500px;
+}
+.page-title {
+  color: #1B5673;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.edit-btn{
+  padding: 8px;
+  color: #0694C5;
+  border: 1px solid #0694C5;
+  background-color: transparent;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  // border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &:hover {
+    background: #1B5673;
+    color: white;
+  }
+  
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid #0694C5 !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(6, 148, 197, 0.2) !important;
+  }
+}
+
+.tabs-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stock-tabs {
+  ::ng-deep .mat-mdc-tab-header {
+    width: 460px;
+    display: inline-flex;
+    border-bottom: none;
+    // margin-left: 20px;
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    gap: 8px;
+    width: auto;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    min-width: auto;
+    padding: 0 24px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    margin-right: 0;
+
+    &:hover {
+      border-color: #0694C5;
+      background: #f8fafc;
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab.mdc-tab--active {
+    background: #0694C5;
+    border-color: #0694C5;
+
+    .mdc-tab__text-label {
+      color: #ffffff !important;
+    }
+  }
+
+  ::ng-deep .mdc-tab__text-label {
+    color: #1B5673;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0;
+    transition: color 0.3s ease;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-wrapper {
+    margin-top: 20px;
+  }
+
+  ::ng-deep .mat-mdc-tab-header-pagination {
+    display: none;
+  }
+
+  ::ng-deep .mdc-tab-indicator {
+    display: none;
+  }
+}
+
+// ...existing code...
+.inline-input {
+    width: 80px;
+    margin: 0 auto;
+//   width:20%;
+//   box-sizing: border-box;
+//   padding: 6px 8px;
+  padding: 2px;
+//   font-size: 15px;
+//   border: 1px solid #e2e8f0;
+//   border-radius: 6px;
+  background: #ffffff;
+}
+
+input:focus-visible {
+  outline: 1px solid rgb(245, 252, 255); /* 10% opacity */
+  border-color: rgba(74, 137, 168, 0.463);
+  border-radius: 4px;
+  outline-offset: 0px;
+}
+
+
+ // ...existing code...
+.purchase-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.purchase-row {
+  white-space: nowrap;
+  padding: 4px 8px;
+}
+
+// .purchase-row:not(:last-child) {
+//   border-bottom: 1px solid #ccc;
+// }
+
+.card{
+    display: flex;
+    gap: 20px;
+}
+.one{
+    flex: .8;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.two{
+    display: flex;
+    flex: .2;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.part-4{
+    flex: 1;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    // margin-left: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+.part-5{
+    flex: 1;
+    width: 100%;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    // margin-left: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* These preview lists only show up to 5 rows, so they don't need the
+   full-page table scroll height - a compact fixed height with its own
+   scroll (and the sticky header from styles.scss) is enough. */
+.part-4 .table__body,
+.part-5 .table__body {
+  height: auto;
+  // max-height: 220px;
+  min-height: 0;
+}
+div.mat-mdc-autocomplete-panel{
+  background-color : white;
+}
+.warehouse{
+    background-color: rgba(243, 186, 255, 0.34);
+}
+// ...existing code...
+
+/* Force remove tab header bottom line / shadow */
+::ng-deep .mat-mdc-tab-header,
+::ng-deep .mat-mdc-tab-label-container,
+::ng-deep .mdc-tab-bar {
+  border-bottom: none !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+/* Remove pseudo elements that draw the divider line */
+::ng-deep .mat-mdc-tab-header::before,
+::ng-deep .mat-mdc-tab-header::after,
+::ng-deep .mat-mdc-tab-label-container::before,
+::ng-deep .mat-mdc-tab-label-container::after,
+::ng-deep .mdc-tab-bar::before,
+::ng-deep .mdc-tab-bar::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* Hide the built‑in indicator if needed */
+::ng-deep .mdc-tab-indicator,
+::ng-deep .mat-mdc-tab-header .mat-mdc-tab-header-pagination {
+  display: none !important;
+}
+
+// .status-select {
+//   width: 100%;
+//   position: relative;
+// }
+.header-card {
+  background: white;
+  padding: 16px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 16px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title {
+  color: #1B5673;
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+.theme-button.add {
+  border-radius: 5px;
+  width: auto;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 30px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid #0694C5 !important;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(6, 148, 197, 0.2) !important;
+  }
+}
+
+// 
+
+// ...existing code...
+
+/* Row status colors */
+.table__body tr.warning-row td {
+  background: #fff8e1;            /* soft yellow */
+  border-left: 4px solid #ffb300; /* amber */
+  transition: background 160ms ease;
+}
+
+.table__body tr.danger-row td {
+  background: #ffebee;            /* soft red */
+  border-left: 4px solid #e53935; /* red */
+  transition: background 160ms ease;
+}
+
+/* keep columns stable while editing */
+.table__body table {
+  table-layout: fixed;
+}
+.table__body th, .table__body td {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline-input {
+  width: 80px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: inherit;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+}
+.table__body tr.warning-row td {
+  background: #fff8e1;            /* soft yellow */
+  border-left: 4px solid #ffb300; /* amber */
+  transition: background 160ms ease;
+}
+
+.table__body tr.danger-row td {
+  background: #ffebee;            /* soft red */
+  border-left: 4px solid #e53935; /* red */
+  transition: background 160ms ease;
+}
+.item-option {
+  display: flex;
+  flex-direction: row;
+  line-height: 1.3;
+  padding: 6px 0;
+  gap: 4px;
+}
+
+.item-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.wh-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 500;
+  background-color: #e8eaf6;
+  color: #3949ab;
+  white-space: nowrap;
+}
+
+.wh-chip.low-stock {
+  background-color: #fdecea;
+  color: #c62828;
+}
+
+::ng-deep .mat-mdc-autocomplete-panel {
+  background-color: #ffffff !important;
+}
+
+/* Older Angular Material versions (pre-15/MDC) */
+::ng-deep .mat-autocomplete-panel {
+  background-color: #ffffff !important;
+}
+/* keep columns stable while editing */
+.table__body table {
+  table-layout: fixed;
+}
+.table__body th, .table__body td {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.inline-input {
+  width: 80px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: inherit;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+}
+
+/* Modal overlay: full viewport and above all */
+.modal-overlay {
+  position: fixed !important;
+  inset: 0 !important; /* top:0; right:0; bottom:0; left:0; */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  z-index: 100000 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  pointer-events: auto !important;
+}
+
+/* Prevent parent's transform/overflow from clipping the overlay */
+.modal-overlay,
+.modal-container {
+  transform: none !important;
+}
+
+/* Modal box */
+.modal-container {
+  width: 100% !important;
+  max-width: 640px !important;
+  background: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25) !important;
+  overflow: hidden !important;
+  outline: none !important;
+}
+
+/* Modal content */
+.modal-content {
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+/* Full width form field inside modal */
+.modal-content .full-width {
+  width: 100% !important;
+}
+
+/* Buttons row */
+.modal-actions {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+}
+
+/* Small devices */
+@media (max-width: 480px) {
+  .modal-container {
+    max-width: 100% !important;
+    border-radius: 8px !important;
+    margin: 0 8px !important;
+  }
+}
+
+/* Modal - Stock Shift (scoped, high z-index, accessible) */
+.stock-modal-overlay,
+.modal-overlay { /* keep backwards compatibility with old class */
+  position: fixed !important;
+  inset: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(0, 0, 0, 0.45) !important;
+  z-index: 12000 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
+
+/* container */
+.stock-modal-container,
+.modal-container {
+  width: 100% !important;
+  max-width: 640px !important;
+  background: #ffffff !important;
+  border-radius: 10px !important;
+  box-shadow: 0 14px 40px rgba(2, 6, 23, 0.2) !important;
+  overflow: hidden !important;
+  transform: translateY(0);
+  transition: transform 180ms ease, opacity 180ms ease;
+  outline: none !important;
+}
+
+/* header */
+.stock-modal-header,
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  background: linear-gradient(90deg, #f8faf9, #ffffff);
+}
+.stock-modal-title {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 600;
+  color: #0694C5;
+}
+
+/* close button */
+.stock-close-btn,
+.close-btn {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* content */
+.stock-modal-content,
+.modal-content {
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: calc(100vh - 220px);
+  overflow: auto;
+}
+
+/* actions */
+.stock-modal-actions,
+.modal-actions {
+  padding: 12px 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid rgba(15, 23, 42, 0.04);
+  background: #fff;
+}
+
+/* inputs inside modal */
+.stock-modal-content .form-group .floating-label-group {
+  width: 100%;
+}
+.stock-modal-content .form-input,
+.stock-modal-content mat-form-field {
+  width: 100%;
+}
+
+/* small screens */
+@media (max-width: 520px) {
+  .stock-modal-container,
+  .modal-container {
+    max-width: calc(100% - 24px) !important;
+    border-radius: 8px !important;
+    margin: 0 8px !important;
+  }
+}
+
+/* accessibility: focus outline for keyboard users */
+.stock-modal-container:focus {
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.12) !important;
+}
+
+/* simple appear animation */
+.stock-modal-overlay[ng-reflect-ng-if='true'] .stock-modal-container {
+  transform: translateY(0);
+  opacity: 1;
+}

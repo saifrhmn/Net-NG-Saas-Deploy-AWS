@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logging\**" />
+    <EmbeddedResource Remove="Logging\**" />
+    <None Remove="Logging\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Karbar.Application\Karbar.Application.csproj" />
+    <ProjectReference Include="..\Karbar.Common\Karbar.Common.csproj" />
+    <ProjectReference Include="..\Karbar.Domain\Karbar.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.9">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="9.0.6" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.6" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.10" />
+  </ItemGroup>
+
+</Project>

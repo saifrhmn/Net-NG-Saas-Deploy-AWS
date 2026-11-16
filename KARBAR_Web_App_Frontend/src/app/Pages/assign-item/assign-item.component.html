@@ -1,0 +1,243 @@
+<div class="assign-page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Assign products</h1>
+      <p class="page-subtitle">
+        {{ totalBergerItems | number }} Berger items · select dealers, warehouse, then products
+      </p>
+    </div>
+    <!-- <div class="header-actions">
+      <button type="button" class="btn btn-outline" (click)="downloadTemplate()">
+        <mat-icon>download</mat-icon> Template
+      </button>
+      <button type="button" class="btn btn-primary" (click)="fileInput.click()">
+        <mat-icon>upload</mat-icon> Bulk Upload
+      </button>
+      <input #fileInput type="file" hidden accept=".xlsx,.xls,.csv" (change)="onFileUpload($event)" />
+    </div> -->
+  </div>
+
+  <!-- Filters -->
+  <div class="card filter-card">
+    <div class="filter-grid">
+      <div class="filter-field dealer-field">
+        <label>Dealer name (multiple)</label>
+        <mat-select class="filter-select" [(ngModel)]="selectedDealerIds" multiple
+          placeholder="Select dealers" panelClass="assign-select-panel" (selectionChange)="onDealerChange()"
+          (openedChange)="onSearchPanelToggle($event, dealerSearchInput, 'dealer')">
+          <mat-select-trigger>
+            <span class="chip" *ngFor="let id of selectedDealerIds.slice(0, 1)">
+              {{ nameOf(lstDealers, id) }}
+              <span class="chip-remove" (click)="removeDealer($event, id)">×</span>
+            </span>
+            <span class="chip chip-more" *ngIf="selectedDealerIds.length > 1">
+              +{{ selectedDealerIds.length - 1 }} more
+            </span>
+          </mat-select-trigger>
+          <!-- Type-to-search; keys are stopped so mat-select doesn't treat them as shortcuts -->
+          <div class="group-search" (click)="$event.stopPropagation()">
+            <mat-icon>search</mat-icon>
+            <input #dealerSearchInput type="text" placeholder="Search dealer or customer no"
+              [(ngModel)]="dealerSearch" (keydown)="$event.stopPropagation()" />
+            <mat-icon class="group-search-clear" *ngIf="dealerSearch"
+              (click)="dealerSearch = ''; dealerSearchInput.focus()">close</mat-icon>
+          </div>
+          <div class="group-search-empty" *ngIf="!visibleDealerCount">No dealer found</div>
+          <!-- Hidden (not removed) so selected dealers stay selected while filtering -->
+          <mat-option *ngFor="let dealer of lstDealers" [value]="dealer.id"
+            [class.option-hidden]="!matchesDealerSearch(dealer)">
+            <span class="group-option">
+              <!-- <span class="group-code" *ngIf="dealer.tenantCustomerNo">{{ dealer.tenantCustomerNo }}</span> -->
+              <!-- <span class="group-code" *ngIf="dealer.tenantCustomerNo">{{ dealer.tenantCustomerNo }}</span> -->
+              <span class="group-name">{{ dealer.name }}<ng-container *ngIf="dealer.tenantCustomerNo"> ({{ dealer.tenantCustomerNo }})</ng-container></span>
+            </span>
+          </mat-option>
+        </mat-select>
+      </div>
+
+
+      <div class="filter-field">
+        <label>Material group (multiple)</label>
+        <mat-select class="filter-select" [(ngModel)]="selectedGroupIds" multiple
+          placeholder="All groups" panelClass="assign-select-panel" (selectionChange)="onGroupChange()"
+          (openedChange)="onSearchPanelToggle($event, groupSearchInput, 'group')">
+          <mat-select-trigger>
+            <span class="chip" *ngFor="let code of selectedGroupIds.slice(0, 2)">
+              {{ groupName(code) }}
+              <span class="chip-remove" (click)="removeGroup($event, code)">×</span>
+            </span>
+            <span class="chip chip-more" *ngIf="selectedGroupIds.length > 2">
+              +{{ selectedGroupIds.length - 2 }} more
+            </span>
+          </mat-select-trigger>
+          <!-- Type-to-search; keys are stopped so mat-select doesn't treat them as shortcuts -->
+          <div class="group-search" (click)="$event.stopPropagation()">
+            <mat-icon>search</mat-icon>
+            <input #groupSearchInput type="text" placeholder="Search code or name"
+              [(ngModel)]="groupSearch" (keydown)="$event.stopPropagation()" />
+            <mat-icon class="group-search-clear" *ngIf="groupSearch"
+              (click)="groupSearch = ''; groupSearchInput.focus()">close</mat-icon>
+          </div>
+          <div class="group-search-empty" *ngIf="!visibleGroupCount">No material group found</div>
+          <!-- Hidden (not removed) so selected groups stay selected while filtering -->
+          <mat-option *ngFor="let group of lstMaterialGroups" [value]="group.materialGroup"
+            [class.option-hidden]="!matchesGroupSearch(group)">
+            <span class="group-option">
+              <span class="group-code">{{ group.materialGroup }}</span>
+              <span class="group-name">{{ group.materialGroupDescription }}</span>
+            </span>
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <div class="filter-field">
+        <label>Status</label>
+        <mat-select class="filter-select" [(ngModel)]="searchReq.status" panelClass="assign-select-panel"
+          (selectionChange)="onFilterChange()">
+          <mat-option [value]="undefined">All</mat-option>
+          <mat-option [value]="statusEnum.Active">Active</mat-option>
+          <mat-option [value]="statusEnum.Inactive">Inactive</mat-option>
+        </mat-select>
+      </div>
+
+      <div class="filter-field">
+        <label>Search</label>
+        <div class="search-box">
+          <mat-icon>search</mat-icon>
+          <input type="text" placeholder="Item" [(ngModel)]="searchReq.searchText" (input)="onSearch()" />
+        </div>
+      </div>
+
+      <div class="filter-field">
+        <label>Common items</label>
+        <label class="common-check" [class.checked]="isCommonItem" title="Select every common item">
+          <input type="checkbox" [(ngModel)]="isCommonItem" (change)="onCommonItemChange()" />
+          Common only
+        </label>
+      </div>
+    </div>
+    <!-- <div class="filter-hints">
+      <p class="filter-hint">
+        <mat-icon>info</mat-icon> Warehouses shown are linked to the selected dealers.
+      </p>
+      <p class="filter-hint">
+        <mat-icon>info</mat-icon> Choosing a material group auto-selects all its items.
+      </p>
+    </div> -->
+  </div>
+
+  <!-- Selection bar -->
+  <div class="selection-bar">
+    <div>
+      <div class="selection-count">
+        {{ selectedCount | number }} items selected
+        <span class="selection-loading" *ngIf="isSelectingGroups">
+          · selecting group items…
+          <ng-container *ngIf="expectedGroupItemCount">
+            {{ selectedCount | number }} of {{ expectedGroupItemCount | number }}
+          </ng-container>
+        </span>
+      </div>
+      <div class="selection-meta">
+        <ng-container *ngIf="isGroupMode">{{ selectedGroupIds.length }} groups · </ng-container>
+        {{ selectedDealerIds.length }} dealers · {{ selectedWarehouseIds.length }} warehouses
+        <ng-container *ngIf="isGroupMode"> · untick any item to exclude it</ng-container>
+      </div>
+    </div>
+    <div class="selection-actions">
+      <button type="button" class="btn btn-success-outline" [disabled]="isSaving" (click)="setSelectedStatus(true)">
+        Set Active
+      </button>
+      <button type="button" class="btn btn-muted-outline" [disabled]="isSaving" (click)="setSelectedStatus(false)">
+        Set Inactive
+      </button>
+      <button type="button" class="btn btn-accent" [disabled]="isSaving" (click)="assignSelected()">
+        Assign
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card table-card">
+    <div class="table__body">
+      <table class="assign-table">
+        <thead>
+          <tr>
+            <th class="col-check">
+              <input type="checkbox" [checked]="allPageSelected" [indeterminate]="somePageSelected"
+                (change)="toggleAllOnPage()" />
+            </th>
+            <th>Item</th>
+            <th>Material No</th>
+            <th>Material Group</th>
+            <th>Material Group Description</th>
+            <th>Status</th>
+            <th>Dealer Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lstItem" [class.selected]="isSelected(item)">
+            <td class="col-check">
+              <input type="checkbox" [checked]="isSelected(item)" (change)="toggleItem(item)" />
+            </td>
+            <td class="item-name">{{ item.materialDescription }}</td>
+            <td class="mono">{{ item.materialNumber }}</td>
+            <td class="mono">{{ item.materialGroup }}</td>
+            <td class="mono">{{ item.materialGroupDescription }}</td>
+
+            <td>
+              <button type="button" class="status-switch" role="switch"
+                [class.on]="item.status === statusEnum.Active"
+                [attr.aria-checked]="item.status === statusEnum.Active" [disabled]="isSaving"
+                (click)="toggleRowStatus(item, item.status !== statusEnum.Active)">
+                <span class="switch-track"><span class="switch-knob"></span></span>
+                <span class="status-label">
+                  {{ item.status === statusEnum.Active ? 'Active' : 'Inactive' }}
+                </span>
+              </button>
+            </td>
+
+            <!-- On/off for the selected dealer(s), from the dealer's own item list -->
+            <td>
+              @if (!selectedDealerIds.length) {
+                <span class="dealer-status-hint">Select a dealer</span>
+              } @else if (loadingDealerIds.size) {
+                <span class="dealer-status-hint">Loading…</span>
+              } @else {
+                <button type="button" class="status-switch dealer-switch" role="switch"
+                  [ngClass]="dealerStatus(item)"
+                  [attr.aria-checked]="dealerStatus(item) === 'on'" [disabled]="isSaving"
+                  [title]="dealerStatus(item) === 'on' ? 'Turn off for selected dealer(s)' : 'Turn on for selected dealer(s)'"
+                  (click)="toggleDealerStatus(item)">
+                  <span class="switch-track"><span class="switch-knob"></span></span>
+                  <span class="status-label">{{ dealerStatusLabel(item) }}</span>
+                </button>
+              }
+            </td>
+          </tr>
+          <!-- <tr *ngIf="!lstItem.length">
+            <td colspan="5" class="empty-row">No items found</td>
+          </tr> -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer / pagination -->
+  <div class="table-footer">
+    <span>
+      Showing {{ pageStart }}–{{ pageEnd }} of {{ totalItems | number }}
+      {{ isGroupMode ? 'in selected groups' : 'filtered' }} ·
+      {{ totalBergerItems | number }} total items
+    </span>
+    <div class="pager">
+      <button type="button" [disabled]="searchReq.pageIndex <= 1" (click)="changePage(-1)">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button type="button" [disabled]="!hasNextPage" (click)="changePage(1)">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

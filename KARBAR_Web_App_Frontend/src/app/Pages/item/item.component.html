@@ -1,0 +1,592 @@
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Item</h2>
+    <div class="search-wrapper">
+      <div class="search-container">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input type="text" name="table-search" id="table-search" placeholder="Item Code" class="search-input"
+          (keyup)="onSearch($event)" [(ngModel)]="searchText">
+        <button type="button" class="add-button" (click)="openCreateItem()" title="Add Item">
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Category Section -->
+<div class="category-section">
+  <div class="category-header">
+    <h3 class="category-title">Category</h3>
+
+    <div class="category-filter">
+      <!-- Brand -->
+      <app-typeable-selection-dropdown [label]="'Choose Brand'" [placeholder]="'Type to search...'"
+        [options]="lstBrands" [displayProperty]="'name'" [valueProperty]="'id'" [selectedValue]="selectedBrandName"
+        [cssClass]="'category-dropdown'" (selectionChanged)="onBrandOptionSelected($event)"
+        (searchChanged)="onBrandSearch($event)">
+      </app-typeable-selection-dropdown>
+      <button type="button" class="category-add-btn" (click)="openAddBrand()" title="Add Brand">
+        <mat-icon>add</mat-icon>
+      </button>
+      <!-- Category -->
+      <app-typeable-selection-dropdown [label]="'Choose Category'" [placeholder]="'Type to search...'"
+        [options]="lstCategories" [displayProperty]="'name'" [valueProperty]="'id'"
+        [selectedValue]="selectedCategoryName" [cssClass]="'category-dropdown'"
+        (selectionChanged)="onCategoryOptionSelected($event)" (searchChanged)="onCategorySearch($event)">
+      </app-typeable-selection-dropdown>
+      <button type="button" class="category-add-btn" (click)="openAddCategory()" title="Add Category">
+        <mat-icon>add</mat-icon>
+      </button>
+
+      @if(this.authenticatedUser?.roleId == 1 || this.authenticatedUser?.roleId == 2){
+      <!-- Download Excel Button -->
+      <button class="download-btn">
+        <a href="../../../assets/template/Item-Upload-bulk-files_standard 1.xlsx" download="" class="view-toggle-btn"
+          title="Download Template">
+          <mat-icon class="icon">cloud_download</mat-icon>
+        </a>
+      </button>
+
+
+      <!-- Upload Excel Button -->
+      <button type="button" class="view-toggle-btn" (click)="fileInput.click()" title="Upload Items from Excel">
+        <mat-icon>upload</mat-icon>
+      </button>
+      <input type="file" #fileInput (change)="onFileUpload($event)" accept=".xlsx,.xls,.csv" style="display: none;">
+      }
+
+
+
+      <!-- Refresh Button -->
+      <button type="button" class="view-toggle-btn" (click)="refreshItemlist()" title="Refresh Items">
+        <mat-icon>refresh</mat-icon>
+      </button>
+
+      <!-- View Toggle Button -->
+      <button type="button" class="view-toggle-btn" (click)="toggleView()"
+        [attr.title]="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'">
+        <mat-icon>{{ viewMode === 'grid' ? 'view_list' : 'grid_view' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="item-scroller">
+    <!-- Items Grid -->
+    <div class="items-grid" *ngIf="viewMode === 'grid'">
+      <div class="item-card" *ngFor="let item of lstItem">
+        <div class="item-image">
+          <img [src]="getItemImage(item)" [alt]="item.name">
+        </div>
+        <div class="item-info">
+          <div class="item-header">
+            <div class="item-price">৳ {{ item.mrp}}</div>
+            <div class="btn-group">
+              <!-- <button class="item-view-btn" (click)="openViewModal(item.id); $event.stopPropagation()" title="View Item">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="item-edit-btn" (click)="editItem(item); $event.stopPropagation()" title="Edit Item">
+              <mat-icon>edit</mat-icon>
+            </button> -->
+              <button class="item-view-btn" (click)="handleViewClick($event, item.id)" title="View Item">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button class="item-edit-btn" (click)="handleEditClick($event, item)" title="Edit Item">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="item-delete-btn" (click)="deleteItem(item); $event.stopPropagation()" title="Delete Item">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="item-name">{{ item.name || 'Berger Robbialac' }}</div>
+          <div class="mat-no">{{ item.materialNumber }}</div>
+          <!-- <div class="item-badges">
+          <span class="badge badge-a">A</span>
+          <span class="badge badge-b">B</span>
+          <span class="badge badge-c">C</span>
+        </div> -->
+          <div class="item-badges">
+            <ng-container *ngIf="item.warehousestk?.length; else totalCount">
+              <span class="badge" *ngFor="let w of getPerWarehouseStocks(item)" [class.empty]="w.qty === 0"
+                title="Warehouse {{ w.name || w.warehouseId }}: {{ w.qty }}"> {{ w.name || ('W-' + w.warehouseId) }}: {{
+                w.qty }} </span> </ng-container> <ng-template #totalCount> <span class="badge">Total: {{ item.totalCount
+                ?? 0 }}</span> </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List view -->
+    <div class="items-list" *ngIf="viewMode === 'list'">
+      <table class="items-list-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Item</th>
+            <th>Material Number</th>
+            <th>Category</th>
+            <th>Brand</th>
+            <th>UOM</th>
+            <th>MRP</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of lstItem" class="list-row">
+            <td class="list-image-cell">
+              <img [src]="getItemImage(item)" [alt]="item.name" class="list-thumb" />
+            </td>
+            <td>
+              <div class="list-name">{{ item.name }}</div>
+              <div class="list-desc">{{ item.itemDescription }}</div>
+            </td>
+            <td>{{ item.materialNumber }}</td>
+            <td>{{ item.categoryName }}</td>
+            <td>{{ item.brandName }}</td>
+            <td>{{ item.uomName }}</td>
+            <td>৳ {{ item.mrp }}</td>
+            <td class="list-actions">
+              <!-- <button class="item-view-btn" (click)="openViewModal(item.id); $event.stopPropagation()" title="View Item">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="item-edit-btn" (click)="editItem(item); $event.stopPropagation()" title="Edit Item">
+              <mat-icon>edit</mat-icon>
+            </button> -->
+
+              <button class="item-view-btn" (click)="handleViewClick($event, item.id)" title="View Item">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button class="item-edit-btn" (click)="handleEditClick($event, item)" title="Edit Item">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="item-delete-btn" (click)="deleteItem(item); $event.stopPropagation()" title="Delete Item">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Create Item Modal -->
+<div class="modal-overlay" *ngIf="showItemModal">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="modalTitle" class="modal-title">
+        <mat-icon>inventory_2</mat-icon>
+        <span>{{ isEditMode ? 'Edit Item' : 'Create New Item' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeItemModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="modal-grid">
+        <!-- Left Column - Form Fields -->
+        <div class="form-column">
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModel.name" placeholder=" "
+                required (input)="onItemNameInput(($any($event.target)).value)"
+                (focus)="onItemNameInput(searchModel.name)" (blur)="onItemNameBlur()"
+                (keydown.escape)="showItemNameSuggestions = false">
+              <label class="floating-label">Item Name</label>
+
+              <!-- Simple inline suggestions panel -->
+              <div class="autocomplete-panel" *ngIf="showItemNameSuggestions && itemNameSuggestions.length">
+                <button type="button" class="autocomplete-option" *ngFor="let name of itemNameSuggestions"
+                  (mousedown)="selectItemNameSuggestion(name)" [title]="name">
+                  {{ name }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Item Description -->
+          <div class="form-group">
+            <div class="floating-label-group">
+              <textarea #firstModalField class="form-input" [(ngModel)]="searchModel.itemDescription"
+                placeholder=" "></textarea>
+              <label class="floating-label">Item Description</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="text" class="form-input" [(ngModel)]="searchModel.materialNumber" placeholder=" " required
+                (input)="onMaterialNumberInput(($any($event.target)).value)"
+                (focus)="onMaterialNumberInput(searchModel.materialNumber)" (blur)="onMaterialNumberBlur()"
+                (keydown.escape)="showMatNoSuggestions = false">
+              <label class="floating-label">Material Number</label>
+            </div>
+
+            <div class="autocomplete-panel" *ngIf="showMatNoSuggestions && matNoSuggestions.length">
+              <button type="button" class="autocomplete-option" *ngFor="let name of matNoSuggestions"
+                (mousedown)="selectMatNoSuggestion(name)" [title]="name">
+                {{ name }}
+              </button>
+            </div>
+          </div>
+
+
+          <!-- Item Category -->
+          <div class="form-group">
+            <div class="mat-dropdown-with-add">
+              <app-typeable-selection-dropdown [label]="'Choose Brand'" [placeholder]="'Type to search...'"
+                [options]="lstBrands" [displayProperty]="'name'" [valueProperty]="'id'"
+                [selectedValue]="selectedBrandName" [cssClass]="'category-dropdown'"
+                (selectionChanged)="onBrandOptionSelected($event)" (searchChanged)="onBrandSearch($event)">
+              </app-typeable-selection-dropdown>
+              <button type="button" class="add-dropdown-btn" (click)="openAddBrand()" title="Add Brand">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="mat-dropdown-with-add">
+              <app-typeable-selection-dropdown [label]="'Choose Category'" [placeholder]="'Type to search...'"
+                [options]="lstCategories" [displayProperty]="'name'" [valueProperty]="'id'"
+                [selectedValue]="selectedCategoryName" [cssClass]="'category-dropdown'"
+                (selectionChanged)="onCategoryOptionSelected($event)">
+              </app-typeable-selection-dropdown>
+              <button type="button" class="add-dropdown-btn" (click)="openAddCategory()" title="Add Category">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+        
+          <!-- Unit -->
+          <div class="form-group">
+            <div class="mat-dropdown-with-add">
+              <mat-form-field appearance="outline" class="dropdown-field">
+                <mat-label>Unit</mat-label>
+                <mat-select [(ngModel)]="searchModel.uomId">
+                  <!-- <mat-option [value]="0" disabled>Select Unit</mat-option> -->
+                  <mat-option *ngFor="let unit of lstUnits" [value]="unit.id">
+                    {{ unit.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button type="button" class="add-dropdown-btn" (click)="openAddUnit()" title="Add Unit">
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
+          </div>
+
+
+          <!-- MRP -->
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="number" class="form-input" [(ngModel)]="searchModel.lowStock"
+                (focus)="searchModel.lowStock === 0 && (searchModel.lowStock = null)"
+                (blur)="!searchModel.lowStock && (searchModel.lowStock = 0)" placeholder=" " required min="0" step="1"
+                (keydown)="onNumericKeydown($event, 'lowStock')" (input)="onNumericInput('lowStock')"
+                (paste)="onNumericPaste($event, 'lowStock')" (wheel)="onNumericWheel($event)">
+              <label class="floating-label">Safety Stock</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="number" class="form-input" [(ngModel)]="searchModel.mrp"
+                (focus)="searchModel.mrp === 0 && (searchModel.mrp = null)"
+                (blur)="!searchModel.mrp && (searchModel.mrp = 0)" placeholder=" " required min="0" step="1"
+                (keydown)="onNumericKeydown($event, 'mrp')" (input)="onNumericInput('mrp')"
+                (paste)="onNumericPaste($event, 'mrp')" (wheel)="onNumericWheel($event)">
+              <label class="floating-label">MRP</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="number" class="form-input" [(ngModel)]="searchModel.purchasePrice"
+                (focus)="searchModel.purchasePrice === 0 && (searchModel.purchasePrice = null)"
+                (blur)="!searchModel.purchasePrice && (searchModel.purchasePrice = 0)" placeholder=" " required min="0"
+                step="1" (keydown)="onNumericKeydown($event, 'purchasePrice')" (input)="onNumericInput('purchasePrice')"
+                (paste)="onNumericPaste($event, 'purchasePrice')" (wheel)="onNumericWheel($event)">
+              <label class="floating-label">Purchase Price</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="number" class="form-input" [(ngModel)]="searchModel.sellingPrice"
+                (focus)="searchModel.sellingPrice === 0 && (searchModel.sellingPrice = null)"
+                (blur)="!searchModel.sellingPrice && (searchModel.sellingPrice = 0)" placeholder=" " required min="0"
+                step="1" (keydown)="onNumericKeydown($event, 'sellingPrice')" (input)="onNumericInput('sellingPrice')"
+                (paste)="onNumericPaste($event, 'sellingPrice')" (wheel)="onNumericWheel($event)">
+              <label class="floating-label">Selling Price</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <div class="floating-label-group">
+              <input type="number" class="form-input" [(ngModel)]="searchModel.weightedAveragePrice" placeholder=" " readonly>
+              <label class="floating-label">Weighted Average Price</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Image Upload -->
+        <div class="image-column">
+          <div class="image-upload-container">
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" style="display: none;"
+              [(ngModel)]="searchModel.imageBase64">
+            <div class="image-preview clickable" (click)="fileInput.click()" *ngIf="!imagePreview">
+              <mat-icon class="upload-icon">file_upload</mat-icon>
+              <p class="upload-text">Upload Product Image</p>
+            </div>
+            <div class="image-preview clickable" (click)="fileInput.click()" *ngIf="imagePreview">
+              <img [src]="imagePreview" alt="Product Image">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="create-btn" (click)="createItem(searchModel)">
+        <mat-icon>{{ isEditMode ? 'edit' : 'check' }}</mat-icon>
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showUOMModal" (click)="closeUOMModal()">
+  <div class="modal-container small-modal" role="dialog" aria-modal="true" aria-labelledby="uomModalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="uomModalTitle" class="modal-title">
+        <mat-icon>inventory_2</mat-icon>
+        <span>{{ isEditUOMModel ? 'Edit UOM' : 'Create New UOM' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeUOMModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModelSettings.name" placeholder=" "
+            required>
+          <label class="floating-label">UOM Name</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="searchModelSettings.status">
+            <mat-option [value]="1">Active</mat-option>
+            <mat-option [value]="0">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeUOMModal()">Cancel</button>
+      <button class="create-btn" (click)="createUOM(searchModelSettings)"><mat-icon>{{ isEditUOMModel ? 'save' : 'add'
+          }}</mat-icon>{{ isEditUOMModel ? 'Update' : 'Create' }}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showBrandModal" (click)="closeBrandModal()">
+  <div class="modal-container small-modal" role="dialog" aria-modal="true" aria-labelledby="brandModalTitle"
+    tabindex="-1" (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="brandModalTitle" class="modal-title">
+        <mat-icon>branding_watermark</mat-icon>
+        <span>{{ isEditBrandMode ? 'Edit Brand' : 'Create New Brand' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeBrandModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModelSettings.name" placeholder=" "
+            required>
+          <label class="floating-label">Brand Name</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="searchModelSettings.status">
+            <mat-option [value]="1">Active</mat-option>
+            <mat-option [value]="0">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeBrandModal()">Cancel</button>
+      <button class="create-btn" (click)="createBrand(searchModelSettings)"><mat-icon>{{ isEditBrandMode ? 'save' :
+          'add' }}</mat-icon>{{ isEditBrandMode ? 'Update' : 'Create' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div class="modal-overlay" *ngIf="showCategoryModal" (click)="closeCategoryModal()">
+  <div class="modal-container small-modal" role="dialog" aria-modal="true" aria-labelledby="categoryModalTitle"
+    tabindex="-1" (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="categoryModalTitle" class="modal-title">
+        <mat-icon>category</mat-icon>
+        <span>{{ isEditCategoryMode ? 'Edit Category' : 'Create New Category' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeCategoryModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModelSettings.name" required>
+          <label class="floating-label">Category Name</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="checkbox-wrapper">
+          <input type="checkbox" id="haveParent" [(ngModel)]="hasParentCategory">
+          <label for="haveParent" class="checkbox-label">Have parent?</label>
+        </div>
+      </div>
+      <div class="form-group" *ngIf="hasParentCategory">
+        <mat-form-field appearance="outline" class="category-select">
+          <mat-select [(ngModel)]="searchModelSettings.parentCategoryId" placeholder="Select Parent Category">
+            <!-- <mat-option [value]="null">Select Parent Category</mat-option> -->
+            <mat-option *ngFor="let category of lstCategories" [value]="category.categoryId">
+              {{ category.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="searchModelSettings.status">
+            <mat-option [value]="1">Active</mat-option>
+            <mat-option [value]="0">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeCategoryModal()">Cancel</button>
+      <button class="create-btn" (click)="createCategory(searchModelSettings)"><mat-icon>{{ isEditCategoryMode ?
+          'save' : 'add' }}</mat-icon>{{ isEditCategoryMode ? 'Update' : 'Create' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Item Modal -->
+<div class="modal-overlay" *ngIf="showViewModal" (click)="closeViewModal()">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="whModalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="whModalTitle" class="modal-title">
+        <mat-icon>inventory_2</mat-icon>
+        <span>Item Details</span>
+      </div>
+      <button mat-icon-button (click)="closeViewModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-content">
+      <div class="view-modal-1st-part">
+        <div class="view-details-col">
+          <h3 class="view-title">{{viewItem.name}}</h3>
+          <div class="view-badge">
+            <mat-chip>{{viewItem.brandName}}</mat-chip>
+            <mat-chip>{{viewItem.categoryName}}</mat-chip>
+            <mat-chip>{{viewItem.uomName}}</mat-chip>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title"><mat-icon>info</mat-icon> Product Information</div>
+            <div class="info-row">
+              <span class="info-label">Brand</span>
+              <span class="info-colon">:</span>
+              <span class="info-value">{{viewItem.brandName}}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Category</span>
+              <span class="info-colon">:</span>
+              <span class="info-value">{{viewItem.categoryName}}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Unit</span>
+              <span class="info-colon">:</span>
+              <span class="info-value">{{viewItem.uomName}}</span>
+            </div>
+          </div>
+
+          <hr class="info-divider">
+
+          <button type="button" class="price-reveal-card" (click)="togglePrice($event)">
+            <mat-icon class="price-reveal-icon">{{ showPriceInfo ? 'lock_open' : 'lock' }}</mat-icon>
+            <span class="price-reveal-text">
+              <span class="price-reveal-title">{{ showPriceInfo ? 'Price Details' : 'View Price Details' }}</span>
+              <span class="price-reveal-subtitle" *ngIf="!showPriceInfo">Authorized access required</span>
+            </span>
+            <mat-icon class="price-reveal-chevron">{{ showPriceInfo ? 'expand_more' : 'chevron_right' }}</mat-icon>
+          </button>
+
+          <!-- keep in DOM and toggle .open for smooth transition -->
+          <div class="price" [class.open]="showPriceInfo" [attr.aria-hidden]="!showPriceInfo"
+            [style.pointer-events]="showPriceInfo ? 'auto' : 'none'">
+            <mat-chip>MRP : {{viewItem.mrp}}</mat-chip>
+            <mat-chip>Selling Price : {{viewItem.sellingPrice}}</mat-chip>
+            <mat-chip>Purchase Price : {{viewItem.purchasePrice}}</mat-chip>
+            <mat-chip>Weighted Average Price : {{viewItem.weightedAveragePrice}}</mat-chip>
+          </div>
+
+          <div class="price-restricted-note" *ngIf="!showPriceInfo">
+            <mat-icon>lock</mat-icon>
+            <span>Prices are restricted</span>
+          </div>
+        </div>
+
+        <div class="item-container">
+          <img [src]="viewItem?.imageUrl || imagePreview || 'assets/img/berger-pack-img.png'"
+            (error)="handleImageError($event)" [alt]="viewItem?.name || 'Default image'">
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Price Password Modal -->
+<div class="modal-overlay" *ngIf="showPricePasswordModal" (click)="closePricePasswordModal()">
+  <div class="modal-container small-modal" role="dialog" aria-modal="true" aria-labelledby="pricePasswordModalTitle"
+    tabindex="-1" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div id="pricePasswordModalTitle" class="modal-title">
+        <mat-icon>lock</mat-icon>
+        <span>Enter Password</span>
+      </div>
+      <button mat-icon-button (click)="closePricePasswordModal()" class="close-btn"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="password" class="form-input" [(ngModel)]="pricePasswordInput"
+            (keydown.enter)="confirmPricePassword()" placeholder=" " autocomplete="current-password">
+          <label class="floating-label">Password</label>
+        </div>
+        <p *ngIf="pricePasswordError" style="color: red;">{{ pricePasswordError }}</p>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closePricePasswordModal()">Cancel</button>
+      <button class="create-btn" [disabled]="verifyingPricePassword" (click)="confirmPricePassword()">
+        <mat-icon>lock_open</mat-icon>{{ verifyingPricePassword ? 'Verifying...' : 'Confirm' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Paginator -->
+<mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+  (page)="onPageChange($event)">
+</mat-paginator>

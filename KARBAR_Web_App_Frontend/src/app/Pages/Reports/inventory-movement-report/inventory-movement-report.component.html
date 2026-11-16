@@ -1,0 +1,107 @@
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Inventory Movement Report</h2>
+  </div>
+</div>
+
+<div class="header-card">
+  <div class="table-top">
+    <div class="material-filter">
+      <mat-form-field appearance="outline" class="material-search">
+        <mat-label>Search</mat-label>
+
+        <input matInput [(ngModel)]="searchReq.ItemName" (ngModelChange)="onFilter()" placeholder="Item search..." />
+
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+<div >
+  <mat-checkbox color="primary" class="include-zero-stock-checkbox" [(ngModel)]="includeZeroStock"
+    (ngModelChange)="onIncludeZeroToggle($event)">
+    Do not include 0
+  </mat-checkbox>
+</div>
+    <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+      <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+      <!-- <button type="button" class="theme-button" (click)="clearFilter()">Clear</button> -->
+    </div>
+    @if(authenticatedUser?.roleId != 3 && authenticatedUser?.roleId != 4){
+    <div>
+      <mat-form-field appearance="outline" class="category-dropdown">
+        <mat-select placeholder="Choose Dealer" [(ngModel)]="selectedDealer"
+          (selectionChange)="onDealerChange($event.value)">
+          <mat-option *ngFor="let dealer of lstDealers" [value]="dealer.id">
+            {{ dealer.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    }
+
+    <div>
+      <app-typeable-selection-dropdown [label]="'Choose Brand'" [placeholder]="'Type to search...'"
+        [options]="lstBrands" [displayProperty]="'name'" [valueProperty]="'id'" [selectedValue]="selectedBrandName"
+        [cssClass]="'category-dropdown'" (selectionChanged)="onBrandOptionSelected($event)"
+        (searchChanged)="onBrandSearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+
+    <div>
+      <app-typeable-selection-dropdown [label]="'Choose Category'" [placeholder]="'Type to search...'"
+        [options]="lstCategories" [displayProperty]="'name'" [valueProperty]="'id'"
+        [selectedValue]="selectedCategoryName" [cssClass]="'category-dropdown'"
+        (selectionChanged)="onCategoryOptionSelected($event)" (searchChanged)="onCategorySearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+
+
+    <div>
+      <button type="button" class="download-button" (click)="onExportAllExcel()">
+        <mat-icon>download</mat-icon>
+      </button>
+    </div>
+    <div>
+      <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>SI No</th>
+          <th>Material Code</th>
+          <th>Material Name</th>
+          <th>Opening Stock Quantity</th>
+          <th>Purchase Qty</th>
+          <th>Sales Qty</th>
+          <th>Closing Stock Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of lstStock; track $index) {
+        <tr>
+          <td>{{ (searchReq.pageIndex - 1) * searchReq.pageSize + $index + 1 }}</td>
+          <td>{{row.materialCode}}</td>
+          <td>{{row.materialName}}</td>
+          <td>{{row.openingStockQty}}</td>
+          <td>{{row.receivedQty}}</td>
+          <td>{{row.salesQty}}</td>
+          <td>{{row.closingStockQty}}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>

@@ -1,0 +1,10 @@
+<mat-form-field [class]="class" [id]="id" appearance="outline">
+  <mat-label>{{label}}</mat-label>
+  <input #input="ngModel" matInput [name]="name" [type]="type" [placeholder]="placeholder" [required]="required"
+    [disabled]="disabled" [readonly]="readonly" [(ngModel)]="value" (ngModelChange)="onInputChange($event)"
+    [autocomplete]="autocomplete" />
+
+  @if (input.invalid && input.touched) {
+  <mat-error>{{errorMessage}}</mat-error>
+  }
+</mat-form-field>

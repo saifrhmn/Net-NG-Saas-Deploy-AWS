@@ -1,0 +1,110 @@
+<div class="header-div-card ">
+    <div class="header-content">
+        <h2 class="page-title">Sales Return Report</h2>
+    </div>
+</div>
+
+<div class="header-card">
+    <div class="table-top">
+        <div class="material-filter">
+            <mat-form-field appearance="outline" class="material-search">
+                <mat-label>Invoice no/Customer Name..</mat-label>
+
+                <input matInput [(ngModel)]="searchReq.searchText" (ngModelChange)="onFilter()"
+                    placeholder="search..." />
+
+                <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+        </div>
+        <div class="table-filters">
+            <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+            <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+            <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+
+        </div>
+
+        <div>
+            <button type="button" class="download-button" (click)="onExportAllExcel()">
+                <mat-icon>download</mat-icon>
+            </button>
+        </div>
+        <div>
+            <button type="button" class="download-button" (click)="refreshItemlist()">
+                <mat-icon>refresh</mat-icon>
+            </button>
+        </div>
+
+    </div>
+    <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+        <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+        <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+    </div>
+    <div class="table__body" *ngIf="!isLoading">
+        <table>
+    <thead>
+        <tr>
+            <th>Sl No.</th>
+            <th>Return Date</th>
+            <th>Return No</th>
+            <th>Original Invoice No</th>
+            <th>Customer Name</th>
+            <th>Customer Phone</th>
+            <th>Item Name</th>
+            <th>Warehouse</th>
+            <th>Qty Return</th>
+            <th>Unit Price</th>
+            <th>Return Value</th>
+            <th>Payment Method</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @for (row of lstReport; track row.id; let i = $index) {
+
+            <!-- One serial per return; its item rows share the merged return cells -->
+            @for (detail of row.returnOrderDetails; track detail.id; let first = $first; let count = $count) {
+
+                <tr>
+                    @if (first) {
+                    <!-- Continues across pages: page 2 starts at pageSize + 1 -->
+                    <td [attr.rowspan]="count">{{ (searchReq.pageIndex - 1) * searchReq.pageSize + i + 1 }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.salesDate | date:'dd-MMM-yy' }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.returnOrderId }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.salesInvoiceNo }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.customerName }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.customerPhone }}</td>
+                    }
+
+                    <td>{{ detail.itemName }}</td>
+
+                    <td>{{ detail.warehouseName }}</td>
+
+                    <td>{{ detail.quantity }}</td>
+
+                    <td>{{ detail.unitPrice | number:'1.2-2' }}</td>
+
+                    <td>{{ detail.totalAmount | number:'1.2-2' }}</td>
+
+                    @if (first) {
+                    <td [attr.rowspan]="count">{{ row.paymentMethod }}</td>
+
+                    <td [attr.rowspan]="count">{{ row.remarks }}</td>
+                    }
+                </tr>
+
+            }
+
+        }
+    </tbody>
+</table>
+    </div>
+    <mat-paginator [length]="totalItems" [pageIndex]="searchReq.pageIndex - 1" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+        (page)="onPageChange($event)">
+    </mat-paginator>
+</div>

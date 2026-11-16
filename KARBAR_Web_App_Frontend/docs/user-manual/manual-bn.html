@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<title>বার্জার কারবার ব্যবহার নির্দেশিকা</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Noto+Sans:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="manual.css">
+<style>
+  @page { @bottom-left { content: "বার্জার কারবার · ব্যবহার নির্দেশিকা (বাংলা)"; font-family: "Nirmala UI", "Segoe UI", sans-serif; } @bottom-right { content: counter(page) " / " counter(pages); } }
+  body { font-family: "Noto Sans Bengali", "Nirmala UI", "Noto Sans", sans-serif; }
+  h1, h2, .cover .kicker, .toc .part, .note b:first-child { font-family: "Noto Sans Bengali", "Nirmala UI", sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
+  .steps > li::before { content: counter(s, bengali); font-family: "Noto Sans Bengali", "Nirmala UI", sans-serif; line-height: 20px; }
+  .toc li span, h2 .n { font-family: "Noto Sans Bengali", "Nirmala UI", sans-serif; }
+  .note b:first-child { font-size: 9.5pt; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="logo"><img src="../../src/assets/img/Karbar_Logo.png" alt="Berger Karbar"></div>
+  <div class="kicker">ব্যবহার নির্দেশিকা · বাংলা</div>
+  <h1>বার্জার কারবার</h1>
+  <p class="sub">বিক্রয়, ক্রয়, বার্জার থেকে অর্ডার, স্টক ব্যবস্থাপনা, বকেয়া আদায় ও রিপোর্ট দেখার ধাপে ধাপে নির্দেশিকা।</p>
+  <div class="foot">
+    <span>Powered by Berger Tech Consulting Limited</span>
+    <img src="../../src/assets/img/BTCL-logo.png" alt="BTCL">
+  </div>
+</div>
+
+<div class="toc">
+  <h2>সূচিপত্র</h2>
+  <ol>
+    <li class="part">শুরু করুন</li>
+    <li><span>১</span><a href="#login">লগইন করা</a></li>
+    <li><span>২</span><a href="#layout">স্ক্রিন চেনা</a></li>
+    <li><span>৩</span><a href="#roles">আপনার রোল কী দেখতে পায়</a></li>
+    <li><span>৪</span><a href="#dashboard">ড্যাশবোর্ড</a></li>
+    <li class="part">প্রতিদিনের কাজ</li>
+    <li><span>৫</span><a href="#sales">বিক্রয় (Sales)</a></li>
+    <li><span>৬</span><a href="#returns">বিক্রয় ফেরত</a></li>
+    <li><span>৭</span><a href="#purchase">ক্রয় (Purchase)</a></li>
+    <li><span>৮</span><a href="#sap">বার্জার SAP ইনভয়েস</a></li>
+    <li><span>৯</span><a href="#order">বার্জার থেকে অর্ডার</a></li>
+    <li><span>১০</span><a href="#payment">পেমেন্ট ও বকেয়া</a></li>
+    <li><span>১১</span><a href="#expense">খরচ</a></li>
+    <li class="part">ইনভেন্টরি</li>
+    <li><span>১২</span><a href="#stock">স্টক ম্যানেজমেন্ট</a></li>
+    <li><span>১৩</span><a href="#item">আইটেম</a></li>
+    <li class="part">সেটআপ</li>
+    <li><span>১৪</span><a href="#parties">সাপ্লায়ার ও কাস্টমার</a></li>
+    <li><span>১৫</span><a href="#users">ইউজার</a></li>
+    <li><span>১৬</span><a href="#settings">সেটিংস</a></li>
+    <li class="part">রেফারেন্স</li>
+    <li><span>১৭</span><a href="#reports">রিপোর্ট</a></li>
+    <li><span>১৮</span><a href="#messages">মেসেজ ও সমাধান</a></li>
+  </ol>
+  <div class="note" style="margin-top:14mm"><b>এই নির্দেশিকা কীভাবে পড়বেন</b><span class="ui">নীল বক্সের</span> লেখাগুলো হুবহু স্ক্রিনে যেমন দেখায় তেমনই রাখা হয়েছে: মেনু, বাটন ও ঘরের নাম। <span class="mi">edit</span> এর মতো আইকনগুলো কারবারে যেমন দেখায় এখানেও তেমন দেখানো হয়েছে। সব টাকার পরিমাণ টাকায় (৳)।</div>
+</div>
+
+<section id="login">
+  <h2><span class="n">১</span>লগইন করা</h2>
+  <p class="where">লগইন না থাকলে এই স্ক্রিন নিজে থেকেই খুলবে।</p>
+  <ol class="steps">
+    <li><span class="ui">Phone Number Or Email</span> ও <span class="ui">Password</span> লিখুন। টাইপ করার সময় পাসওয়ার্ড দেখতে <span class="mi">visibility</span> চাপুন।</li>
+    <li><span class="ui">Login</span> চাপুন। তথ্য যাচাইয়ের সময় বাটনে <em>Loading…</em> দেখাবে, তারপর ড্যাশবোর্ড খুলবে।</li>
+  </ol>
+  <p>তথ্য ভুল হলে পাসওয়ার্ড বক্সের নিচে <em>*** Phone Number or Password is incorrect</em> দেখাবে।</p>
+  <h3>পাসওয়ার্ড ভুলে গেলে</h3>
+  <ol class="steps">
+    <li>পাসওয়ার্ড বক্সের নিচে <span class="ui">Forgot Password?</span> চাপুন।</li>
+    <li>আপনার <span class="ui">Phone Number</span>, একটি <span class="ui">New Password</span> এবং <span class="ui">Confirm Password</span> ঘরে আবার একই পাসওয়ার্ড লিখুন।</li>
+    <li><span class="ui">Reset Password</span> চাপুন। দুটি পাসওয়ার্ড না মেলা পর্যন্ত বাটনটি কাজ করবে না।</li>
+  </ol>
+  <div class="note"><b>সেশন</b>সেশনের মেয়াদ শেষ হলে কারবার আপনাকে লগআউট করে দেবে। আবার লগইন করে কাজ চালিয়ে যান; খোলা স্ক্রিনে যা সেভ করা হয়নি তা আবার লিখতে হবে।</div>
+</section>
+
+<section id="layout">
+  <h2><span class="n">২</span>স্ক্রিন চেনা</h2>
+  <ul>
+    <li><b>বাম পাশের মেনু।</b> সব স্ক্রিন এখান থেকে খোলে। উপরে বাম কোণের <span class="mi">menu</span> বাটন মেনুকে ছোট (শুধু আইকন) বা আবার বড় করে। আইকনের উপর মাউস রাখলে নাম দেখা যায়। মোবাইলে মেনু বাম দিক থেকে বেরিয়ে আসে।</li>
+    <li><b>রিপোর্ট।</b> <span class="ui">Reports</span> চাপলে নিচে সব রিপোর্টের তালিকা খুলবে।</li>
+    <li><b>আপনার নাম</b> উপরে ডান কোণে থাকে। সেখানে চেপে <span class="ui">Logout</span> বেছে নিলে লগআউট হবে। বাম মেনুর একদম নিচেও <span class="ui">Logout</span> আছে।</li>
+    <li><b>ট্যাব।</b> Sales, Purchase, Order ও Settings স্ক্রিনে কাজগুলো উপরের ট্যাবে ভাগ করা, যেমন <span class="ui">New Sales</span> ও <span class="ui">Completed Sales</span>।</li>
+    <li><b>তালিকার</b> উপরে সার্চ বক্স আর নিচে পেজ বদলানোর বাটন থাকে। প্রতি পেজে ১০, ২৫, ৫০ বা ১০০ সারি দেখাতে পারেন।</li>
+    <li><b>তালিকার আইকন।</b> <span class="mi">border_color</span> বা <span class="mi">edit</span> দিয়ে তথ্য বদলান, <span class="mi">delete</span> দিয়ে মুছুন, <span class="mi">visibility</span> দিয়ে শুধু দেখুন।</li>
+    <li><b>মেসেজ</b> সেভ করার পরে বা কোনো ভুল থাকলে স্ক্রিনের কোণে কিছুক্ষণের জন্য দেখায়।</li>
+  </ul>
+</section>
+
+<section id="roles">
+  <h2><span class="n">৩</span>আপনার রোল কী দেখতে পায়</h2>
+  <p>বাম মেনুতে শুধু সেই স্ক্রিনগুলোই দেখায় যেগুলো আপনার রোলের জন্য অনুমোদিত। ইউজার তৈরির সময় অ্যাডমিন আপনার রোল ঠিক করে দেন। রোলের নাম Settings → Role এ ঠিক করা হয়, তাই আপনার সিস্টেমে নামগুলো নিচের শিরোনাম থেকে ভিন্ন হতে পারে।</p>
+  <table>
+    <thead><tr><th>স্ক্রিন</th><th>অ্যাডমিন</th><th>ডিলার</th><th>দোকানের কর্মী</th><th>বার্জার SCM অ্যাডমিন</th></tr></thead>
+    <tbody>
+      <tr><td>Dashboard</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Order, Purchase, Sales, Stock Management</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">–</td></tr>
+      <tr><td>Expense, Supplier, Customer, Settings, Item, Payment</td><td class="yes">✓</td><td class="yes">✓</td><td class="no">–</td><td class="no">–</td></tr>
+      <tr><td>Users</td><td class="yes">✓</td><td class="no">–</td><td class="no">–</td><td class="no">–</td></tr>
+      <tr><td>Reports</td><td class="yes">সব</td><td class="c">User Login History ছাড়া সব</td><td class="no">–</td><td class="c">Sales, Purchase, Inventory</td></tr>
+    </tbody>
+  </table>
+  <p>অ্যাডমিনরা কিছু বাড়তি সুবিধা পান: বার্জার অর্ডারের স্ট্যাটাস বদলানো, Excel থেকে আইটেম আপলোড এবং রিপোর্টে ডিলার বেছে নেওয়া।</p>
+</section>
+
+<section id="dashboard">
+  <h2><span class="n">৪</span>ড্যাশবোর্ড</h2>
+  <p class="where">মেনু: <b>Dashboard</b>। লগইনের পরে প্রথমে এটিই খোলে।</p>
+  <ul>
+    <li><b>আজকের হিসাব:</b> <span class="ui">Today's Sale</span> (আজকের বিক্রয়), <span class="ui">Today's Customer Due</span> (কাস্টমারের বকেয়া), <span class="ui">Today's Berger Purchase</span> ও <span class="ui">Today's Non Berger Purchase</span>।</li>
+    <li><b>List of Receivable:</b> যেসব কাস্টমারের কাছে টাকা পাওনা, পরিমাণ ও মাসসহ।</li>
+    <li><b>খরচের চার্ট:</b> <span class="ui">Today</span>, <span class="ui">7 days</span> বা <span class="ui">30 days</span> চেপে খরচ তুলনা করুন। সঠিক পরিমাণ দেখতে বিন্দুর উপর মাউস রাখুন।</li>
+    <li><b>Low Stock:</b> যেসব আইটেম কমে আসছে, প্রতিটি গুদামের বর্তমান স্টকসহ। Order বা Purchase থেকে আবার আনান।</li>
+    <li><b>User Manual:</b> এই নির্দেশিকা যেকোনো সময় ইংরেজি বা বাংলায় ডাউনলোড করুন।</li>
+  </ul>
+</section>
+
+<section id="sales">
+  <h2><span class="n">৫</span>বিক্রয় (Sales)</h2>
+  <p class="where">মেনু: <b>Sales</b>। ট্যাব: <b>New Sales</b>, <b>Draft</b>, <b>Completed Sales</b>, <b>Sales Return</b>।</p>
+  <div class="flow">
+    <span class="box">New Sales</span><span class="arr">→</span>
+    <span class="box">Save → ইনভয়েস দেখুন</span><span class="arr">→</span>
+    <span class="box">Submit &amp; Print অথবা Draft</span><span class="arr">→</span>
+    <span class="box">Completed Sales</span><span class="arr">→</span>
+    <span class="box">প্রয়োজনে ফেরত</span>
+  </div>
+  <h3>বিক্রয় করুন</h3>
+  <ol class="steps">
+    <li><span class="ui">New Sales</span> ট্যাবে উপরের <span class="ui">Invoice No</span> দেখুন। নিজে থেকে তৈরি হতে দিন, নিজের নম্বর লিখুন, অথবা নতুন নম্বর পেতে <span class="mi">sync</span> চাপুন। বিক্রয় আজ না হলে <span class="ui">Date</span> বদলে দিন।</li>
+    <li><span class="ui">Customer</span> ঘরে নাম, ফোন নম্বর বা ঠিকানা লিখে কাস্টমার বেছে নিন। নতুন কাস্টমার হলে <span class="mi">add</span> চেপে <span class="ui">Customer Name</span>, <span class="ui">Contact No</span> ও <span class="ui">Address</span> লিখে সেভ করুন। ফোন নম্বরটি আগে থেকে থাকলে <em>Contact already exists!</em> সতর্কবার্তা দেখাবে।</li>
+    <li>যে গুদাম থেকে মাল যাবে সেই <span class="ui">Warehouse</span> বেছে নিন।</li>
+    <li><span class="ui">Item Code, Name …</span> ঘরে ম্যাটেরিয়াল নম্বর বা নামের অংশ লিখে আইটেমে ক্লিক করুন। এটি স্টক ও বিক্রয়মূল্যসহ যোগ হবে। টিন্টেড রঙের জন্য প্রয়োজনে <span class="ui">Shades Name</span> লিখুন।</li>
+    <li>ডান পাশের সারাংশে প্রতিটি লাইনের <span class="ui">Quantity</span> <span class="mi">remove</span> / <span class="mi">add</span> দিয়ে বা টাইপ করে ঠিক করুন। প্রতি লাইনের <span class="ui">Price</span> বদলানো যায়। কোনো লাইন বাদ দিতে <span class="mi">delete</span> চাপুন।</li>
+    <li><span class="ui">Discount</span> (<b>%</b> বা <b>৳</b> বেছে নিন), <span class="ui">TAX (%)</span>, <span class="ui">Delivery Charge</span> ও প্রয়োজনে <span class="ui">Remarks</span> লিখুন। কারবার নিজেই <span class="ui">Final Amount</span> ও <span class="ui">Total Payable</span> হিসাব করবে।</li>
+    <li>কাস্টমার যত টাকা দিচ্ছেন তা <span class="ui">Payment</span> ঘরে লিখুন। কারবার <b>Due</b> (বকেয়া) দেখাবে, অথবা বেশি দিলে <b>Return</b> (ফেরত দেওয়ার টাকা) দেখাবে।</li>
+    <li>পেমেন্টের বিস্তারিত খুলে <span class="ui">Payment Method</span> বেছে নিন: Cash, Credit, Mobile Banking (bKash, Nagad, Rocket বা Upay বেছে ফোন নম্বর লিখুন) অথবা Bank Transfer (ব্যাংক বেছে অ্যাকাউন্ট নম্বর লিখুন)।</li>
+    <li><span class="ui">Save</span> চাপুন। ইনভয়েসের প্রিভিউ খুলবে। যাচাই করে বিক্রয় সম্পন্ন করতে <span class="ui">Submit &amp; Print</span> চাপুন, অথবা পরে শেষ করতে <span class="ui">Draft</span> চাপুন।</li>
+  </ol>
+  <div class="note warn"><b>স্টক যথেষ্ট নেই</b><em>One or more items do not have sufficient stock in the selected warehouse</em> দেখালে পরিমাণ কমান, অন্য গুদাম বেছে নিন, অথবা আগে Shift Stock দিয়ে স্টক সরিয়ে আনুন (অধ্যায় ১২)।</div>
+  <p>প্রিন্ট করা ইনভয়েসে আপনার ইউজার প্রোফাইলের দোকানের লোগো, ঠিকানা ও স্বাক্ষর, কথায় মোট টাকা এবং “Color Bank products are non-returnable.” লেখাটি থাকে।</p>
+  <h3>ড্রাফট নিয়ে কাজ</h3>
+  <p><span class="ui">Draft</span> ট্যাবে সেভ করা অসম্পূর্ণ বিক্রয়গুলো থাকে। প্রতিটি ড্রাফটের জন্য:</p>
+  <ul>
+    <li><span class="mi">edit</span> <b>Edit draft</b> — New Sales এ আবার খুলে বদলানো যায়।</li>
+    <li><span class="mi">send</span> <b>Send to Sales</b> — বিক্রয় হিসেবে সম্পন্ন করে।</li>
+    <li><span class="mi">delete</span> <b>Delete draft</b> — ড্রাফট মুছে ফেলে।</li>
+  </ul>
+  <h3>সম্পন্ন বিক্রয় খোঁজা</h3>
+  <p><span class="ui">Completed Sales</span> ট্যাবে From ও To তারিখ দিয়ে তালিকা ছোট করুন, অথবা সব দেখতে <span class="ui">Clear</span> চাপুন। কোনো সারির <span class="mi">visibility</span> চাপলে ইনভয়েস খুলবে, আবার প্রিন্ট করতে <span class="ui">Print</span> চাপুন। আবার প্রিন্ট করা ইনভয়েসে ফেরত আসা আইটেম দেখায় এবং মোট থেকে বাদ দেওয়া হয়।</p>
+</section>
+
+<section id="returns">
+  <h2><span class="n">৬</span>বিক্রয় ফেরত</h2>
+  <p class="where">মেনু: <b>Sales</b> → <b>Completed Sales</b> ট্যাব।</p>
+  <ol class="steps">
+    <li>ইনভয়েসটি খুঁজে কাস্টমার যে আইটেমগুলো ফেরত দিচ্ছেন সেগুলোতে টিক দিন।</li>
+    <li><span class="ui">Change Quantity</span> ঘরে কয়টি ফেরত আসছে লিখুন। বিক্রি হওয়া পরিমাণের বেশি দেওয়া যাবে না।</li>
+    <li><span class="ui">Return</span> কলামে <span class="mi">undo</span> চাপুন, <span class="ui">Remarks</span> ঘরে ফেরতের কারণ লিখুন এবং <span class="ui">Submit</span> চাপুন।</li>
+  </ol>
+  <p>ফেরত হওয়া লাইনে <span class="mi">check_circle</span> সহ <em>Returned</em> দেখাবে এবং স্টক গুদামে ফিরে যাবে। সব ফেরত <span class="ui">Sales Return</span> ট্যাবে ও Sales Return রিপোর্টে দেখা যায়।</p>
+</section>
+
+<section id="purchase">
+  <h2><span class="n">৭</span>ক্রয় (Purchase)</h2>
+  <p class="where">মেনু: <b>Purchase</b>। ট্যাব: <b>New Purchase</b>, <b>Completed Purchase</b>। বার্জার SAP ইনভয়েস ছাড়া কেনা মালের জন্য এটি ব্যবহার করুন।</p>
+  <ol class="steps">
+    <li>উপরের সুইচটি (টুলটিপ <em>Berger SAP invoice</em>) <b>বন্ধ</b> আছে কিনা দেখুন। চালু করলে বার্জার SAP ইনভয়েস স্ক্রিনে চলে যাবে (অধ্যায় ৮)।</li>
+    <li>সাপ্লায়ারের <span class="ui">Invoice No</span> লিখুন। এটি বাধ্যতামূলক।</li>
+    <li><span class="ui">Supplier</span> বেছে নিন। নতুন সাপ্লায়ার হলে <span class="mi">add</span> চেপে <span class="ui">Supplier Name</span>, <span class="ui">Contact</span>, <span class="ui">Address</span> ও <span class="ui">Status</span> লিখুন।</li>
+    <li>যে গুদামে মাল ঢুকবে সেই <span class="ui">Warehouse</span> বেছে নিন, তারপর প্রতিটি আইটেম খুঁজে ক্লিক করুন।</li>
+    <li>সারাংশে প্রতিটি লাইনের <span class="ui">Quantity</span>, <span class="ui">MRP</span> ও <span class="ui">PR. Price</span> (আপনার কেনা দাম) লিখুন।</li>
+    <li><span class="ui">Discount</span> (% বা ৳), <span class="ui">TAX (%)</span> ও <span class="ui">VAT (%)</span>, <span class="ui">Payment</span> ঘরে পরিশোধিত টাকা এবং <span class="ui">Payment Method</span> দিন।</li>
+    <li><span class="ui">Save</span> চাপুন, ক্রয়ের সারাংশ যাচাই করে <span class="ui">Submit</span> চাপুন। স্টক নির্বাচিত গুদামে যোগ হবে।</li>
+  </ol>
+  <p>সেভ করা ক্রয় <span class="ui">Completed Purchase</span> ট্যাবে প্রতিটি লাইনের পরিমাণ, দাম, ডিসকাউন্ট, ট্যাক্স ও ভ্যাটসহ দেখায়। সাপ্লায়ারের বাকি টাকা Payment থেকে পরিশোধ করুন (অধ্যায় ১০)।</p>
+</section>
+
+<section id="sap">
+  <h2><span class="n">৮</span>বার্জার SAP ইনভয়েস</h2>
+  <p class="where">মেনু: <b>Purchase</b>, তারপর উপরের সুইচ <b>চালু</b> করুন। শিরোনাম বদলে <b>Purchase Details</b> হবে। পরের বার কারবার সুইচের অবস্থা মনে রাখে।</p>
+  <p>বার্জার থেকে SAP ইনভয়েসসহ মাল এলে এটি ব্যবহার করুন। ইনভয়েসের লাইনগুলো আগে থেকেই কারবারে থাকে; আপনি শুধু নিশ্চিত করবেন আসলে কী এসেছে।</p>
+  <ol class="steps">
+    <li><span class="ui">Berger Invoice No</span> ঘরে ইনভয়েস নম্বর লিখে সাজেশন থেকে বেছে নিন।</li>
+    <li><span class="ui">Purchase List</span> ট্যাবে প্রতিটি লাইনের জন্য <span class="ui">Warehouse</span> বেছে নিন। সব লাইনে গুদাম না দিলে ইনভয়েস রিসিভ করা যাবে না।</li>
+    <li>প্রতিটি লাইনে ইনভয়েসের পরিমাণ পর্যন্ত <span class="ui">Receive Quantity</span> লিখুন এবং <span class="ui">Unit Price</span> যাচাই করুন।</li>
+    <li>রিসিভ করতে সারির <span class="mi">arrow_forward</span> চাপুন। <em>Received quantity updated</em> দেখাবে।</li>
+  </ol>
+  <p>ইনভয়েসের কিছু অংশ এলে বাকিটা <span class="ui">Remaining Quantity</span> সহ <span class="ui">Pending Purchase</span> ট্যাবে অপেক্ষায় থাকে। বাকি মাল এলে সেখান থেকে <span class="mi">arrow_forward</span> চেপে রিসিভ করুন। পুরো রিসিভ হওয়া ইনভয়েস <span class="ui">Completed Purchase</span> ট্যাবে চলে যায়।</p>
+</section>
+
+<section id="order">
+  <h2><span class="n">৯</span>বার্জার থেকে অর্ডার</h2>
+  <p class="where">মেনু: <b>Order</b>। ট্যাব: <b>New Order</b>, <b>Order List</b>।</p>
+  <p>বার্জারের কাছে স্টক চাইতে এটি ব্যবহার করুন। সাপ্লায়ার হিসেবে বার্জার নির্দিষ্ট করা থাকে।</p>
+  <ol class="steps">
+    <li><span class="ui">New Order</span> ট্যাবে মাল যে গুদামে যাবে সেই <span class="ui">Warehouse</span> বেছে নিন। এটি বাধ্যতামূলক।</li>
+    <li>আইটেম খুঁজে ক্লিক করে যোগ করুন। কতটা অর্ডার দেবেন ঠিক করতে টেবিলে প্রতিটি আইটেমের বর্তমান স্টক দেখায়।</li>
+    <li>প্রতিটি লাইনের <span class="ui">Quantity</span> দিন। ক্রয়মূল্য নির্দিষ্ট এবং নিজে থেকে বসানো থাকে।</li>
+    <li><span class="ui">Save</span> চাপুন, অর্ডারের সারাংশ যাচাই করে <span class="ui">Submit</span> চাপুন।</li>
+  </ol>
+  <p><span class="ui">Order List</span> এ প্রতিটি অর্ডারের আইটেম ও স্ট্যাটাস দেখায়: রিসিভ না হওয়া পর্যন্ত <b>Pending</b>, তারপর <b>Received</b>। অ্যাডমিনরা প্রতিটি অর্ডারে ডিলারের নাম দেখেন এবং ড্রপডাউন থেকে স্ট্যাটাস বদলান। Received হওয়া অর্ডার আর বদলানো যায় না।</p>
+</section>
+
+<section id="payment">
+  <h2><span class="n">১০</span>পেমেন্ট ও বকেয়া</h2>
+  <p class="where">মেনু: <b>Payment</b>।</p>
+  <p>কাস্টমারের কাছে পাওনা টাকা আদায় করুন, অথবা সাপ্লায়ারের পাওনা পরিশোধ করুন।</p>
+  <ol class="steps">
+    <li><span class="ui">Select Type</span> এ <b>Customer</b> (টাকা আসছে) অথবা <b>Supplier</b> (টাকা যাচ্ছে) বেছে নিন।</li>
+    <li><span class="ui">Invoice No, Name, Phone</span> দিয়ে খুঁজে ফলাফল বেছে নিন। তালিকায় প্রতিটি ইনভয়েসের মোট, পরিশোধিত ও বকেয়া টাকা দেখায়।</li>
+    <li>বকেয়া আছে এমন ইনভয়েসে <span class="mi">arrow_forward</span> (View Details) চাপুন।</li>
+    <li><span class="ui">Payment Details</span> এ পেমেন্টের পদ্ধতি বেছে নিন, প্রয়োজনে অতিরিক্ত ডিসকাউন্ট দিন এবং কত টাকা দেওয়া হচ্ছে লিখুন। বকেয়ার বেশি দেওয়া যাবে না।</li>
+    <li><span class="ui">Submit</span> চাপুন, রসিদ লাগলে <span class="ui">Print Receipt</span> চাপুন।</li>
+  </ol>
+  <p>পুরো পরিশোধিত ইনভয়েসে আবার প্রিন্টের জন্য <span class="mi">print</span> দেখায়।</p>
+</section>
+
+<section id="expense">
+  <h2><span class="n">১১</span>খরচ</h2>
+  <p class="where">মেনু: <b>Expense Information</b>।</p>
+  <ol class="steps">
+    <li><span class="ui">Create Expense</span> চাপুন।</li>
+    <li><span class="ui">Expense Date</span> দিন। এন্ট্রির তারিখ হিসেবে আজকের তারিখ বসানো থাকে।</li>
+    <li><span class="ui">Expense Category</span> বেছে নিন। নতুন ক্যাটাগরি যোগ করতে <span class="mi">add</span> চেপে <span class="ui">Category Name</span> লিখুন; এটি অন্য কোনো ক্যাটাগরির অধীনে হলে <span class="ui">Have parent?</span> টিক দিন (যেমন “Utilities” এর অধীনে “Electricity”)।</li>
+    <li><span class="ui">Expense Amount</span> ও <span class="ui">Expense Purpose</span> লিখে সেভ করুন।</li>
+  </ol>
+  <p>কোনো এন্ট্রি ঠিক করতে বা মুছতে <span class="mi">border_color</span> বা <span class="mi">delete</span> ব্যবহার করুন। খরচগুলো ড্যাশবোর্ডের খরচ চার্টেও দেখায়।</p>
+</section>
+
+<section id="stock">
+  <h2><span class="n">১২</span>স্টক ম্যানেজমেন্ট</h2>
+  <p class="where">মেনু: <b>Stock Management</b>।</p>
+  <p>প্রতিটি আইটেমের জন্য একটি সারি, প্রতিটি গুদামের জন্য একটি কলাম এবং একটি <span class="ui">Total Quantity</span> কলাম।</p>
+  <ul>
+    <li><b>আইটেম খুঁজুন</b> সার্চ বক্স দিয়ে। <span class="ui">Sort / Filter</span> থেকে A→Z, Z→A, Low Stock, High Stock বা Safety Stock বেছে নিন; শূন্য স্টকের আইটেম লুকাতে <span class="ui">Not Include 0 stock</span> টিক দিন।</li>
+    <li><b>ইতিহাস:</b> প্রতিটি আইটেমের <b>Last Purchase</b> (সাপ্লায়ার, পরিমাণ, টাকা) ও <b>Last Sell</b> (কাস্টমার, পরিমাণ, টাকা) দেখায়।</li>
+  </ul>
+  <h3>স্টকের হিসাব ঠিক করা</h3>
+  <ol class="steps">
+    <li>গুদামের কলামে পরিমাণের উপর ডাবল-ক্লিক করে গুনে পাওয়া সংখ্যা লিখুন।</li>
+    <li>সেই সারির <span class="ui">Save</span> চাপুন, <span class="ui">Remarks</span> লিখুন (যেমন “১২ জানুয়ারির গণনা”) এবং <span class="ui">Submit</span> চাপুন।</li>
+  </ol>
+  <h3>এক গুদাম থেকে অন্য গুদামে স্টক সরানো</h3>
+  <ol class="steps">
+    <li>সার্চ বক্সের পাশের <span class="mi">compare_arrows</span> চেপে <span class="ui">Shift Stock</span> খুলুন। (দোকানের কর্মীদের জন্য নয়।)</li>
+    <li><span class="ui">Item Name</span> বেছে নিন। কোন গুদামে কত আছে কারবার দেখাবে।</li>
+    <li><span class="ui">From Ware House</span> ও <span class="ui">To Ware House</span> বেছে নিন, <span class="ui">Quantity</span> ও <span class="ui">Remarks</span> লিখে <span class="ui">Submit</span> চাপুন।</li>
+  </ol>
+  <p>প্রতিটি স্থানান্তর Stock Transfer রিপোর্টে দেখা যায়।</p>
+</section>
+
+<section id="item">
+  <h2><span class="n">১৩</span>আইটেম</h2>
+  <p class="where">মেনু: <b>Item</b>।</p>
+  <p>আপনার পণ্যের তালিকা। <span class="mi">view_list</span> / <span class="mi">grid_view</span> দিয়ে কার্ড ও টেবিল ভিউ বদলান। আইটেম কোড দিয়ে খুঁজুন এবং <span class="ui">Choose Brand</span> ও <span class="ui">Choose Category</span> দিয়ে তালিকা ছোট করুন।</p>
+  <h3>নতুন আইটেম যোগ করা</h3>
+  <ol class="steps">
+    <li>সার্চ বক্সের পাশের <span class="mi">add</span> চাপুন।</li>
+    <li><span class="ui">Item Name</span>, <span class="ui">Item Description</span> ও <span class="ui">Material Number</span> লিখুন। টাইপ করার সময় কারবার আগের নাম ও নম্বর সাজেস্ট করে, যাতে একই আইটেম দুবার না হয়।</li>
+    <li>ব্র্যান্ড, ক্যাটাগরি ও <span class="ui">Unit</span> বেছে নিন। কোনোটি না থাকলে পাশের <span class="mi">add</span> চেপে তৈরি করুন।</li>
+    <li><span class="ui">Safety Stock</span> (সর্বনিম্ন যতটুকু রাখতে চান), <span class="ui">MRP</span>, <span class="ui">Purchase Price</span> ও <span class="ui">Selling Price</span> লিখুন। <span class="ui">Weighted Average Price</span> কারবার নিজেই হিসাব করে।</li>
+    <li>চাইলে পণ্যের ছবি আপলোড করে সেভ করুন।</li>
+  </ol>
+  <h3>একসাথে অনেক আইটেম আপলোড (অ্যাডমিন)</h3>
+  <ol class="steps">
+    <li>Excel টেমপ্লেট নামাতে <span class="mi">cloud_download</span> চাপুন।</li>
+    <li>প্রতি সারিতে একটি করে আইটেম লিখুন। আইটেমের নাম বা ম্যাটেরিয়াল নম্বর না থাকলে সেই সারি বাদ পড়বে।</li>
+    <li><span class="mi">upload</span> চেপে ফাইল (.xlsx, .xls বা .csv) বেছে নিন। কয়টি আইটেম আপলোড হলো কারবার জানাবে।</li>
+  </ol>
+  <h3>দাম দেখা</h3>
+  <p>আইটেমের বিস্তারিত দেখতে <span class="mi">visibility</span> চাপুন। দাম লুকানো থাকে: <span class="ui">View Price Details</span> চেপে আপনার পাসওয়ার্ড দিলে MRP, বিক্রয়মূল্য, ক্রয়মূল্য ও গড় মূল্য দেখা যাবে।</p>
+</section>
+
+<section id="parties">
+  <h2><span class="n">১৪</span>সাপ্লায়ার ও কাস্টমার</h2>
+  <p class="where">মেনু: <b>Supplier</b> বা <b>Customer</b>।</p>
+  <p>দুটি স্ক্রিন একইভাবে কাজ করে। <span class="ui">Create Supplier</span> বা <span class="ui">Create Customer</span> চেপে পূরণ করুন:</p>
+  <table>
+    <thead><tr><th>ঘর</th><th>সাপ্লায়ার</th><th>কাস্টমার</th></tr></thead>
+    <tbody>
+      <tr><td>নাম</td><td>বাধ্যতামূলক</td><td>বাধ্যতামূলক</td></tr>
+      <tr><td>ফোন নম্বর</td><td>Contact No 1 (বাধ্যতামূলক), Contact No 2</td><td>Contact No (বাধ্যতামূলক)</td></tr>
+      <tr><td>ইমেইল</td><td>ঐচ্ছিক</td><td>–</td></tr>
+      <tr><td>ঠিকানা</td><td>বাধ্যতামূলক</td><td>বাধ্যতামূলক</td></tr>
+      <tr><td>স্ট্যাটাস</td><td>Active / Inactive</td><td>Active / Inactive</td></tr>
+    </tbody>
+  </table>
+  <p>ফোন নম্বর ১১ সংখ্যার (যেমন 01712345678)। ইতিহাস না হারিয়ে কোনো সাপ্লায়ার বা কাস্টমারের ব্যবহার বন্ধ করতে <b>Inactive</b> করুন। Purchase ও Sales স্ক্রিন থেকেও সরাসরি এদের যোগ করা যায়।</p>
+</section>
+
+<section id="users">
+  <h2><span class="n">১৫</span>ইউজার</h2>
+  <p class="where">মেনু: <b>Users</b>। শুধু অ্যাডমিনদের জন্য।</p>
+  <ol class="steps">
+    <li><span class="ui">Create User</span> চাপুন।</li>
+    <li><span class="ui">User Name</span>, <span class="ui">Address Line 1</span>, <span class="ui">Address Line 2</span> ও <span class="ui">Phone Number</span> লিখুন। এই ফোন নম্বর দিয়েই ইউজার লগইন করবেন।</li>
+    <li><span class="ui">Role</span> বেছে নিন। ডিলারের ক্ষেত্রে তাদের <span class="ui">SAP Code</span> লিখুন।</li>
+    <li><span class="ui">Logo</span> ও <span class="ui">Signature</span> আপলোড করুন। এগুলো ইউজারের বিক্রয় ইনভয়েসে প্রিন্ট হয়।</li>
+    <li><span class="ui">Password</span> ও <span class="ui">Status</span> দিয়ে সেভ করুন।</li>
+  </ol>
+  <p>কাউকে নতুন পাসওয়ার্ড দিতে তার সারির <span class="mi">lock_outline</span> চাপুন, দুবার পাসওয়ার্ড লিখে <span class="ui">Reset Password</span> চাপুন।</p>
+</section>
+
+<section id="settings">
+  <h2><span class="n">১৬</span>সেটিংস</h2>
+  <p class="where">মেনু: <b>Settings</b>। প্রতিটি ট্যাব একটি তালিকা, যেখানে Create বাটন, এডিট ও ডিলিট আছে।</p>
+  <table>
+    <thead><tr><th>ট্যাব</th><th>কী রাখা হয়</th><th>ঘরগুলো</th></tr></thead>
+    <tbody>
+      <tr><td>Role</td><td>ইউজারের রোল, যা মেনু নিয়ন্ত্রণ করে</td><td>Role Name, Is Admin, Status</td></tr>
+      <tr><td>UOM</td><td>মাপের একক, যেমন Litre, Kg বা Pcs</td><td>UOM Name (শুধু অক্ষর), Status</td></tr>
+      <tr><td>Brand</td><td>পণ্যের ব্র্যান্ড</td><td>Brand Name, Status</td></tr>
+      <tr><td>WareHouse</td><td>আপনার দোকান ও গুদাম</td><td>Warehouse Name, Location, Status</td></tr>
+      <tr><td>Category</td><td>পণ্যের ক্যাটাগরি, প্রয়োজনে একটির অধীনে আরেকটি</td><td>Category Name, Have parent?, Status</td></tr>
+      <tr><td>Bank Information</td><td>আপনার নিজের ব্যাংক অ্যাকাউন্ট</td><td>Account Name, Account Number, Bank Name, Branch Name, Status</td></tr>
+    </tbody>
+  </table>
+  <div class="note"><b>আগে সেটআপ করুন</b>আইটেম যোগ করার আগে গুদাম, একক, ব্র্যান্ড ও ক্যাটাগরি তৈরি করুন। আইটেম, ক্রয় ও বিক্রয় সবই এগুলোর উপর নির্ভর করে।</div>
+</section>
+
+<section id="reports" class="new-page">
+  <h2><span class="n">১৭</span>রিপোর্ট</h2>
+  <p class="where">মেনু: <b>Reports</b>, তারপর রিপোর্ট বেছে নিন।</p>
+  <p>প্রতিটি রিপোর্টের উপরে একই নিয়ন্ত্রণ থাকে:</p>
+  <ul>
+    <li><b>From</b> ও <b>To</b> তারিখ দিয়ে সময়কাল ঠিক করুন। <span class="mi">backspace</span> ফিল্টার মুছে দেয়।</li>
+    <li><span class="mi">download</span> রিপোর্টটি Excel ফাইল হিসেবে সেভ করে।</li>
+    <li><span class="mi">refresh</span> সর্বশেষ তথ্য আবার লোড করে।</li>
+  </ul>
+  <p>অ্যাডমিনরা নির্দিষ্ট ডিলারের হিসাব দেখতে ডিলারও বেছে নিতে পারেন।</p>
+  <table>
+    <thead><tr><th>রিপোর্ট</th><th>কী দেখায়</th><th>বাড়তি ফিল্টার</th></tr></thead>
+    <tbody>
+      <tr><td>Stock Report</td><td>প্রতিটি গুদামে প্রতিটি আইটেমের পরিমাণ ও মূল্য, MRP, বিক্রয়, ক্রয় ও গড় মূল্যসহ</td><td>গুদাম, ব্র্যান্ড, ক্যাটাগরি, ম্যাটেরিয়াল নম্বর</td></tr>
+      <tr><td>Inventory Report</td><td>প্রতিটি আইটেমের শুরুর স্টক, ক্রয়, বিক্রয় ও শেষের স্টক</td><td>আইটেম, ডিলার, ব্র্যান্ড, ক্যাটাগরি</td></tr>
+      <tr><td>Top Sold Items</td><td>পরিমাণ ও বিক্রয়মূল্য অনুযায়ী সবচেয়ে বেশি বিক্রিত আইটেম</td><td>ব্র্যান্ড, ক্যাটাগরি</td></tr>
+      <tr><td>Slow Moving</td><td>ধীরগতির, অচল ও মৃত স্টক: শেষ বিক্রয়ের পর কত দিন, ৩০/৬০/৯০ দিনের বিক্রয়, পরামর্শ</td><td>–</td></tr>
+      <tr><td>Stock Transfer</td><td>গুদামের মধ্যে স্থানান্তর, রেফারেন্স নম্বর ও মন্তব্যসহ</td><td>–</td></tr>
+      <tr><td>Sales Report</td><td>প্রতিটি ইনভয়েস লাইন: মোট বিক্রয়, ডিসকাউন্ট, নিট বিক্রয়, ট্যাক্স, ভ্যাট, বিক্রয়কর্মী, গুদাম</td><td>ডিলার, গুদাম, ব্র্যান্ড, ক্যাটাগরি, ইনভয়েস নম্বর, ম্যাটেরিয়াল</td></tr>
+      <tr><td>Sales Return</td><td>ফেরত আইটেম, মূল ইনভয়েস, ফেরতের মূল্য ও মন্তব্য</td><td>ইনভয়েস নম্বর বা কাস্টমার</td></tr>
+      <tr><td>Customer Receivable</td><td>কাস্টমারের অপরিশোধিত ইনভয়েস, বকেয়া ও কত দিন পুরনো</td><td>কাস্টমারের নাম বা ইনভয়েস নম্বর</td></tr>
+      <tr><td>Customer Statement</td><td>কাস্টমারের বিক্রয় (ডেবিট), পেমেন্ট (ক্রেডিট) ও চলতি ব্যালেন্স</td><td>কাস্টমারের নাম বা ফোন</td></tr>
+      <tr><td>Purchase Report</td><td>প্রতিটি ক্রয় লাইন: মোট, ডিসকাউন্ট, নিট, ট্যাক্স, ভ্যাট ও ইনভয়েসের মোট, সময়কালের যোগফলসহ</td><td>Berger / Non Berger, ডিলার, গুদাম, ব্র্যান্ড, ক্যাটাগরি, ইনভয়েস নম্বর, ম্যাটেরিয়াল কোড</td></tr>
+      <tr><td>Supplier Payable</td><td>প্রতিটি সাপ্লায়ারকে ইনভয়েস অনুযায়ী এখনও কত দিতে হবে</td><td>সাপ্লায়ারের নাম, ফোন বা ইনভয়েস</td></tr>
+      <tr><td>Supplier Statement</td><td>সাপ্লায়ারের ক্রয় (ক্রেডিট), পেমেন্ট (ডেবিট) ও চলতি ব্যালেন্স</td><td>সাপ্লায়ার বা রসিদ নম্বর</td></tr>
+      <tr><td>Profit/Loss</td><td>সময়কালের আয় ও খরচের তুলনা</td><td>–</td></tr>
+      <tr><td>Payment Collection</td><td>আদায় বা পরিশোধিত টাকা: রসিদ নম্বর, পদ্ধতি, কে আদায় করেছেন, পরের ব্যালেন্স</td><td>কাস্টমার বা সাপ্লায়ার, নাম বা নম্বর</td></tr>
+      <tr><td>User Login History</td><td>প্রতিটি ইউজার কখন লগইন ও লগআউট করেছেন, ইনভয়েসের সংখ্যা ও মূল্যসহ (শুধু অ্যাডমিন)</td><td>–</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="messages">
+  <h2><span class="n">১৮</span>মেসেজ ও সমাধান</h2>
+  <table>
+    <thead><tr><th>মেসেজ</th><th>কী করবেন</th></tr></thead>
+    <tbody>
+      <tr><td>Phone Number or Password is incorrect</td><td>নম্বর বা ইমেইল যাচাই করুন, অথবা Forgot Password? ব্যবহার করুন।</td></tr>
+      <tr><td>Invoice number is required</td><td>Purchase বা Order এর উপরে Invoice No পূরণ করুন।</td></tr>
+      <tr><td>WareHouse selection is required</td><td>অর্ডার সেভ করার আগে গুদাম বেছে নিন।</td></tr>
+      <tr><td>One or more items do not have sufficient stock in the selected warehouse</td><td>পরিমাণ কমান, অন্য গুদাম বেছে নিন, অথবা আগে স্টক সরিয়ে আনুন।</td></tr>
+      <tr><td>Please select a warehouse for all items before receiving</td><td>Purchase Details এ ইনভয়েসের প্রতিটি লাইনে গুদাম দিন।</td></tr>
+      <tr><td>Payment amount cannot exceed due amount</td><td>দেখানো Due Amount এর বেশি লিখবেন না।</td></tr>
+      <tr><td>Please select a payment method and enter a valid amount</td><td>পেমেন্টের পদ্ধতি বেছে নিয়ে শূন্যের বেশি টাকা লিখুন।</td></tr>
+      <tr><td>Please select at least one item for return</td><td>আগে ফেরত আসা আইটেমের লাইনে টিক দিন।</td></tr>
+      <tr><td>Please enter remarks for the return</td><td>ফেরত জমা দেওয়ার আগে Remarks ঘরে কারণ লিখুন।</td></tr>
+      <tr><td>Contact already exists!</td><td>এই ফোন নম্বরে আগে থেকেই কাস্টমার আছে। তাকে খুঁজে বেছে নিন।</td></tr>
+      <tr><td>Please select category, brand, and unit of measure</td><td>আইটেম ফর্মে এই তিনটি বেছে নিন।</td></tr>
+      <tr><td>No data found to export</td><td>রিপোর্টের তারিখ বাড়ান বা ফিল্টার মুছে আবার ডাউনলোড করুন।</td></tr>
+    </tbody>
+  </table>
+  <p>কারবার তৈরি ও পরিচালনা করে Berger Tech Consulting Limited। এখানে নেই এমন সমস্যার জন্য আপনার অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
+</section>
+
+</body>
+</html>

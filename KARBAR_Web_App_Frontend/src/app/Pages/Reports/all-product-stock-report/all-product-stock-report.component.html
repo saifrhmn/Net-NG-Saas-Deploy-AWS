@@ -1,0 +1,170 @@
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">All Stock Report</h2>
+  </div>
+  @if(selectedWarehouse == 'all'){
+  <div class="total-invoice-amount-summary">
+    <h6>Total Stock Summary</h6>
+    <p>Total Stock Quantity: {{getTotalStock()}}</p>
+    <p>Total Stock Value: {{getTotalStockAmount()}}</p>
+    <p>Weighted Average Stock Value: {{getTotalWeightedAmount()}}</p>
+    </div>
+  }@else{
+ <div class="total-invoice-amount-summary">
+    <h6>Warehouse Total Stock Summary</h6>
+    <p>Total Stock Quantity: {{getTotalStock()}}</p>
+    <p>Total Stock Value: {{getTotalStockAmount()}}</p>
+    <p>Weighted Average Stock Value: {{getWarehouseTotalWeightedAmount()}}</p>
+    </div>
+ }
+</div>
+
+<div class="header-card">
+  <div class="table-top">
+    <!-- <div class="table-filters">
+      <input type="date" [(ngModel)]="fromDate" label="From" (change)="onFilter()" class="filter-date">
+      <input type="date" [(ngModel)]="toDate" label="To" (change)="onFilter()" class="filter-date">
+      <button type="button" class="theme-button" (click)="clearFilter()">Clear</button>
+      <mat-icon (click)="clearFilter()" style="color: #0694C5;">backspace</mat-icon>
+    </div> -->
+    <div>
+      <mat-form-field appearance="outline" class="category-dropdown">
+        <mat-select placeholder="Choose Warehouse" [(ngModel)]="selectedWarehouse"
+          (selectionChange)="onWarehouseChange($event.value)">
+          <mat-option *ngFor="let warehouse of lstWarehouses" [value]="warehouse.id">
+            {{ warehouse.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <!-- <div>
+      <mat-form-field appearance="outline" class="category-dropdown">
+        <mat-select placeholder="Choose Brand" [(ngModel)]="selectedBrand"
+          (selectionChange)="onBrandChange($event.value)">
+          <mat-option *ngFor="let brand of lstBrands" [value]="brand.id">
+            {{ brand.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+        <div>
+      <mat-form-field appearance="outline" class="category-dropdown">
+        <mat-select placeholder="Choose Category" [(ngModel)]="selectedCategory"
+          (selectionChange)="onCategoryChange($event.value)">
+          <mat-option *ngFor="let category of lstCategories" [value]="category.id">
+            {{ category.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div> -->
+     <div>
+      <app-typeable-selection-dropdown
+        [label]="'Choose Brand'"
+        [placeholder]="'Type to search...'"
+        [options]="lstBrands"
+        [displayProperty]="'name'"
+        [valueProperty]="'id'"
+        [selectedValue]="selectedBrandName"
+        [cssClass]="'category-dropdown'"
+        (selectionChanged)="onBrandOptionSelected($event)"
+        (searchChanged)="onBrandSearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+
+    <div>
+      <app-typeable-selection-dropdown
+        [label]="'Choose Category'"
+        [placeholder]="'Type to search...'"
+        [options]="lstCategories"
+        [displayProperty]="'name'"
+        [valueProperty]="'id'"
+        [selectedValue]="selectedCategoryName"
+        [cssClass]="'category-dropdown'"
+        (selectionChanged)="onCategoryOptionSelected($event)"
+        (searchChanged)="onCategorySearch($event)">
+      </app-typeable-selection-dropdown>
+    </div>
+<div class="material-filter">
+  <mat-form-field appearance="outline" class="material-search">
+    <mat-label>Material Number</mat-label>
+    
+    <input
+      matInput
+      [(ngModel)]="materialSearch"
+      (ngModelChange)="onMaterialSearchChange($event)"
+      placeholder="Type material number..."
+    />
+    
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+</div>
+<div >
+  <mat-checkbox
+    color="primary" class="include-zero-stock-checkbox"
+    [(ngModel)]="includeZeroStock"
+    (ngModelChange)="onIncludeZeroToggle($event)">
+    Do not include 0
+  </mat-checkbox>
+</div>
+<div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>
+<div>
+   <button type="button" class="download-button" (click)="refreshItemlist()">
+        <mat-icon>refresh</mat-icon>
+      </button></div>
+      
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+    <table>
+      <thead>
+        <tr>
+          <th>SI No</th>
+          <th>Material Number</th>
+          <th>Item Name</th>
+          <th>Brand</th>
+          <th>Warehouse</th>
+          <th>Quantity</th>
+          <th>Unit</th>
+          <th>MRP</th>
+          <th>Selling Price</th>
+          <th>Purchase Price</th>
+          <th>Total stock price</th>
+          <th>Weighted Avg Price</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of lstReport; track $index) {
+        <tr>
+          <td>{{ (searchReq.pageIndex - 1) * searchReq.pageSize + $index + 1 }}</td>
+          <td>{{row.materialNumber}}</td>
+          <td>{{row.itemName}}</td>
+          <td>{{row.brand}}</td>
+          <td>{{row.warehouse}}</td>
+          <td>{{row.quantity}}</td>
+          <td>{{row.unit}}</td>
+          <td>{{row.mrp}}</td>
+          <td>{{row.sellingPrice}}</td>
+          <td>{{row.purchasePrice}}</td>
+          <td>{{row.quantity * row.purchasePrice }}</td>
+          <td>{{row.weightedAvgPrice}}</td>
+          <td>{{row.stockDate | date:'shortDate'}}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

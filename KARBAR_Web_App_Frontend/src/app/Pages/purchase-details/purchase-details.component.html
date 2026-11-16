@@ -1,0 +1,311 @@
+<div class="purchase-container">
+  <!-- Header Card -->
+  <div class="header-card">
+    <div class="header-content">
+      <div>
+        <h2 class="page-title">Purchase Details</h2>
+      </div>
+      <div class="date-field">
+        <div class="purchase-actions">
+          <mat-slide-toggle [(ngModel)]="invoiceToggle" (change)="onToggleChange()">
+          </mat-slide-toggle>
+        </div>
+        <mat-form-field appearance="outline" class="reference-field">
+          <mat-label>Berger Invoice No</mat-label>
+          <input matInput type="text" name="invoiceNo" maxlength="50" placeholder="Invoice No"
+            [(ngModel)]="invoiceSearch" (keyup)="onInvoiceSearchChange($event)" [matAutocomplete]="auto" />
+          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onInvoiceSelected($event.option.value)">
+            <!-- <mat-option *ngFor="let opt of invoiceOptionsFiltered" [value]="opt">{{ opt }}</mat-option> -->
+          </mat-autocomplete>
+        </mat-form-field>
+        <!-- <div>
+          <mat-form-field appearance="outline">
+            <mat-label>Date</mat-label>
+            <input matInput [matDatepicker]="picker" />
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div> -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <div class="main-content">
+    <!-- Tab Navigation Card -->
+    <div class="tabs-card">
+      <mat-tab-group class="purchase-tabs" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+        <!-- Completed Purchase Tab -->
+
+        <mat-tab label="Purchase List">
+          <div class="tab-content">
+            <div class="table-scroll-container">
+              <table >
+                <thead>
+                  <tr>
+                    <th>Invoice No</th>
+                    <th>Invoice Date</th>
+                    <th>Material cardNumber</th>
+                    <th>Item Name</th>
+                    <th>Warehouse</th>
+                    <th>Invoice Quantity</th>
+                    <th>Receive Quantity</th>
+                    <th>Remaining Quantity</th>
+                    <th>Invoice Amount</th>
+
+                    <th>Unit Price</th>
+
+                    <th>Final Purchase Amount</th>
+                    <th>Total Amount</th>
+
+                    <th>Total Purchase Amount</th>
+                    <th>Paid Amount</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let row of lstPurchase">
+                    <!-- Invoice No -->
+                    <!-- <td>{{ row.billingDocument }}</td> -->
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      {{ row.billingDocument }}
+                    </td>
+
+                    <!-- Purchase Date -->
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      {{ row.billingDate | date:'yyyy-MM-dd' }}
+                    </td>
+                    <!-- <td>{{ row.billingDate | date:'yyyy-MM-dd' }}</td> -->
+                    <td>{{ row.materialNumber }}</td>
+                    <td>
+                      {{ row.materialDescription }}
+                    </td>
+
+                    <td>
+                      <mat-form-field appearance="outline" class="warehouse-select">
+                        <mat-label>Warehouse</mat-label>
+                        <mat-select [(ngModel)]="row.warehouseId" placeholder="Select Warehouse"
+                          (selectionChange)="onWarehouseChange(row)">
+                          <mat-option *ngFor="let wh of lstWarehouses" [value]="wh.id">
+                            {{ wh.name }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td>
+                      {{ row.actualBilledQuantity | number:'1.0-0' }}
+                    </td>
+
+                    <td>
+                      <div class="purchase-info">
+                        <input type="number" class="receive-qty-input" [(ngModel)]="row.receivedQuantity"
+                          (focus)="row.receivedQuantity === 0 ? row.receivedQuantity = null : null"
+                          (blur)="!row.actualBilledQuantity && (row.payment = 0)" (blur)="onReceivedQuantityCommit(row)"
+                          (keydown.enter)="onReceivedQuantityCommit(row)" step="1" min="0"
+                          [max]="row.actualBilledQuantity"
+                          [value]="row.receivedQuantity === 0 || row.receivedQuantity === null ? 0 : row.receivedQuantity" />
+                      </div>
+                    </td>
+
+
+                    <td>
+                      {{ (row.actualBilledQuantity - (row.receivedQuantity || 0)) | number:'1.0-0'
+                      }}
+                    </td>
+
+                    <!-- Total Amount -->
+                    <td>{{ row.invoiceAmount }}</td>
+                    
+                    <td>
+                      <div class="purchase-info">
+                        <input type="number" class="receive-qty-input" [(ngModel)]="row.unitPrice"
+                          (focus)="onUnitPriceFocus(row)" (blur)="unitCalculation(row)" />
+                      </div>
+                    </td>
+
+                    <td>
+                      <div class="purchase-info">
+                        <input type="number" class="receive-qty-input" [(ngModel)]="row.bergerPurchaseAmount" [readonly]="true" />
+                      </div>
+                    </td>
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      {{ row.totalAmount | number:'1.2-2' }}
+                    </td>
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      <div class="purchase-info">
+                        <input type="number" class="receive-qty-input" [(ngModel)]="row.bergerTotalPurchaseAmount"
+                          (focus)="row.bergerTotalPurchaseAmount === 0 && (row.bergerTotalPurchaseAmount = null)"
+                          (blur)="!row.bergerTotalPurchaseAmount && (row.bergerTotalPurchaseAmount = 0)"
+                          [max]="row.actualBilledQuantity"  [readonly]="true" />
+                      </div>
+                    </td>
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      <div class="purchase-info">
+                        <input type="number" class="receive-qty-input" [(ngModel)]="row.paidAmount"
+                          (blur)="onReceivepaidAmount(row)" (keydown.enter)="onReceivepaidAmount(row)" step="1" min="0"
+                          [max]="row.actualBilledQuantity"  [readonly]="true" />
+                      </div>
+                    </td>
+
+                    <td *ngIf="row._showInvoiceCell" [attr.rowspan]="row._rowspanInvoice">
+                      <button mat-icon-button color="primary" (click)="openReceiveModal(row)">
+                        <mat-icon>arrow_forward</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+          <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        </mat-tab>
+
+        <mat-tab label="Pending Purchase" class="pending-purchase">
+          <div class="tab-content">
+            <div class="table-scroll-container">
+              <table >
+                <thead>
+                  <tr>
+                    <th>Invoice No</th>
+                    <th>Invoice Date</th>
+                    <th>Received Date</th>
+                    <!-- <th>Material cardNumber</th> -->
+                    <th>Item Name</th>
+                    <!-- <th>Item Id</th> -->
+                    <th>Warehouse</th>
+                    <th>Invoice Quantity</th>
+                    <th>Remaining Quantity</th>
+                    <th>Unit Price</th>
+                    <th>Purchase Price</th>
+                    <th>Total Amount</th>
+                    <th>Purchase Amount</th>
+
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let row of pendingPurchase">
+                    <tr *ngFor="let pd of row.purchaseDetails; let i = index; let isFirst = first">
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        {{ row.recievedNo }}
+                      </td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        <div>{{ row.createdDate | date:'yyyy-MM-dd' }}</div>
+                        <div>{{ row.createdDate | date:'hh:mm a' }}</div>
+                      </td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        <div>{{ row.recievedDate | date:'yyyy-MM-dd' }}</div>
+                        <div>{{ row.recievedDate | date:'hh:mm a' }}</div>
+                      </td>
+                      <td>{{ pd.itemName || pd.itemId }}</td>
+                      <!-- <td>{{ pd.itemId }}</td> -->
+                      <td>{{ pd.warehouseName }}</td>
+                      <td>{{ pd.invoiceQty }}</td>
+                      @if(pd.remainingQty > 0){
+                      <td>
+                        <span class="remainingQty">
+                          {{ pd.remainingQty }}
+                        </span>
+                      </td>
+                      }@else{
+                      <td>{{ pd.remainingQty }}</td>
+                      }
+                      <td>{{ pd.unitPrice }}</td>
+                      <td>{{ pd.bergerPurchaseAmount || 0 }}</td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length"> {{ row.totalAmount }}</td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">{{ row.bergerTotalPurchaseAmount
+                        || 0 }}</td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        <button mat-icon-button color="primary" (click)="completePurchase(row,pd)">
+                          <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+          <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        </mat-tab>
+
+        <mat-tab label="Completed Purchase" class="completed-purchase">
+          <div class="tab-content">
+            <div class="table-scroll-container">
+              <!-- <div class="scroller"> -->
+              <table >
+                <thead >
+                  <tr>
+                    <th>Invoice No</th>
+                    <th>Invoice Date</th>
+                    <th>Received Date</th>
+                    <!-- <th>Material cardNumber</th> -->
+                    <th>Item Name</th>
+                    <!-- <th>Item Id</th> -->
+                    <th>Warehouse</th>
+                    <th>Invoice Quantity</th>
+                    <!-- <th>Remaining Quantity</th> -->
+                    <!-- <th>Unit Price</th> -->
+                    <th>Purchase Price</th>
+                    <th>Total Amount</th>
+                    <th>Berger Purchase Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <ng-container *ngFor="let row of pendingPurchase">
+                    <tr *ngFor="let pd of row.purchaseDetails; let i = index; let isFirst = first">
+
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        {{ row.recievedNo }}
+                      </td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        <div>{{ row.createdDate | date:'yyyy-MM-dd' }}</div>
+                        <div>{{ row.createdDate | date:'hh:mm a' }}</div>
+                      </td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">
+                        <div>{{ row.recievedDate | date:'yyyy-MM-dd' }}</div>
+                        <div>{{ row.recievedDate | date:'hh:mm a' }}</div>
+                      </td>
+                      <td>{{ pd.itemName || pd.itemId }}</td>
+                      <!-- <td>{{ pd.itemId }}</td> -->
+                      <td>{{ pd.warehouseName }}</td>
+                      <td>{{ pd.invoiceQty }}</td>
+                      <!-- @if(pd.remainingQty > 0){
+                      <td>
+                        <span class="remainingQty">
+                          {{ pd.remainingQty }}
+                        </span>
+                      </td>
+                      }@else{
+                      <td>{{ pd.remainingQty }}</td>
+                      } -->
+                      <!-- <td>{{ pd.unitPrice || 0 }}</td> -->
+                      <td>{{ pd.bergerPurchaseAmount || 0 }}</td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length"> {{ row.totalAmount }}</td>
+                      <td *ngIf="isFirst" [attr.rowspan]="row.purchaseDetails.length">{{ row.bergerTotalPurchaseAmount
+                        || 0 }}</td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+
+              </table>
+            </div>
+          </div>
+          <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)">
+          </mat-paginator>
+        </mat-tab>
+
+      </mat-tab-group>
+    </div>
+  </div>
+
+  <!-- <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator> -->

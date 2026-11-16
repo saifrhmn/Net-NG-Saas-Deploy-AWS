@@ -1,0 +1,152 @@
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Supplier</h2>
+  </div>
+</div>
+
+<div class="content">
+  <div class="table-top">
+    <div class="table-search">
+      <input type="text" name="table-search" id="table-serach" [(ngModel)]="searchText"
+        placeholder="Search by name, phoneNumber, address ..." (keyup)="onSearch($event)">
+      <mat-icon>search</mat-icon>
+    </div>
+    <button type="button" class="theme-button add" (click)="openCreateSupplier()">
+      <mat-icon class="material-icons-outlined">add</mat-icon>
+      Create Supplier
+    </button>
+  </div>
+  <div class="table__body">
+    <div class="scroller">
+      <table>
+        <thead class="sticky-header">
+          <tr>
+            <th>Supplier Name</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Creation Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (supplier of lstSuppler; track $index) {
+          <tr>
+            <td>{{supplier.name}}</td>
+  
+            <td>
+              @if(supplier.contact != null && supplier.phoneNo != null){
+                {{supplier.contact}} , {{supplier.phoneNo}}
+              } @else if(supplier.contact != null && supplier.phoneNo == null){
+                {{supplier.contact}}
+              } @else if(supplier.contact == null && supplier.phoneNo != null){
+                {{supplier.phoneNo}}
+              } @else {
+                N/A
+              }
+            </td>
+            <td>{{supplier.email}}</td>
+            <td>{{supplier.address}}</td>
+            <td>{{supplier.createdDate | date: 'dd-MM-yyyy'}}</td>
+            <td>
+              <span class="activity-badge" [ngClass]="{
+                'success': supplier.status === 1,
+                'danger': supplier.status === 0
+              }">{{statusEnum[supplier.status]}}</span>
+            </td>
+            <td>
+              <div class="button-wrapper">
+                <button class="action-button text-primary" (click)="editSupplier(supplier)">
+                  <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                </button>
+                <button class="action-button text-danger" (click)="deleteSupplier(supplier)">
+                  <mat-icon class="material-icons-outlined">delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      </div>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+<!-- Create Supplier Modal -->
+<div class="modal-overlay" *ngIf="showSupplierModal" (click)="closeSupplierModal()">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="modalTitle" class="modal-title">
+        <mat-icon>store</mat-icon>
+        <span>{{ isEditMode ? 'Edit Supplier' : 'Create New Supplier' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeSupplierModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModelforCreate.name" placeholder=" "
+            required>
+          <label class="floating-label">Supplier Name</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" maxlength="11" [(ngModel)]="searchModelforCreate.contact"
+            placeholder=" " required>
+          <label class="floating-label">Contact No 1</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" maxlength="11" [(ngModel)]="searchModelforCreate.phoneNo"
+            placeholder=" ">
+          <label class="floating-label">Contact No 2</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="email" class="form-input" [(ngModel)]="searchModelforCreate.email"
+            placeholder=" ">
+          <label class="floating-label">Email</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <textarea class="form-input" [(ngModel)]="searchModelforCreate.address" rows="3" placeholder=" "
+            required></textarea>
+          <label class="floating-label">Address</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="searchModelforCreate.status">
+            <mat-option [value]="0">Inactive</mat-option>
+            <mat-option [value]="1">Active</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeSupplierModal()">Cancel</button>
+      <!-- <button class="create-btn" (click)="saveSupplier()"> -->
+      <button class="create-btn" (click)="createSupplier(searchModelforCreate)">
+        <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>

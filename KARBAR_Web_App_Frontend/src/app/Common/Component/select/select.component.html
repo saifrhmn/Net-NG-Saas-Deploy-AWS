@@ -1,0 +1,34 @@
+<mat-form-field [class]="class" appearance="outline">
+  <mat-label>{{ label }}</mat-label>
+  <mat-select #select="ngModel" [(ngModel)]="value" [name]="name" (selectionChange)="onSelectionChange($event)"
+    [required]="required" [disabled]="disabled" [multiple]="multiple" [placeholder]="placeholder">
+
+    @if (searchable) {
+    <!-- Search input -->
+    <mat-option class="search-option">
+      <input type="text" [(ngModel)]="searchText" (ngModelChange)="filterOptions()" placeholder="Search..."
+        (click)="$event.stopPropagation()" />
+
+      <button type="button" class="clear-button" [disabled]="searchText === ''" (click)="clearSearch()">
+        <mat-icon class="material-icons-outlined">clear</mat-icon>
+      </button>
+    </mat-option>
+    }
+
+    @if (multiple) {
+    <mat-option [value]="'All'">
+      {{ 'All' }}
+    </mat-option>
+    }
+
+    @for (opt of filteredOptions; track $index) {
+    <mat-option [value]="opt[optionValue]">
+      {{ opt[optionLabel] }}
+    </mat-option>
+    }
+
+  </mat-select>
+  @if (select.invalid && select.touched) {
+  <mat-error>{{ errorMessage }}</mat-error>
+  }
+</mat-form-field>

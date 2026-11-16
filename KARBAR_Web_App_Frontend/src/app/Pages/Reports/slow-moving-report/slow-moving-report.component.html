@@ -1,0 +1,76 @@
+
+<div class="header-div-card ">
+  <div class="header-content">
+    <h2 class="page-title">Slow Moving   Non-Moving   Dead Report</h2>  </div>
+    <div>
+  <button type="button" class="download-button" (click)="onExportAllExcel()">
+  <mat-icon >download</mat-icon>
+</button>
+</div>      
+
+
+</div>
+
+<div class="header-card">
+  <div class="table-top">
+  </div>
+  <div *ngIf="isLoading" style="display: flex; align-items: center; justify-content: center; padding: 40px;">
+      <mat-spinner [diameter]="40" [strokeWidth]="4"></mat-spinner>
+      <span style="margin-left: 20px; font-size: 16px;">Loading...</span>
+  </div>
+  <div class="table__body" *ngIf="!isLoading">
+  <table>
+    <thead>
+      <tr>
+        <th>Sl No.</th>
+        <th>Material Code</th>
+        <th>Material Name</th>
+        <th>Category</th>
+        <th>Current Stock</th>
+        <th>Unit Cost</th>
+        <th>Stock Value</th>
+        <th>Last Purchase Date</th>
+        <th>Last Sale Date</th>
+        <th>Days Since Last Sale</th>
+        <th>Sales Qty 30 Days</th>
+        <th>Sales Qty 60 Days</th>
+        <th>Sales Qty 90 Days</th>
+        <th>Stock Status</th>
+        <th>Suggested Action</th>
+      </tr>
+    </thead>
+
+  <tbody>
+  @for (row of lstReport; track row.itemId) {
+    <tr [ngClass]="{
+          'row-slow': row.stockStatus === 'Slow Moving',
+          'row-nonmoving': row.stockStatus === 'Non-Moving',
+          'row-dead': row.stockStatus === 'Dead Stock',
+          'row-fast': row.stockStatus === 'Fast Moving'
+        }">
+       <td>{{ (searchReq.pageIndex - 1) * searchReq.pageSize + $index + 1 }}</td>
+      <td>{{ row.materialCode }}</td>
+      <td>{{ row.materialName }}</td>
+      <td>{{ row.category }}</td>
+      <td>{{ row.currentStock }}</td>
+      <td>{{ row.unitCost | number:'1.2-2' }}</td>
+      <td>{{ row.stockValue | number:'1.2-2' }}</td>
+      <td>{{ row.lastPurchaseDate ? (row.lastPurchaseDate | date:'shortDate') : '-' }}</td>
+      <td>{{ row.lastSaleDate ? (row.lastSaleDate | date:'shortDate') : '-' }}</td>
+      <td>{{ row.daysSinceLastSale ?? '-' }}</td>
+      <td>{{ row.salesQty30Days }}</td>
+      <td>{{ row.salesQty60Days }}</td>
+      <td>{{ row.salesQty90Days }}</td>
+      <td>{{ row.stockStatus }}</td>
+      <td>{{ row.suggestedAction }}</td>
+    </tr>
+  }
+</tbody>
+  </table>
+</div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+
+
+</div>

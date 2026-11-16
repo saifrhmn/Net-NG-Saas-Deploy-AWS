@@ -1,0 +1,14 @@
+<mat-form-field appearance="outline" [ngClass]="cssClass">
+  <mat-label>{{ label }}</mat-label>
+  <input 
+    matInput 
+    [(ngModel)]="searchText" 
+    [matAutocomplete]="auto" 
+    (input)="onSearch(searchText)"
+    [placeholder]="placeholder" />
+  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onOptionSelected($event)">
+    <mat-option *ngFor="let option of filteredOptions" [value]="option[valueProperty]">
+      {{ option[displayProperty] }}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>

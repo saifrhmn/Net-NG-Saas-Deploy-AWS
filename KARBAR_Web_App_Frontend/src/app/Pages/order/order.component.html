@@ -1,0 +1,689 @@
+<div class="purchase-container">
+    <!-- Header Card -->
+    <div class="header-card">
+        <div class="header-content">
+            <div>
+                <h2 class="page-title">Berger Order</h2>
+            </div>
+            <div class="date-field">
+
+                <!-- <div>
+                    <mat-form-field appearance="outline">
+                        <mat-label>Date</mat-label>
+                        <input matInput [matDatepicker]="picker" [(ngModel)]="model.purchaseDate" />
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Tab Navigation Card -->
+        <div class="tabs-card">
+            <mat-tab-group class="purchase-tabs" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+                <!-- Completed Purchase Tab -->
+
+                <mat-tab label="New Order">
+                    <div class="tab-content">
+                        <div class="new-purchase">
+                            <div class="table-card">
+                                <h3 class="section-title">Order Items</h3>
+
+                                <div class="form-section">
+                                    <div class="form-row">
+                                        <div class="supplier-field">
+
+                                            <mat-form-field appearance="outline" class="dropdown-field">
+                                                <mat-label>Supplier</mat-label>
+                                                <mat-select [(ngModel)]="selectedSupplierId" disabled="true"
+                                                    (selectionChange)="onSupplierChange($event.value)">
+                                                    <mat-option *ngFor="let supplier of lstSuppler"
+                                                        [value]="supplier.id">
+                                                        {{ supplier.name }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="form-group">
+
+                                            <div class="mat-dropdown-with-add">
+                                                <mat-form-field appearance="outline" class="dropdown-field">
+                                                    <mat-label>Warehouse</mat-label>
+                                                    <mat-select [(ngModel)]="selectedWarehouseId"
+                                                        (selectionChange)="onWarehouseChange($event.value)">
+                                                        <mat-option *ngFor="let warehouse of lstWarehouses"
+                                                            [value]="warehouse.id">
+                                                            {{ warehouse.name }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+                                        <div class="item-search-field">
+                                            <mat-form-field appearance="outline" class="item-search">
+                                                <mat-label>Item Code, Name .....</mat-label>
+                                                <input matInput [(ngModel)]="itemSearch" (input)="onItemSearchChange()"
+                                                    (focus)="onItemSearchFocus()" (blur)="hideItemDropdown()"
+                                                    (keydown)="onItemSearchKeydown($event)" autocomplete="off" />
+                                                <mat-icon matSuffix>search</mat-icon>
+                                            </mat-form-field>
+
+                                            <div class="item-dropdown"
+                                                *ngIf="showItemDropdown && filteredItems.length > 0">
+                                                <div class="item-dropdown-option"
+                                                    [class.selected]="i === selectedDropdownIndex"
+                                                    *ngFor="let item of filteredItems; let i = index"
+                                                    (mousedown)="selectItem(item)"
+                                                    (mouseenter)="selectedDropdownIndex = i">
+                                                    <div class="item-option-code">{{ item.name }}</div>
+                                                    <div class="item-option-mat">{{ item.materialNumber }}</div>
+                                                    <div class="item-option-name">{{ item.categoryName }}</div>
+                                                    <div class="item-option-brand">{{ item.brandName }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="items-table-container">
+                                    <table mat-table [dataSource]="purchaseItems" >
+                                        <ng-container matColumnDef="materialNumber">
+                                            <th mat-header-cell *matHeaderCellDef>Material Number</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.materialNumber }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="itemName">
+                                            <th mat-header-cell *matHeaderCellDef>Item Name</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.itemName }} </td>
+                                            <!-- <td mat-cell *matCellDef="let item" title="{{ item.itemName }}">{{ item.itemName }}</td> -->
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="currentStock">
+                                            <th mat-header-cell *matHeaderCellDef>Current Stock</th>
+
+                                            <td mat-cell *matCellDef="let item">{{ getItemStock(item) }} <span
+                                                    class="unit">{{item.unit}}</span></td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="brandName">
+                                            <th mat-header-cell *matHeaderCellDef>Brand Name</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.brandName }}</td>
+                                        </ng-container>
+
+
+                                        <ng-container matColumnDef="category">
+                                            <th mat-header-cell *matHeaderCellDef>Category</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.category }}</td>
+                                        </ng-container>
+
+
+
+
+                                        <ng-container matColumnDef="purchasePrice">
+                                            <th mat-header-cell *matHeaderCellDef>Purchase Price</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.purchasePrice }}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="warehouse">
+                                            <th mat-header-cell *matHeaderCellDef>Warehouse</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.warehouse }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="quantity">
+                                            <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="totalAmount">
+                                            <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.totalAmount }}</td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="customer-card">
+                                    <h3 class="section-title">Supplier Information</h3>
+                                    <mat-chip-listbox class="customer-chip-list" aria-label="Selected customer">
+                                        <mat-chip-option selected color="primary">
+                                            {{ selectedSupplier?.name || 'No Supplier' }}
+                                        </mat-chip-option>
+
+                                        <mat-chip-option>
+                                            {{ selectedSupplier?.contact || 'No Phone' }}
+                                        </mat-chip-option>
+                                        <mat-chip-option>
+                                            {{ selectedSupplier?.address || 'No Address' }}
+                                        </mat-chip-option>
+                                    </mat-chip-listbox>
+
+                                </div>
+                                <div class="summary-card-fixed">
+
+                                    <div class="summary-header">
+                                        <h4>Name</h4>
+                                        <h4>Quantity</h4>
+                                        <!-- <h4>MRP</h4> -->
+                                        <h4>Purchase Price</h4>
+                                        <h4>Total</h4>
+                                        <!-- <h4>Action</h4> -->
+                                    </div>
+                                    <div class="summary-scroller">
+                                        <div class="summary-rows">
+                                            <div class="summary-row" *ngFor="let item of summaryItems">
+                                                <!-- <span class="item-name">{{ item.name }}</span> -->
+                                                <span class="item-name">{{ getShortName(item.name) }}</span>
+                                                <!-- <div class="quantity-control">
+                                            <button mat-icon-button class="qty-btn minus-btn"
+                                                (click)="decreaseQuantity(item)">
+                                                <mat-icon>remove</mat-icon>
+                                            </button>
+                                            <span class="qty-value">{{ item.quantity }}</span>
+                                            <button mat-icon-button class="qty-btn plus-btn"
+                                                (click)="increaseQuantity(item)">
+                                                <mat-icon>add</mat-icon>
+                                            </button>
+                                        </div> -->
+                                                <div class="quantity-control">
+                                                    <button mat-icon-button class="qty-btn minus-btn"
+                                                        (click)="decreaseQuantity(item)">
+                                                        <mat-icon>remove</mat-icon>
+                                                    </button>
+                                                    <input type="number" class="qty-input" [min]="1" [step]="1"
+                                                        [(ngModel)]="item.quantity"
+                                                        (ngModelChange)="onQuantityInput(item, $event)"
+                                                        placeholder="1" />
+                                                    <button mat-icon-button class="qty-btn plus-btn"
+                                                        (click)="increaseQuantity(item)">
+                                                        <mat-icon>add</mat-icon>
+                                                    </button>
+                                                </div>
+                                                <!-- <input type="number" class="price-input" [(ngModel)]="item.mrp"
+                                            (ngModelChange)="onItemChange()" placeholder="0" min="0"> -->
+                                                <input type="number" class="price-input"
+                                                    [(ngModel)]="item.purchasePrice" disabled="true"
+                                                    (ngModelChange)="onItemChange()" placeholder="0" min="0">
+                                                <span class="total-value">{{ getItemTotal(item) }}</span>
+                                                <button mat-icon-button class="delete-btn"
+                                                    (click)="deleteFromSummary(item)" title="Remove item">
+                                                    <mat-icon>delete</mat-icon>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="summary-calculations">
+                                            <div class="calc-row">
+                                                <span>Sub Total</span>
+                                                <span>{{ subTotal }}</span>
+                                            </div>
+                                            <!-- <div class="calc-row">
+                                        <span class="text-blue">Discount</span>
+                                        <div class="discount-input-group">
+                                            <mat-form-field appearance="outline" class="discount-input">
+                                                <input matInput type="number" [(ngModel)]="discount"
+                                                    (ngModelChange)="onDiscountChange()" placeholder="0" min="0"
+                                                    [max]="discountType === '%' ? 100 : 999999">
+                                            </mat-form-field>
+                                            <mat-form-field appearance="outline" class="discount-type">
+                                                <mat-select [(value)]="discountType"
+                                                    (selectionChange)="onDiscountTypeChange()"
+                                                    panelClass="tax-dropdown-panel">
+                                                    <mat-option value="%">%</mat-option>
+                                                    <mat-option value="৳">৳</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span>Final Amount</span>
+                                        <mat-form-field appearance="outline" class="tax-select">
+                                            <input matInput type="number" [(ngModel)]="finalAmount"
+                                                (ngModelChange)="onFinalAmountChange()" placeholder="0" min="0">
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span>TAX</span>
+                                        <mat-form-field appearance="outline" class="tax-select">
+                                            <mat-select [(value)]="tax" (selectionChange)="onTaxChange()"
+                                                panelClass="tax-dropdown-panel">
+                                                <mat-option value="10">10%</mat-option>
+                                                <mat-option value="15">15%</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span>VAT(%)</span>
+                                        <mat-form-field appearance="outline" class="tax-select">
+                                            <mat-select [(value)]="vat" (selectionChange)="onVatChange()"
+                                                panelClass="tax-dropdown-panel">
+                                                <mat-option value="5">5%</mat-option>
+                                                <mat-option value="7.5">7.5%</mat-option>
+                                                <mat-option value="10">10%</mat-option>
+                                                <mat-option value="15">15%</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span>Total Payable</span>
+                                        <span>{{ totalPayable }}</span>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span class="text-blue">Payment</span>
+                                        <mat-form-field appearance="outline" class="tax-select">
+                                            <input matInput type="number" [(ngModel)]="payment"
+                                                (ngModelChange)="onPaymentChange()" placeholder="0" min="0"
+                                                class="text-blue">
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="calc-row">
+                                        <span class="text-blue">Due</span>
+                                        <span class="text-blue">{{ due }}</span>
+                                    </div> -->
+
+                                            <!-- <div class="toggle-payment-section" (click)="togglePaymentDetails()">
+                                        <mat-icon class="toggle-icon" [class.expanded]="showPaymentDetails">
+                                            {{ showPaymentDetails ? 'expand_less' : 'expand_more' }}
+                                        </mat-icon>
+                                    </div>
+
+                                    <div *ngIf="showPaymentDetails" class="payment-details-container">
+                                        <div class="payment-method">
+                                            <mat-form-field appearance="outline">
+                                                <mat-label>Payment Method</mat-label>
+                                                <mat-select [(value)]="selectedPaymentMethod">
+                                                    <mat-option value="cash">Cash</mat-option>
+                                                    <mat-option value="credit">Credit</mat-option>
+                                                    <mat-option value="mobile-banking">Mobile Banking</mat-option>
+                                                    <mat-option value="bank">Bank Transfer</mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                      
+                                        <div *ngIf="selectedPaymentMethod === 'cash'" class="cash-payment-fields">
+                                            <div class="calc-row">
+                                                <span class="text-blue">Received</span>
+                                                <mat-form-field appearance="outline" class="tax-select">
+                                                    <input matInput type="number" [(ngModel)]="receivedAmount"
+                                                        (ngModelChange)="onReceivedAmountChange()" placeholder="0"
+                                                        min="0">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="calc-row">
+                                                <span class="text-blue">Return</span>
+                                                <span class="text-blue">{{ returnAmount }}</span>
+                                            </div>
+                                        </div>
+
+                                        <div *ngIf="selectedPaymentMethod === 'mobile-banking'"
+                                            class="payment-details-fields">
+                                            <div class="mobile-banking-methods">
+                                                <label class="method-label">Choose Method</label>
+                                                <mat-radio-group [(ngModel)]="model.mobileBankMethod"
+                                                    class="method-options">
+                                                    <mat-radio-button value="bkash">
+                                                        <span class="method-name">bKash</span>
+                                                    </mat-radio-button>
+                                                    <mat-radio-button value="nagad">
+                                                        <span class="method-name">Nagad</span>
+                                                    </mat-radio-button>
+                                                    <mat-radio-button value="rocket">
+                                                        <span class="method-name">Rocket</span>
+                                                    </mat-radio-button>
+                                                    <mat-radio-button value="upay">
+                                                        <span class="method-name">Upay</span>
+                                                    </mat-radio-button>
+                                                </mat-radio-group>
+                                            </div>
+                                            <div class="payment-detail-row">
+                                                <mat-form-field appearance="outline" class="detail-field">
+                                                    <mat-label>Phone Number</mat-label>
+                                                    <input matInput type="text" [(ngModel)]="model.phoneNumber"
+                                                        placeholder="01923899989" maxlength="11">
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+
+                                       
+                                        <div *ngIf="selectedPaymentMethod === 'bank'" class="payment-details-fields">
+                                            <div class="payment-detail-row">
+                                                <mat-form-field appearance="outline" class="detail-field">
+                                                    <mat-label>Card Number</mat-label>
+                                                    <input matInput type="text" [(ngModel)]="cardNumber"
+                                                        placeholder="112234444444" maxlength="16"
+                                                        [(ngModel)]="model.cardNumber">
+                                                </mat-form-field>
+                                            </div>
+                                            <div class="payment-detail-row">
+                                                <mat-form-field appearance="outline" class="detail-field"
+                                                    [(ngModel)]="model.bankId">
+                                                    <mat-label>Bank Name</mat-label>
+                                                    <mat-select [(value)]="selectedBank">
+                                                        <mat-option value="brac">BRAC Bank</mat-option>
+                                                        <mat-option value="dutch-bangla">Dutch-Bangla Bank</mat-option>
+                                                        <mat-option value="city">City Bank</mat-option>
+                                                        <mat-option value="standard">Standard Chartered</mat-option>
+                                                        <mat-option value="hsbc">HSBC</mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+                                    </div> -->
+                                            <div class="save-section">
+                                                @if(summaryItems.length !== 0){
+                                                <button mat-raised-button class="save-btn"
+                                                    (click)="onSave()">Save</button>
+                                                }@else{
+                                                <button mat-raised-button class="save-btn" (click)="onSave()"
+                                                    [disabled]="true">Save</button>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </mat-tab>
+
+                <mat-tab label="Order List" class="completed-purchase">
+                    <div class="tab-content">
+                        <div class="table-card-completed">
+                            <h3 class="section-title">Order List</h3>
+                            <div class="items-table-container-completed">
+                                <div class="scroller">
+                                    <table class="items-table-completed">
+                                        <thead class="sticky-header">
+                                            <tr>
+                                                <th>Order No</th>
+                                                <th>Date</th>
+
+                                                @if(authenticatedUser.roleId == 1 || this.authenticatedUser.roleId ==
+                                                2){
+                                                <th>
+                                                    Dealer Name
+                                                </th>
+                                                }@else{
+
+                                                <!-- Supplier Name -->
+                                                }
+
+                                                <th>Warehouse</th>
+                                                <th>Items</th>
+                                                <th>Quantity</th>
+                                                <th>Total Amount</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+
+                                        <!-- <tbody>
+                                            <tr *ngFor="let row of lstPurchase">
+                                                <td>{{ row.purchaseInvoiceNo }}</td>
+
+                                                <td>{{ row.purchaseDate | date:'yyyy-MM-dd' }}</td>
+
+
+                                                @if(authenticatedUser.roleId == 1 || this.authenticatedUser.roleId ==
+                                                2){
+                                                <td>
+                                                    <div class="purchase-info">
+                                                        <div class="purchase-row">
+                                                            {{ row.tenantName }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                }@else{
+                                                }
+
+                                                <td>
+                                                    <div class="purchase-info">
+                                                        <div class="purchase-row"
+                                                            *ngFor="let detail of row.requestOrderDetails">
+                                                            {{ detail.warehouseId }} - {{
+                                                            getWarehouseName(detail.warehouseId) || 'NOT FOUND' }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <div class="purchase-info">
+                                                        <div class="purchase-row"
+                                                            *ngFor="let detail of row.requestOrderDetails">
+                                                            {{ detail.itemName }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td>
+                                                    <div class="purchase-info">
+                                                        <div class="purchase-row"
+                                                            *ngFor="let detail of row.requestOrderDetails">
+                                                            {{ detail.quantity }}
+                                                        </div>
+                                                    </div>
+                                                </td>
+
+                                                <td>{{ row.totalAmount }}</td>
+
+                                                @if(authenticatedUser.roleId == 1 || this.authenticatedUser.roleId ==
+                                                2){
+                                                <td>
+                                                    @if(row.status == 1) {
+                                                    <span class="completed">Received</span>
+                                                    } @else {
+                                                    <mat-form-field appearance="outline" class="status-dropdown">
+                                                        <mat-select [(ngModel)]="row.status"
+                                                            [compareWith]="compareStatus"
+                                                            [ngClass]="row.status == 1 ? 'received' : 'pending'"
+                                                            (selectionChange)="onStatusChange(row)">
+                                                            <mat-option [value]="0">Pending</mat-option>
+                                                            <mat-option [value]="1">Received</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    }
+                                                </td>
+
+
+                                                }@else{
+                                                <td>
+                                                    @if(row.orderStatus != null){
+                                                    <span class="completed">{{row.orderStatus}}</span>
+                                                    } @else {
+                                                    <span class="completed">Pending</span>
+                                                    }
+
+                                                </td>
+                                                }
+                                            </tr>
+                                        </tbody> -->
+
+                                        <tbody>
+                                            <ng-container *ngFor="let row of lstPurchase">
+
+                                                <tr *ngFor="let detail of row.requestOrderDetails; let i = index">
+
+                                                    <!-- Invoice -->
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+                                                        {{ row.purchaseInvoiceNo }}
+                                                    </td>
+
+                                                    <!-- Date -->
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+                                                        {{ row.purchaseDate | date:'yyyy-MM-dd' }}
+                                                    </td>
+
+                                                    <!-- Dealer -->
+                                                    @if(authenticatedUser.roleId == 1 || authenticatedUser.roleId == 2){
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+                                                        {{ row.tenantName }}
+                                                    </td>
+                                                    }
+
+                                                    <!-- Warehouse -->
+                                                    <td>
+                                                        {{ detail.warehouseId }} -
+                                                        {{ getWarehouseName(detail.warehouseId) || 'NOT FOUND' }}
+                                                    </td>
+
+                                                    <!-- Item -->
+                                                    <td>
+                                                        {{ detail.itemName }}
+                                                    </td>
+
+                                                    <!-- Quantity -->
+                                                    <td>
+                                                        {{ detail.quantity }}
+                                                    </td>
+
+                                                    <!-- Total Amount -->
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+                                                        {{ row.totalAmount }}
+                                                    </td>
+
+                                                    <!-- Status -->
+                                                    @if(authenticatedUser.roleId == 1 || authenticatedUser.roleId == 2){
+
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+
+                                                        @if(row.status == 1){
+                                                        <span class="completed">Received</span>
+                                                        }
+                                                        @else{
+                                                        <mat-form-field appearance="outline" class="status-dropdown">
+                                                            <mat-select [(ngModel)]="row.status"
+                                                                [compareWith]="compareStatus"
+                                                                (selectionChange)="onStatusChange(row)">
+
+                                                                <mat-option [value]="0">Pending</mat-option>
+                                                                <mat-option [value]="1">Received</mat-option>
+
+                                                            </mat-select>
+                                                        </mat-form-field>
+                                                        }
+
+                                                    </td>
+
+                                                    }
+                                                    @else{
+
+                                                    <td *ngIf="i === 0" [attr.rowspan]="row.requestOrderDetails.length">
+
+                                                        @if(row.orderStatus != null){
+                                                        <span class="completed">{{row.orderStatus}}</span>
+                                                        }
+                                                        @else{
+                                                        <span class="pending">Pending</span>
+                                                        }
+
+                                                    </td>
+
+                                                    }
+
+                                                </tr>
+
+                                            </ng-container>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+            </mat-tab-group>
+        </div>
+    </div>
+
+
+    <!-- Purchase Summary Modal -->
+    <div class="modal-overlay" *ngIf="showPurchaseSummaryModal" (click)="closePurchaseSummaryModal()">
+        <div class="summary-modal-container" (click)="$event.stopPropagation()">
+            <!-- Header with Logo and Invoice Number -->
+            <div class="summary-modal-header">
+                <div class="logo-section">
+                    <!-- <img src="/src/assets/img/bergerlogo.png" alt="Berger Paints" class="company-logo"> -->
+                    <img src="assets/img/bergerlogo.png" alt="Berger Paints" class="company-logo">
+
+                </div>
+                <div class="invoice-number">
+                    <mat-icon>qr_code_scanner</mat-icon>
+                    <span>{{model.orderNo}}</span>
+                </div>
+            </div>
+
+            <!-- Supplier Information -->
+            <div class="info-section">
+                <h3 class="section-heading">Supplier Information</h3>
+                <div class="info-content">
+                    <div class="info-row">
+                        <span class="info-label">Name :</span>
+                        <span class="info-value">
+                            {{ selectedSupplier?.name || model.requestOrderDetails?.[0]?.supplierId || '—' }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Address :</span>
+                        <span class="info-value">{{ selectedSupplier?.address || '—' }}</span>
+                        <!-- <span class="info-value">Berger House, Road 2, Sector 03, Uttara, Dhaka</span> -->
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Contact :</span>
+                        <span class="info-value">{{ selectedSupplier?.contact || '—' }}</span>
+                        <!-- <span class="info-value">+88 02 48953665</span> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Information -->
+            <div class="info-section">
+                <h3 class="section-heading">Order Information</h3>
+                <div class="order-items">
+                    <table class="order-table">
+                        <thead>
+                            <tr>
+                                <th>Sl No.</th>
+                                <th>Item Name</th>
+                                <th>Material Number</th>
+                                <th>Qty</th>
+                                <th>UOM</th>
+                                <th>Unit Price</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <tr *ngFor="let item of model.requestOrderDetails; let i = index">
+                                <td>{{ i + 1 }}</td>
+                                <td>{{ item.itemName || '—' }}</td>
+                                <td>{{ item.materialNumber || '—' }}</td>
+                                <td>{{ item.quantity || 0 }}</td>
+                                <td>{{ item.uomName || '—' }}</td>
+                                <td>{{ item.unitPrice || 0 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="order-totals">
+                    <div class="total-row">
+                        <span class="total-label">Total :</span>
+                        <span class="total-value">{{ totalPayable }}</span>
+                    </div>
+                    <!-- <div class="total-row payment-status">
+                        <span class="total-label">Payment :</span>
+                        <span class="total-value complete">Complete</span>
+                    </div> -->
+                </div>
+            </div>
+            <!-- Submit Button -->
+            <div class="summary-modal-actions">
+                <button mat-raised-button class="submit-btn" (click)="submitPurchase()">
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Features\Dealers\**" />
+    <EmbeddedResource Remove="Features\Dealers\**" />
+    <None Remove="Features\Dealers\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Karbar.Common\Karbar.Common.csproj" />
+    <ProjectReference Include="..\Karbar.Domain\Karbar.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\Behaviors\" />
+    <Folder Include="Common\Exceptions\" />
+    <Folder Include="Contracts\Brand\" />
+    <Folder Include="Contracts\Customer\" />
+    <Folder Include="Contracts\Category\" />
+    <Folder Include="Contracts\Supplier\" />
+    <Folder Include="Contracts\Uom\" />
+    <Folder Include="Features\Brand\Queries\" />
+    <Folder Include="Features\Category\Commands\" />
+    <Folder Include="Features\Customers\Commands\" />
+    <Folder Include="Features\Customers\Queries\" />
+    <Folder Include="Features\Roles\Commands\" />
+    <Folder Include="Features\Roles\Queries\" />
+    <Folder Include="Features\Suppliers\Commands\" />
+    <Folder Include="Features\Suppliers\Queries\" />
+    <Folder Include="Features\Uom\Commands\" />
+    <Folder Include="Features\Uom\Queries\" />
+    <Folder Include="Features\Warehouses\Commands\" />
+    <Folder Include="Features\Warehouses\Queries\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
+    <PackageReference Include="Mapster" Version="7.4.0" />
+    <PackageReference Include="Mapster.EFCore" Version="5.1.1" />
+    <PackageReference Include="MediatR" Version="13.0.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
+    <PackageReference Include="NPOI" Version="2.7.5" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
+  </ItemGroup>
+
+</Project>

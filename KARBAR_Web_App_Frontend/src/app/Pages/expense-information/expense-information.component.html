@@ -1,0 +1,218 @@
+<div class="header-card">
+    <div class="header-content">
+        <h2 class="page-title">Expense Information</h2>
+    </div>
+</div>
+
+<!-- Create Category Modal -->
+<div class="modal-cat-overlay" *ngIf="showCategoryModal" (click)="closeCategoryModal()">
+    <div class="modal-cat-container" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div class="modal-title">
+                <mat-icon>category</mat-icon>
+                <span>Create Expense Category</span>
+            </div>
+            <button mat-icon-button (click)="closeCategoryModal()" class="close-btn">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="modal-content">
+                 <div class="form-group">
+                <div class="floating-label-group">
+                    <input type="text" class="form-input" [(ngModel)]="expenseCategoryModel.name" placeholder=" " required>
+                    <label class="floating-label">Category Name</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="haveParent" [(ngModel)]="hasParent" class="checkbox-input">
+                    <label for="haveParent" class="checkbox-label">Have parent?</label>
+                </div>
+            </div>
+
+            <!-- <div class="form-group" *ngIf="hasParent">
+                <mat-form-field appearance="outline" class="category-select status-select">
+                    <mat-label>Parent Category</mat-label>
+                    <mat-select (selectionChange)="onParentChange($event.value)" placeholder="">
+                        <mat-option *ngFor="let category of lstExpenseCategories" [value]="category.categoryId">
+                            {{ category.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div> -->
+
+            <div class="form-group" *ngIf="hasParent">
+                <mat-form-field appearance="outline" class="category-select status-select">
+                    <mat-label>Parent Category</mat-label>
+                    <mat-select [(ngModel)]="expenseCategoryModel.parentId" (selectionChange)="onParentChange($event.value)">
+                        <mat-option *ngFor="let category of lstExpenseCategories" [value]="category.expenseCategoryId">
+                            {{ category.name }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+
+            <div class="form-group">
+                <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="expenseCategoryModel.status">
+                        <mat-option [value]="1">Active</mat-option>
+                        <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+       
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeCategoryModal()">Cancel</button>
+            <button class="create-btn" (click)="createCategory(expenseCategoryModel)">Create</button>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="table-top">
+        <div class="table-search">
+            <input type="text" name="table-search" id="table-serach" [(ngModel)]="searchText"
+                placeholder="Search by name, phoneNumber, address ..." (keyup)="onSearch($event)">
+            <mat-icon>search</mat-icon>
+        </div>
+        <button type="button" class="download-button" title="Download Excel" [disabled]="isDownloading"
+            (click)="onExportAllExcel()">
+            <mat-icon>download</mat-icon>
+        </button>
+        <button type="button" class="theme-button add" (click)="openCreateExpense()">
+            <mat-icon class="material-icons-outlined">add</mat-icon>
+            Create Expense
+        </button>
+    </div>
+    <div class="table__body">
+       <div class="scroller">
+         <table>
+            <thead class="sticky-header">
+                <tr>
+                    <th>Expense Entry Date</th>
+                    <th>Expense Date</th>
+                    <th>Expense Category</th>
+                    <th>Expense Sub Category</th>
+                    <th>Expense Amount</th>
+                    <th>Expense Purpose</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (expense of lstExpense; track $index) {
+                <tr>
+                    <td>{{expense.entryDate | date: 'dd-MM-yyyy'}}</td>
+                    <td>{{expense.expenseDate | date: 'dd-MM-yyyy'}}</td>
+                    <td>{{expense.categoryName}}</td>
+                    <td>{{expense.subCategoryName}}</td>
+                    <td>{{expense.expenseAmount}}</td>
+                    <td>{{expense.expensePurpose}}</td>
+                    <td>
+                        <div class="button-wrapper">
+                            <button class="action-button text-primary" (click)="editExpense(expense)">
+                                <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                            </button>
+                            <button class="action-button text-danger" (click)="deleteExpense(expense)">
+                                <mat-icon class="material-icons-outlined">delete</mat-icon>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+       </div>
+    </div>
+    <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+        (page)="onPageChange($event)">
+    </mat-paginator>
+</div>
+
+<!-- Create Expense Modal -->
+<div class="modal-overlay" *ngIf="showExpenseModal" (click)="closeExpenseModal()">
+    <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+        (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+        <div class="modal-header">
+            <div id="modalTitle" class="modal-title">
+                <mat-icon>store</mat-icon>
+                <span>{{ isEditMode ? 'Edit Expense' : 'Create New Expense' }}</span>
+            </div>
+            <button mat-icon-button (click)="closeExpenseModal()" class="close-btn">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="modal-content">
+            <div class="form-group">
+                <div class="floating-label-group">
+                    <input type="text" class="form-input" [value]="today | date:'dd-MM-yyyy'" placeholder=" " disabled>
+                    <label class="floating-label">Entry Date</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="floating-label-group">
+                    <input #firstModalField type="date" class="form-input" [(ngModel)]="Search.expenseDate"
+                        placeholder=" " required>
+                    <label class="floating-label">Expense Date</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Expense Category</mat-label>
+                    <!-- <mat-select [(ngModel)]="Search.forWhom">
+                        <mat-option *ngFor="let c of lstExpenseCategories" [value]="c.id">{{ c.name }} 
+                            <span *ngIf="c.parentCategoryName!= null" class="expence-chip">{{c.parentCategoryName}}</span>
+                        </mat-option>
+                    </mat-select>
+        -->
+
+        <mat-select [(ngModel)]="Search.forWhom">
+  <mat-select-trigger>
+    {{ getSelectedCategoryName(Search.forWhom) }}
+  </mat-select-trigger>
+
+  <mat-option *ngFor="let c of lstExpenseCategories" [value]="c.id">
+    {{ c.name }}
+    <span *ngIf="c.parentCategoryName" class="expence-chip">{{ c.parentCategoryName }}</span>
+  </mat-option>
+</mat-select>
+                    <button mat-icon-button matSuffix type="button" aria-label="Add category"
+                        (click)="openCategoryModal(); $event.stopPropagation()" (mousedown)="$event.stopPropagation()">
+                        <mat-icon>add</mat-icon>
+                    </button>
+
+                </mat-form-field>
+            </div>
+            <div class="form-group">
+                <div class="floating-label-group">
+                    <input class="form-input" type="number"  [(ngModel)]="Search.expenseAmount" (focus)="Search.expenseAmount === 0 && (Search.expenseAmount = null)"
+                          (blur)="!Search.expenseAmount && (Search.expenseAmount = 0)" placeholder=" " required>
+                    <label class="floating-label">Expense Amount</label>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="floating-label-group">
+                    <textarea class="form-input" [(ngModel)]="Search.expensePurpose" rows="3" placeholder=" "
+                        required></textarea>
+                    <label class="floating-label">Expense Purpose</label>
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" (click)="closeExpenseModal()">Cancel</button>
+            <button class="create-btn" (click)="createExpense(Search)">
+                <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+                {{ isEditMode ? 'Update' : 'Create' }}
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="login-shell">
+  <div class="login-container">
+    <aside class="left-panel">
+      <div class="form-box">
+        <!-- <img src="assets/img/BTCL-logo.png" alt="Berger Karbar logo" class="logo" /> -->
+        <h2 class="title">Login</h2>
+
+        <form (ngSubmit)="onSubmit()" class="login-form" novalidate>
+          <label class="field">
+            <!-- <span class="label-text">User Name</span> -->
+            <input type="text" name="email" class="white-bg" [(ngModel)]="loginRequest.phoneNo"
+            maxlength="11"  placeholder="Phone Number Or Email" required autocomplete="phoneNumber" />
+          </label>
+
+          <label class="field">
+            <!-- <span class="label-text">Password</span> -->
+            <div class="password-row">
+              <input [type]="togglePassword ? 'text' : 'password'" class="white-bg" name="password"
+                [(ngModel)]="loginRequest.password" placeholder="Password" required autocomplete="current-password" />
+
+              <button type="button" class="toggle-btn" (click)="togglePassword = !togglePassword"
+                [attr.aria-pressed]="togglePassword ? 'true' : 'false'">
+                <span class="material-icons">
+                  {{ togglePassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+            @if(checked === false){
+              <p style="color: red;">*** Phone Number or Password is incorrect</p>
+            }
+          </label>
+             <div class="forgot-row">
+            <a class="forgot-link" role="button" tabindex="0" (click)="openForgetPasswordModal()"
+              (keydown.enter)="openForgetPasswordModal()" (keydown.space)="openForgetPasswordModal()">
+              Forgot Password?
+            </a>
+          </div>
+          <div class="actions">
+            <button type="submit" [disabled]="isLoading" class="btn-submit">
+              <mat-icon *ngIf="isLoading" class="spinner">hourglass_empty</mat-icon>
+              <span *ngIf="!isLoading">Login</span>
+              <span *ngIf="isLoading">Loading...</span>
+            </button>
+            
+          </div>
+       
+        </form>
+      </div>
+    </aside>
+
+    <aside class="right-panel">
+      <div class="info-card">
+        <img src="assets/img/Karbar_Logo.png" alt="Berger Karbar logo" class="brand" />
+        <p class="info">
+          <b>Berger Karbar</b> — Manage Better. Sell Smarter. Grow Faster.<br><br>
+          Seamlessly manage inventory, monitor daily sales, and gain real-time 
+          business insights — all in one intelligent platform designed to simplify 
+          operations, improve control, and accelerate your business growth. 
+          <br><br>
+          <p>Powered by <b><br> Berger Tech Consulting Limited</b></p>
+          <img src="assets/img/BTCL-logo.png" alt="Berger Karbar logo" class="logo" />
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- Forget Password Modal -->
+<div class="modal-overlay" *ngIf="showForgetPasswordModal" (click)="closeForgetPasswordModal()">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="forgetPasswordModalTitle"
+    tabindex="-1" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div id="forgetPasswordModalTitle" class="modal-title">
+        <mat-icon>lock_reset</mat-icon>
+        <span>Forgot Password</span>
+      </div>
+      <button type="button" class="close-btn" (click)="closeForgetPasswordModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" [(ngModel)]="forgetPasswordModel.phoneNumber" name="phoneNumber"
+            placeholder=" " required>
+          <label class="floating-label">Phone Number</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input [type]="toggleNewPassword ? 'text' : 'password'" class="form-input"
+            [(ngModel)]="forgetPasswordModel.newPassword" name="newPassword" placeholder=" " required>
+          <label class="floating-label">New Password</label>
+          <button type="button" class="modal-toggle-btn" (click)="toggleNewPassword = !toggleNewPassword">
+            <mat-icon>{{ toggleNewPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input [type]="toggleConfirmPassword ? 'text' : 'password'" class="form-input"
+            [(ngModel)]="forgetPasswordModel.confirmPassword" name="confirmPassword" placeholder=" " required>
+          <label class="floating-label">Confirm Password</label>
+          <button type="button" class="modal-toggle-btn" (click)="toggleConfirmPassword = !toggleConfirmPassword">
+            <mat-icon>{{ toggleConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="forgetPasswordModel.newPassword && forgetPasswordModel.confirmPassword &&
+        forgetPasswordModel.newPassword !== forgetPasswordModel.confirmPassword" class="form-group">
+        <small style="color: #d32f2f; font-size: 12px;">Passwords do not match</small>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="cancel-btn" (click)="closeForgetPasswordModal()">Cancel</button>
+      <button type="button" class="create-btn"
+        [disabled]="isResettingPassword || !forgetPasswordModel.phoneNumber ||
+        !forgetPasswordModel.newPassword || !forgetPasswordModel.confirmPassword ||
+        forgetPasswordModel.newPassword !== forgetPasswordModel.confirmPassword"
+        (click)="submitForgetPassword()">
+        <mat-icon>save</mat-icon>
+        {{ isResettingPassword ? 'Resetting...' : 'Reset Password' }}
+      </button>
+    </div>
+  </div>
+</div>

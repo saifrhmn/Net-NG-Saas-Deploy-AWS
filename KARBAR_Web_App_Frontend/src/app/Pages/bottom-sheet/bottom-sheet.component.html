@@ -1,0 +1,23 @@
+<div class="bs-search">
+  <div class="bs-header">
+    <h4>{{ data?.label || 'Search' }}</h4>
+    <button mat-icon-button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="bs-body">
+    <div class="search-row">
+      <input
+        #searchInput
+        type="text"
+        class="bs-input"
+        [(ngModel)]="query"
+        (keyup)="onKey($event)"
+        [placeholder]="data?.placeholder || 'Type to search...'"
+        autofocus
+      />
+      <button mat-flat-button color="primary" (click)="apply()">Search</button>
+    </div>
+  </div>
+</div>

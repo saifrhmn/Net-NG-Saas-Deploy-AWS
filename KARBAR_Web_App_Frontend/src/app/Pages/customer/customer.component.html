@@ -1,0 +1,154 @@
+
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Customer</h2>
+  </div>
+</div>
+
+<div class="content">
+  <div class="table-top">
+    <div class="table-search">
+      <input type="text" name="table-search" id="table-serach" [(ngModel)]="searchText"
+        placeholder="Search by name, phoneNumber, address ..." (keyup)="onSearch($event)">
+      <mat-icon>search</mat-icon>
+    </div>
+    <button  type="button" class="theme-button add" (click)="openCreateCustomer()">
+      <mat-icon class="material-icons-outlined">add</mat-icon>
+      Create Customer
+    </button>
+  </div>
+  <div class="table__body">
+    <div class="scroller">
+      <table>
+        <thead class="sticky-header">
+          <tr>
+            <th>Customer Name</th>
+            <th>Contact</th>
+          <th>Address</th>
+          <th>Creation Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (customer of lstCustomer; track $index) {
+        <tr>
+          <td>{{customer.name}}</td>
+          <td>{{customer.contact}}</td>
+          <td>{{customer.address}}</td>
+<!-- 
+          @if(customer.phone != null){
+            <td>
+              {{customer.contact}},{{customer.phone}}
+              </td>
+          }@else{
+            <td>{{customer.contact}}</td>
+          } -->
+            <!-- @if(customer.addressLine1 != null){
+
+              <td>{{customer.address }}, {{customer.addressLine1 }}</td>
+            }@else{
+              <td>{{customer.address }}</td>
+            } -->
+              
+          <td>{{customer.createdDate | date: 'dd-MM-yyyy'}}</td>
+          <td>
+            <span class="activity-badge" [ngClass]="{
+              'success': customer.status === 1,
+              'danger': customer.status === 0
+            }">{{statusEnum[customer.status]}}</span>
+          </td>
+          <td>
+            <div class="button-wrapper">
+              <button class="action-button text-primary" (click)="editCustomer(customer)">
+                <mat-icon class="material-icons-outlined">border_color</mat-icon>
+              </button>
+              <button class="action-button text-danger" (click)="deleteCustomer(customer)">
+                <mat-icon class="material-icons-outlined">delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+<!-- Create customer Modal -->
+<div class="modal-overlay" *ngIf="showCustomerModal" (click)="closeCustomerModal()">
+  <div class="modal-container"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modalTitle"
+       tabindex="-1"
+       (click)="$event.stopPropagation()"
+       (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="modalTitle" class="modal-title">
+        <mat-icon>store</mat-icon>
+        <span>{{ isEditMode ? 'Edit Customer' : 'Create New Customer' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeCustomerModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="searchModelforCreate.name" placeholder=" " required>
+          <label class="floating-label">customer Name</label>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" maxlength="11" [(ngModel)]="searchModelforCreate.contact" placeholder=" " required>
+          <label class="floating-label">Contact No</label>
+        </div>
+      </div>
+      <!-- <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" maxlength="11" [(ngModel)]="searchModelforCreate.phone" placeholder=" ">
+          <label class="floating-label">Contact No 2</label>
+        </div>
+      </div>
+       -->
+      <div class="form-group">
+        <div class="floating-label-group">
+          <textarea class="form-input" [(ngModel)]="searchModelforCreate.address" rows="3" placeholder=" " required></textarea>
+          <label class="floating-label">Address</label>
+        </div>
+      </div>
+      <!-- <div class="form-group">
+        <div class="floating-label-group">
+          <textarea class="form-input" [(ngModel)]="searchModelforCreate.addressLine1" rows="3" placeholder=" " required></textarea>
+          <label class="floating-label">Another Address</label>
+        </div>
+      </div> -->
+      
+      <div class="form-group">
+                  <mat-form-field appearance="outline" class="status-select">
+                    <mat-label>Status</mat-label>
+                    <mat-select [(ngModel)]="searchModelforCreate.status">
+                      <mat-option [value]="1">Active</mat-option>
+                      <mat-option [value]="0">Inactive</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+      </div>
+    </div>
+    
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeCustomerModal()">Cancel</button>
+      <!-- <button class="create-btn" (click)="savecustomer()"> -->
+      <button class="create-btn" (click)="createCustomer(searchModelforCreate)">
+        <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,243 @@
+<div class="header-card">
+  <div class="header-content">
+    <h2 class="page-title">Users</h2>
+  </div>
+</div>
+
+<div class="content">
+  <div class="table-top">
+    <div class="table-search">
+      <input type="text" name="table-search" id="table-serach" [(ngModel)]="searchText"
+        placeholder="Search by username, phoneNumber, employeeId, email ..." (keyup)="onSearch($event)">
+      <mat-icon>search</mat-icon>
+    </div>
+    <button type="button" class="theme-button add" (click)="openCreateUser()">
+      <mat-icon class="material-icons-outlined">add</mat-icon>
+      Create User
+    </button>
+  </div>
+  <div class="table__body">
+    <div class="scroller">
+      <table>
+        <thead class="sticky-header">
+          <tr>
+            <th>User Name</th>
+            <th>Phone Number</th>
+            <th>Address</th>
+            <th>Tenant ID</th>
+            <th>Role</th>
+            <th>SAP Code</th>
+            <th>Logo</th>
+            <th>Signature</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of lstUser; track $index) {
+          <tr>
+            <td>{{user.userName}}</td>
+            <td>{{user.phoneNumber}}</td>
+            <td>{{user.addressLine1}}, {{user.addressLine2}} </td>
+            <td>{{user.tenantId}}</td>
+            <td>{{user.roleName}}</td>
+            <td>{{user.tenantCustomerNo}}</td>
+            <td>
+              <img *ngIf="user.imageBase64" [src]="user.imageBase64" width="50" height="50"
+                style="border-radius:4px; object-fit:cover;" />
+            </td>
+            <td>
+              <img *ngIf="user.signatureImageBase64" [src]="user.signatureImageBase64" width="50" height="50"
+                style="border-radius:4px; object-fit:cover;" />
+            </td>
+            <td>
+              <span class="activity-badge" [ngClass]="{
+                'success': user.status == 1,
+                'danger': user.status == 0
+              }">{{statusEnum[user.status]}}</span>
+            </td>
+            <td>
+              <div class="button-wrapper">
+                <button class="action-button text-primary" (click)="editUser(user)">
+                  <mat-icon class="material-icons-outlined">border_color</mat-icon>
+                </button>
+                <button class="action-button text-danger">
+                  <mat-icon class="material-icons-outlined" (click)="deleteUser(user)">delete</mat-icon>
+                </button>
+                <button class="action-button text-primary" (click)="openPasswordModal(user)">
+                  <mat-icon class="material-icons-outlined">lock_outline</mat-icon>
+                </button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <mat-paginator [length]="totalItems" [pageSize]="searchReq.pageSize" [pageSizeOptions]="[10, 25, 50, 100]"
+    (page)="onPageChange($event)">
+  </mat-paginator>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal-overlay" *ngIf="showUserModal" (click)="closeUserModal()">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="modalTitle" class="modal-title">
+        <mat-icon>store</mat-icon>
+        <span>{{ isEditMode ? 'Edit User' : 'Create New User' }}</span>
+      </div>
+      <button mat-icon-button (click)="closeUserModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="user.userName" placeholder=" " >
+          <label class="floating-label">User Name</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input"  [(ngModel)]="user.addressLine1" placeholder=" " >
+          <label class="floating-label">Address Line 1</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input"  [(ngModel)]="user.addressLine2" placeholder=" " >
+          <label class="floating-label">Address Line 2</label>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" maxlength="11" [(ngModel)]="user.phoneNumber" placeholder=" " >
+          <label class="floating-label">Phone Number</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Role</mat-label>
+          <mat-select [(ngModel)]="user.roleId">
+            <mat-option *ngFor="let role of lstRole" [value]="role.id">
+              {{ role.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+       <div class="form-group">
+        <div class="floating-label-group">
+          <input #firstModalField type="text" class="form-input" [(ngModel)]="user.tenantCustomerNo" placeholder=" " >
+          <label class="floating-label">SAP Code</label>
+        </div>
+      </div>
+
+      <div *ngIf="user.roleId === 3">
+              <div class="form-group">
+        <label>Logo</label>
+        <input id="file-upload-logo" class="form-input" type="file" accept="image/*" (change)="onImageUpload($event)" />
+        <img *ngIf="user.imageBase64"
+          [src]="user.imageBase64.startsWith('http') ? user.imageBase64 : 'data:image/png;base64,' + user.imageBase64"
+          width="120" style=" border-radius:8px;" />
+      </div>
+
+      <div class="form-group" style="margin-bottom : 20px">
+        <label>Signature</label>
+        <input id="file-upload-signature" class="form-input" type="file" accept="image/*"
+          (change)="onSignatureImageUpload($event)" />
+        <img *ngIf="user.signatureImageBase64"
+          [src]="user.signatureImageBase64.startsWith('http') ? user.signatureImageBase64 : 'data:image/png;base64,' + user.signatureImageBase64"
+          width="120" style="margin-top:10px; margin-bottom:10px;
+          border-radius:8px;" />
+      </div>
+      </div>
+
+
+
+      @if(!isEditMode){
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="text" class="form-input" [(ngModel)]="user.password" placeholder=" " required>
+          <label class="floating-label">Password</label>
+        </div>
+      </div>
+      }
+
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="status-select">
+          <mat-label>Status</mat-label>
+          <mat-select [(ngModel)]="user.status">
+            <mat-option [value]="1">Active</mat-option>
+            <mat-option [value]="0">Inactive</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closeUserModal()">Cancel</button>
+      <!-- <button class="create-btn" (click)="saveSupplier()"> -->
+      <button class="create-btn" (click)="createUser(user)">
+        <mat-icon>{{ isEditMode ? 'save' : 'add' }}</mat-icon>
+        {{ isEditMode ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Reset Modal -->
+<div class="modal-overlay" *ngIf="showPasswordModal" (click)="closePasswordModal()">
+  <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle" tabindex="-1"
+    (click)="$event.stopPropagation()" (keydown)="onModalKeydown($event)">
+    <div class="modal-header">
+      <div id="passwordModalTitle" class="modal-title">
+        <mat-icon>lock</mat-icon>
+        <span>Reset Password</span>
+      </div>
+      <button mat-icon-button (click)="closePasswordModal()" class="close-btn">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-content">
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="password" class="form-input" [(ngModel)]="passwordResetModel.newPassword" 
+            placeholder=" " required>
+          <label class="floating-label">New Password</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="floating-label-group">
+          <input type="password" class="form-input" [(ngModel)]="passwordResetModel.confirmPassword" 
+            placeholder=" " required>
+          <label class="floating-label">Confirm Password</label>
+        </div>
+      </div>
+
+      <div *ngIf="passwordResetModel.newPassword && passwordResetModel.confirmPassword && 
+        passwordResetModel.newPassword !== passwordResetModel.confirmPassword" class="form-group">
+        <small style="color: #d32f2f; font-size: 12px;">Passwords do not match</small>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="cancel-btn" (click)="closePasswordModal()">Cancel</button>
+      <button class="create-btn" 
+        [disabled]="!passwordResetModel.newPassword || !passwordResetModel.confirmPassword || 
+        passwordResetModel.newPassword !== passwordResetModel.confirmPassword"
+        (click)="resetPassword()">
+        <mat-icon>save</mat-icon>
+        Reset Password
+      </button>
+    </div>
+  </div>
+</div>

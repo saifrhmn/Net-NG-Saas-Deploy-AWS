@@ -1,0 +1,598 @@
+$purple: #7b4fa6;
+$purple-soft: #f3ecf9;
+$cyan: #0ab0e8;
+$cyan-soft: #e8f6fc;
+$green: #22b161;
+$text: #1f2937;
+$muted: #8a94a6;
+$border: #e5e9f0;
+
+.assign-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: $text;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: $muted;
+}
+
+.header-actions,
+.selection-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid $border;
+  transition: background 0.15s, opacity 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-outline {
+  color: $purple;
+  border-color: #d6c7e6;
+  &:hover { background: $purple-soft; }
+}
+
+.btn-primary {
+  color: #fff;
+  background: $purple;
+  border-color: $purple;
+  &:hover { background: darken($purple, 6%); }
+}
+
+.btn-success-outline {
+  color: $green;
+  border-color: #bfe8cf;
+  &:hover { background: #eefaf3; }
+}
+
+.btn-muted-outline {
+  color: #6b7280;
+  &:hover { background: #f5f7fa; }
+}
+
+.btn-accent {
+  color: #fff;
+  background: $cyan;
+  border-color: $cyan;
+  &:hover { background: darken($cyan, 6%); }
+}
+
+/* Cards */
+.card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 10px;
+}
+
+.filter-card {
+  padding: 16px 18px;
+}
+
+.filter-grid {
+  display: grid;
+  // Dealer, Material group, Status, Search, Common items
+  grid-template-columns: minmax(180px, 1.6fr) minmax(180px, 1.6fr) minmax(130px, 1fr) minmax(150px, 1.2fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: $muted;
+  }
+}
+
+.filter-select {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+
+  &[aria-expanded='true'] {
+    border-color: $cyan;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: $cyan-soft;
+  color: #0b7fa8;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.chip-remove {
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.chip-more {
+  background: #f1f3f6;
+  color: #6b7280;
+}
+
+// Same height and border as the other filter boxes so the row lines up
+.filter-field label.common-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  margin: 0;
+  padding: 0 12px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
+  color: $text;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &.checked {
+    border-color: $purple;
+    color: $purple;
+  }
+
+  input {
+    width: 16px;
+    height: 16px;
+    accent-color: $purple;
+    cursor: pointer;
+  }
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid $border;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 300px;
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: $muted;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    font-size: 14px;
+  }
+}
+
+.filter-hints {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 28px;
+  row-gap: 4px;
+  margin-top: 12px;
+}
+
+.filter-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 13px;
+  color: #0b8fbf;
+
+  mat-icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+  }
+}
+
+/* Selection bar */
+.selection-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 18px;
+  border: 1px solid #cdeaf7;
+  border-radius: 10px;
+  background: $cyan-soft;
+}
+
+.selection-count {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0b8fbf;
+}
+
+// Material group options render in the overlay panel, outside this component
+::ng-deep .assign-select-panel {
+  .group-search {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: -8px 0 4px; // sit flush with the panel's top padding
+    padding: 8px 12px;
+    background: #fff;
+    border-bottom: 1px solid $border;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: $muted;
+    }
+
+    input {
+      flex: 1;
+      min-width: 0;
+      height: 30px;
+      border: none;
+      outline: none;
+      font-family: inherit;
+      font-size: 14px;
+      color: $text;
+    }
+
+    .group-search-clear {
+      cursor: pointer;
+    }
+  }
+
+  .group-search-empty {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: $muted;
+  }
+
+  .mat-mdc-option.option-hidden {
+    display: none;
+  }
+}
+
+::ng-deep .assign-select-panel .group-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+
+  .group-code {
+    min-width: 42px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 12px;
+    color: #6d3f96;
+  }
+
+  .group-name {
+    flex: 1;
+  }
+
+  .group-count {
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: #f1f3f6;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+.selection-loading {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.selection-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Table */
+.table-card {
+  overflow: hidden;
+}
+
+.assign-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #fff;
+    padding: 14px 12px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: $muted;
+    border-bottom: 1px solid $border;
+    margin: 20px;
+  }
+
+  td {
+    padding: 12px;
+    font-size: 14px;
+    border-bottom: 1px solid $border;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr.selected {
+    background: #f4fbfe;
+    td:first-child { box-shadow: inset 3px 0 0 $cyan; }
+  }
+
+  .col-check {
+    width: 40px;
+    padding-left: 16px;
+
+    input {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      accent-color: $cyan;
+      margin: 10px;
+    }
+  }
+}
+
+.item-name {
+  font-weight: 700;
+}
+
+.mono {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 13px;
+  color: $muted;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: $purple-soft;
+  color: #6d3f96;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &:focus-visible .switch-track {
+    outline: 2px solid $cyan;
+    outline-offset: 2px;
+  }
+
+  .switch-track {
+    position: relative;
+    flex-shrink: 0;
+    width: 38px;
+    height: 20px;
+    border-radius: 10px;
+    background: #cfd5dd;
+    transition: background 0.2s;
+  }
+
+  .switch-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+  }
+
+  .status-label {
+    min-width: 58px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: $muted;
+  }
+
+  &.on {
+    .switch-track { background: $green; }
+    .switch-knob { transform: translateX(18px); }
+    .status-label { color: $green; }
+  }
+
+  // Some selected dealers have it on, some off
+  &.mixed {
+    .switch-track { background: #f0b429; }
+    .switch-knob { transform: translateX(9px); }
+    .status-label { color: #b7791f; }
+  }
+
+  // None of the selected dealers has this product yet
+  &.none .status-label {
+    font-weight: 500;
+    font-style: italic;
+  }
+}
+
+// Dealer on/off uses its own colors so it is not confused with the SAP status switch
+.status-switch.dealer-switch {
+  &.on {
+    .switch-track { background: $cyan; }
+    .status-label { color: #0891c2; }
+  }
+
+  &.off {
+    .switch-track { background: #f1a7a7; }
+    .status-label { color: #d64545; }
+  }
+
+  &.none {
+    .switch-track {
+      background: transparent;
+      box-shadow: inset 0 0 0 1.5px #cfd5dd;
+    }
+    .switch-knob { box-shadow: 0 0 0 1px #cfd5dd; }
+    .status-label { color: $muted; }
+  }
+}
+
+.dealer-status-hint {
+  font-size: 13px;
+  color: $muted;
+}
+
+.empty-row {
+  text-align: center;
+  color: $muted;
+  padding: 32px 12px !important;
+}
+
+/* Footer */
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: $muted;
+}
+
+.pager {
+  display: flex;
+  gap: 8px;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid $border;
+    border-radius: 6px;
+    background: #fff;
+    color: $muted;
+    cursor: pointer;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@media (max-width: 991px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 576px) {
+  .filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

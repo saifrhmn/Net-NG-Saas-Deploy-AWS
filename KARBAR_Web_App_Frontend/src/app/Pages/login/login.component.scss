@@ -1,0 +1,583 @@
+
+.login-shell {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;               /* outer spacing around the centered container */
+  background: transparent;     /* keep shell transparent so global bg shows */
+  box-sizing: border-box;
+  // border-radius: 10px;
+  border: 15px solid #1B5673;
+  /* removed: border: 100px solid #1B5673; */
+}
+
+
+.login-container {
+  width: 96%;
+  max-width: 1100px;
+  display: flex;
+  gap: 24px;
+  
+  background: transparent;
+}
+
+.left-panel,
+.right-panel {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+}
+
+.left-panel .form-box {
+  width: 100%;
+  max-width: 420px;
+  padding: 32px;
+}
+
+.title {
+  font-size: 28px;
+  color: #0b5770;
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.login-form .field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.label-text {
+  display: block;
+  font-size: 13px;
+  color: #4b6b79;
+  margin-bottom: 8px;
+}
+
+/* Regular input style */
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 40px 12px 12px;;
+  // padding: 12px 0 8px;
+  // border: none;
+  // border-bottom: 2px solid rgba(0, 0, 0, 0.08);
+  background-color: transparent !important; /* 👈 make it transparent */
+  outline: none;
+  font-size: 20px;
+  color: #12343f;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+/* Optional: if you want pure white instead of transparent */
+input.white-bg {
+  background-color: #fff !important;
+  -webkit-box-shadow: 0 0 0px 1000px #fff inset !important;
+  box-shadow: 0 0 0px 1000px #fff inset !important;
+}
+
+/* Placeholder text */
+input::placeholder {
+  color: #bfcfd5;
+  font-size: 15px;
+}
+
+/* On focus */
+input:focus {
+  border-bottom-color: #0ea5e9;
+  box-shadow: none;
+}
+
+.password-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Make input full width and outlined */
+.password-row input.white-bg {
+  width: 100%;
+  padding: 12px 40px 12px 12px; /* space for icon */
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  font-size: 20px;
+  color: #12343f;
+  background-color: #fff !important;
+  box-shadow: none;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+/* On focus */
+.password-row input.white-bg:focus {
+  border-color: #0ea5e9;
+}
+
+/* Toggle button (eye icon) */
+.password-row .toggle-btn {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #0ea5e9;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.toggle-btn:focus-visible {
+  outline: 1px solid #64b3cd;
+  padding: 5px;
+  outline-offset: 1px;
+  // box-shadow: 0 0 0 2px rgba(229, 229, 229, 0.25);
+}
+
+.password-row .toggle-btn .material-icons {
+  font-size: 20px;
+}
+
+/* Autofill fix (Chrome) */
+input.white-bg:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  -webkit-text-fill-color: #12343f !important;
+}
+
+
+.password-row input:focus {
+  border-bottom-color: #0ea5e9;
+}
+
+.logo{
+  width: 220px;
+  height: auto;
+  margin-left: -10px;
+}
+
+.toggle-btn {
+  position: absolute;
+  right: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #4b6b79;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn .material-icons {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.toggle-btn:hover {
+  color: #0ea5e9;
+}
+
+
+
+
+/* Autofill fixes (Chrome, Edge, Safari) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  background-color: transparent !important;
+  -webkit-text-fill-color: #12343f !important;
+  transition: background-color 9999s ease-out 0s;
+}
+
+
+.password-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: #0aa6e6;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn .material-icons {
+  font-size: 22px;
+  vertical-align: middle;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+}
+
+.actions .btn-submit {
+  flex: 1;
+}
+
+.forgot-row {
+  margin-top: -10px;
+  text-align: right;
+}
+
+.forgot-link {
+  color: #0b8fc4;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    color: #0b6f9c;
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #267893;
+    outline-offset: 2px;
+  }
+}
+
+/* Forget Password Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow: hidden;
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: #ffffff;
+}
+
+.modal-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1B5673;
+  font-size: 18px;
+
+  mat-icon {
+    color: #1B5673;
+  }
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+
+  &:hover {
+    background: #f1f5f9;
+  }
+}
+
+.modal-content {
+  padding: 0 24px 24px 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 20px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.floating-label-group {
+  position: relative;
+  margin-top: 8px;
+}
+
+.floating-label {
+  position: absolute;
+  left: 16px;
+  top: -10px;
+  color: #0694C5;
+  font-size: 12px;
+  font-weight: 400;
+  background: white;
+  padding: 0 4px;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  transform-origin: left top;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 44px 14px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1B5673;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: #0694C5;
+    box-shadow: 0 0 0 3px rgba(6, 148, 197, 0.1);
+  }
+
+  &::placeholder {
+    color: transparent;
+  }
+
+  &:focus ~ .floating-label {
+    color: #0694C5;
+  }
+}
+
+.modal-toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #0aa6e6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.modal-actions {
+  padding: 20px 24px;
+  background: #ffffff;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e2e8f0;
+  }
+}
+
+.create-btn {
+  background: #0694C5;
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    background: #1B5673;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.btn-submit {
+  background: linear-gradient(90deg,#0ea5e9,#0b99d9);
+  color: #fff;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.spinner {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.right-panel .info-card {
+  width: 100%;
+  padding: 36px;
+  background: #e9f8fb;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  // align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  box-sizing: border-box;
+}
+
+.brand {
+  width: 160px;
+  height: auto;
+  margin-bottom: 18px;
+}
+
+.info {
+  color: #2b6b78;
+  font-size: 13px;
+  line-height: 1.45;
+  max-width: 420px;
+  text-align: left;
+}
+.btn-submit:focus,
+.btn-submit:focus-visible {
+  border: 1px solid #267893;
+  outline: none;
+  // box-shadow: 0 0 0 2px rgba(18,52,63,.25);
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .login-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .right-panel {
+    margin-top: 18px;
+  }
+  .info {
+    text-align: center;
+  }
+}
+/* ...existing code... */
+/* Phone: shrink the decorative frame and let the panels use the full width. */
+@media (max-width: 599px) {
+  .login-shell {
+    padding: 16px 12px;
+    border-width: 6px;
+    align-items: flex-start;
+    min-height: 100dvh;
+  }
+
+  .login-container {
+    width: 100%;
+    gap: 16px;
+  }
+
+  .left-panel .form-box {
+    max-width: 100%;
+    padding: 16px 12px;
+  }
+
+  .title {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .logo {
+    width: 160px;
+    margin-left: 0;
+  }
+
+  .right-panel .info-card {
+    padding: 20px;
+    min-height: 0;
+  }
+
+  .brand {
+    width: 120px;
+  }
+
+  .info {
+    max-width: 100%;
+  }
+
+  .actions .btn-submit {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+  }
+
+  input[type="text"],
+  input[type="password"],
+  .password-row input.white-bg {
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+}

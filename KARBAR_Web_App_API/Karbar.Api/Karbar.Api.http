@@ -1,0 +1,6 @@
+@Karbar.Api_HostAddress = http://localhost:5089
+
+GET {{Karbar.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
