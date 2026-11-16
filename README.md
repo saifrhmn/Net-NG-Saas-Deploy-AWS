@@ -16,7 +16,7 @@ This repo holds the Karbar web app and everything needed to run it in Docker, on
 | `.env.example` | Template for `.env`, which holds all passwords and settings. `.env` is never committed. |
 | `db/backups/` | Put `.bak` files here to restore them into the `sqlserver` container |
 
-**How this guide works:**
+**How this guide works:**   
 - AWS resources (server, firewall, load balancer, certificate…) are created in the **AWS web console**: https://console.aws.amazon.com. No AWS CLI is needed on your PC.
 - All commands run in an **Ubuntu terminal**. Each block is marked with where it runs:
   - 💻 **PC terminal**: Ubuntu on your PC. On Windows, that's **WSL Ubuntu** (`wsl --install -d Ubuntu`). There, `d:\` is `/mnt/d/`.
