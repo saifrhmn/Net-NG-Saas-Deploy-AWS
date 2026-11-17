@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js for Angular 13
         uses: actions/setup-node@v4
         with:
-          node-version: '16.20.2'
+          node-version: '18'
           cache: npm
           cache-dependency-path: KARBAR_Web_App_Frontend/package-lock.json
 
