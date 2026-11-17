@@ -1,0 +1,192 @@
+# Karbar CI / Security / CD
+#
+#   PR to main   -> quality + trivy-repository
+#   push to main -> quality + trivy-repository -> build, scan & push images -> deploy to EC2
+#
+# Repo secrets (Settings -> Secrets and variables -> Actions -> Secrets):
+#   DOCKERHUB_TOKEN       Docker Hub access token (Read & Write)
+#   EC2_SSH_KEY           full contents of karbar-key.pem
+# Repo variables (same page -> Variables):
+#   DOCKERHUB_USERNAME    Docker Hub user / org
+#   EC2_HOST              Elastic IP of the server
+#   EC2_USER              ubuntu
+#   EC2_HOST_FINGERPRINT  SHA256:... of the server's ed25519 host key
+#                         (on the server: ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub -E sha256)
+#   API_BASE_URL          optional, URL the browser uses for the API, baked into the Angular build
+#                         e.g. https://karbar.example.com/api/  (empty = value in environment.prod.ts)
+
+name: Karbar - CI Security CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Build validation (API + Web)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: API restore and build
+        working-directory: KARBAR_Web_App_API
+        run: |
+          dotnet restore Karbar.sln
+          dotnet build Karbar.sln -c Release --no-restore
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: KARBAR_Web_App_Frontend/package-lock.json
+      - name: Web install and production build
+        working-directory: KARBAR_Web_App_Frontend
+        run: |
+          npm ci
+          npx ng build --configuration production
+
+  trivy-repository:
+    name: Trivy repository CRITICAL scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan dependencies, misconfiguration and secrets
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,misconfig,secret
+          severity: CRITICAL
+          exit-code: '1'
+          ignore-unfixed: false
+          format: table
+
+  image-build-scan-push:
+    name: Build, scan images and push Docker Hub
+    needs: [quality, trivy-repository]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API image
+        run: docker build -t karbar-api:ci ./KARBAR_Web_App_API
+      - name: Build Web image
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+        run: docker build --build-arg API_BASE_URL="$API_BASE_URL" -t karbar-web:ci ./KARBAR_Web_App_Frontend
+
+      - name: Trivy API image - CRITICAL only
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: karbar-api:ci
+          scanners: vuln
+          severity: CRITICAL
+          exit-code: '1'
+          format: table
+      - name: Trivy Web image - CRITICAL only
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: karbar-web:ci
+          scanners: vuln
+          severity: CRITICAL
+          exit-code: '1'
+          format: table
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Tag and push immutable commit images
+        env:
+          HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -n "$HUB_USER"
+          docker tag karbar-api:ci "$HUB_USER/karbar-api:$COMMIT"
+          docker tag karbar-web:ci "$HUB_USER/karbar-web:$COMMIT"
+          docker push "$HUB_USER/karbar-api:$COMMIT"
+          docker push "$HUB_USER/karbar-web:$COMMIT"
+
+  deploy:
+    name: CD - Deploy to EC2
+    needs: image-build-scan-push
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    concurrency:
+      group: karbar-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure SSH with verified server fingerprint
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_HOST_FINGERPRINT: ${{ vars.EC2_HOST_FINGERPRINT }}
+        run: |
+          set -euo pipefail
+          test -n "$EC2_HOST" && test -n "$EC2_USER" && test -n "$EC2_SSH_KEY" && test -n "$EC2_HOST_FINGERPRINT"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/id_ec2
+          chmod 600 ~/.ssh/id_ec2
+          ssh-keyscan -T 15 -t ed25519 "$EC2_HOST" > ~/.ssh/known_hosts
+          test -s ~/.ssh/known_hosts
+          ACTUAL="$(ssh-keygen -lf ~/.ssh/known_hosts -E sha256 | awk '{print $2}')"
+          test "$ACTUAL" = "$EC2_HOST_FINGERPRINT" || { echo 'EC2 SSH fingerprint mismatch'; exit 1; }
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Upload production Compose file
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+        run: |
+          ssh -i ~/.ssh/id_ec2 -o StrictHostKeyChecking=yes "$EC2_USER@$EC2_HOST" 'mkdir -p ~/karbar/db/backups'
+          scp -i ~/.ssh/id_ec2 -o StrictHostKeyChecking=yes docker-compose.prod.yml "$EC2_USER@$EC2_HOST:karbar/docker-compose.prod.yml"
+
+      - name: Deploy images and verify health
+        env:
+          EC2_HOST: ${{ vars.EC2_HOST }}
+          EC2_USER: ${{ vars.EC2_USER }}
+          HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
+          IMAGE_TAG: ${{ github.sha }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SSH="ssh -i $HOME/.ssh/id_ec2 -o StrictHostKeyChecking=yes $EC2_USER@$EC2_HOST"
+          COMPOSE="cd ~/karbar && DOCKERHUB_USERNAME='$HUB_USER' IMAGE_TAG='$IMAGE_TAG' docker compose -f docker-compose.prod.yml --profile local-db"
+
+          # Token travels over the encrypted SSH channel via stdin
+          printf '%s\n' "$DOCKERHUB_TOKEN" | $SSH "docker login -u '$HUB_USER' --password-stdin"
+          $SSH "$COMPOSE pull && $COMPOSE up -d --remove-orphans && docker image prune -f"
+
+          for attempt in $(seq 1 30); do
+            if $SSH 'curl -fsS --max-time 5 http://127.0.0.1/health >/dev/null &&
+                     curl -fsS --max-time 5 -o /dev/null http://127.0.0.1:8080/swagger/v1/swagger.json'; then
+              echo 'Deployment health check passed'
+              $SSH "$COMPOSE ps"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo 'Health check failed after 150 seconds'
+          $SSH "$COMPOSE ps; $COMPOSE logs api --tail 80" || true
+          exit 1
+
+      - name: Remove SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_ec2

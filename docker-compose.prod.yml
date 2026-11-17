@@ -1,0 +1,63 @@
+# Production compose used by the CD pipeline (.github/workflows/deploy.yml).
+# Same as docker-compose.yml, but runs pre-built images from Docker Hub instead of building on the server.
+#
+#   DOCKERHUB_USERNAME=<user> IMAGE_TAG=<git sha> docker compose -f docker-compose.prod.yml --profile local-db up -d
+#
+# Values like DB_CONNECTION / JWT_KEY still come from .env next to this file.
+# Project name "karbar" is kept so the existing volumes (karbar_sql-data, karbar_api-images) are reused.
+
+name: karbar
+
+services:
+  api:
+    image: ${DOCKERHUB_USERNAME:?set DOCKERHUB_USERNAME}/karbar-api:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: ${DB_CONNECTION}
+      JwtSettings__Key: ${JWT_KEY}
+    volumes:
+      - api-images:/app/wwwroot/Images
+    networks:
+      - karbar
+
+  web:
+    image: ${DOCKERHUB_USERNAME:?set DOCKERHUB_USERNAME}/karbar-web:${IMAGE_TAG:?set IMAGE_TAG}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-80}:80"
+    depends_on:
+      - api
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - karbar
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles: ["local-db"]
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SQL_SA_PASSWORD}
+      MSSQL_PID: ${MSSQL_PID:-Developer}
+      MSSQL_MEMORY_LIMIT_MB: ${MSSQL_MEMORY_LIMIT_MB:-2048}
+    ports:
+      - "${SQL_PORT:-1433}:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+      - ./db/backups:/var/opt/mssql/backup
+    networks:
+      - karbar
+
+volumes:
+  api-images:
+  sql-data:
+
+networks:
+  karbar:
