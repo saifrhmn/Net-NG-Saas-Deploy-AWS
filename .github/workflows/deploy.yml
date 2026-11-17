@@ -111,7 +111,7 @@ jobs:
         env:
           HUB_USER: ${{ vars.DOCKERHUB_USERNAME }}
           COMMIT: ${{ github.sha }}
-        run: |
+        run: | 
           set -euo pipefail
           test -n "$HUB_USER"
           docker tag karbar-api:ci "$HUB_USER/karbar-api:$COMMIT"
