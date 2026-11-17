@@ -16,7 +16,7 @@ RUN if [ -n "$API_BASE_URL" ]; then \
  && npx ng build --configuration production
 
 # ---------- runtime ----------
-FROM nginx:1.27-alpine AS final
+FROM nginx:1.27-alpine AS final 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Angular 17+ application builder outputs to dist/<name>/browser
 COPY --from=build /app/dist/berger-karbar/browser /usr/share/nginx/html
