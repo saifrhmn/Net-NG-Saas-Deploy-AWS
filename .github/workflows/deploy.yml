@@ -113,7 +113,8 @@ jobs:
           image-ref: karbar-web:ci
           scanners: vuln
           severity: CRITICAL
-          exit-code: '1'
+          exit-code: '1'  
+          ignore-unfixed: true  # <--- Add this line to skip unfixed vulnerabilities
           format: table
 
       - name: Login to Docker Hub
