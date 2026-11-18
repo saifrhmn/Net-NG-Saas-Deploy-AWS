@@ -105,6 +105,7 @@ jobs:
           scanners: vuln
           severity: CRITICAL
           exit-code: '1'
+          ignore-unfixed: true  # skip OS CVEs with no fix available (e.g. zlib1g CVE-2023-45853, will_not_fix)
           format: table
 
       - name: Scan Web image
